@@ -7,17 +7,22 @@ import "hardhat/console.sol";
 contract Lock {
     uint public unlockTime;
     address payable public owner;
+    string name = "test";
 
     event Withdrawal(uint amount, uint when);
 
-    constructor(uint _unlockTime) payable {
-        require(
-            block.timestamp < _unlockTime,
-            "Unlock time should be in the future"
-        );
+    // constructor(uint _unlockTime) payable {
+    //     require(
+    //         block.timestamp < _unlockTime,
+    //         "Unlock time should be in the future"
+    //     );
 
-        unlockTime = _unlockTime;
-        owner = payable(msg.sender);
+    //     unlockTime = _unlockTime;
+    //     owner = payable(msg.sender);
+    // }
+
+    function hello() public view returns(string memory) {
+        return name;
     }
 
     function withdraw() public {

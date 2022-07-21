@@ -1,7 +1,7 @@
 const main = async () => {
-  const transactionFactory = await hre.ethers.getContractFactory('Lock')
+  const transactionFactory = await hre.ethers.getContractFactory('MainContract')
   // const transactionContract = await transactionFactory.deploy()
-  const transactionContract = await transactionFactory.deploy()
+  const transactionContract = await transactionFactory.deploy(process.env.OWNER_ADDRESS)
 
   await transactionContract.deployed()
 
