@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from "react-router-dom";
+import Sidebar from '../../components/Sidebar';
 
 const PersonalInfo = () => {
     const navigate = useNavigate();
@@ -63,6 +64,8 @@ const PersonalInfo = () => {
     return (
         <div>
             <h1>Personal Info</h1>
+
+            <Sidebar logged={"merchant"} />
 
             <label htmlFor="walletAddress">Address:</label>
             <input

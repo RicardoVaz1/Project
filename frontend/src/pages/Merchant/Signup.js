@@ -19,7 +19,7 @@ const Signup = () => {
 
     document.getElementById("done-successfully").style.display = '';
 
-    // MainContract > addMerchantContract(walletAddress, name)
+    // MainContract > addMerchantContract(walletAddress, name) ---> ??
 
     setTimeout(function () {
       navigate("/vote")
@@ -53,7 +53,7 @@ const Signup = () => {
       <button onClick={() => submit()}>Submit</button>
       <br />
 
-      <span id="done-successfully" style={{ "display": "none" }}>Done successfully! <br/> Redirecting ...</span>
+      <span id="done-successfully" style={{ "display": "none" }}>Done successfully! <br /> You'll be added to Vote List! <br /> Redirecting ...</span>
     </div>
   )
 }

@@ -5,6 +5,7 @@ const Vote = () => {
   const navigate = useNavigate();
 
   const merchantsList = [
+    {id: 0, walletAddress: "1234", merchantName: "zxc", numberOfVotes: 50},
     {id: 1, walletAddress: "1234", merchantName: "zxc", numberOfVotes: 50},
     {id: 2, walletAddress: "1234", merchantName: "zxc", numberOfVotes: 500},
     {id: 3, walletAddress: "1234", merchantName: "zxc", numberOfVotes: 200},
