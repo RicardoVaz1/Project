@@ -6,12 +6,12 @@ const Sidebar = ({ logged }) => {
 
     logged === "admin" ?
         (items = [
-            { label: 'Merchants List', route: '/admin-logged' },
-            { label: 'Add Merchant', route: '/admin-logged/add-merchant' }
+            { label: 'Merchants List', route: `${process.env.REACT_APP_PATH}/admin-logged` },
+            { label: 'Add Merchant', route: `${process.env.REACT_APP_PATH}/admin-logged/add-merchant` }
         ]) :
         (items = [
-            { label: 'Home', route: '/logged' },
-            { label: 'Personal Info', route: '/personal-info' }
+            { label: 'Home', route: `${process.env.REACT_APP_PATH}/logged` },
+            { label: 'Personal Info', route: `${process.env.REACT_APP_PATH}/personal-info` }
         ])
 
     return (
