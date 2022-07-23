@@ -30,21 +30,21 @@ function App() {
         <Routes>
           {/* ----- Merchant Routes ----- */}
           <Route path="/" element={<Home />} />
-          <Route path={`${process.env.REACT_APP_PATH}/signup`} element={<Signup />} />
-          <Route path={`${process.env.REACT_APP_PATH}/login`} element={<Login />} />
-          <Route path={`${process.env.REACT_APP_PATH}/logged`} element={<Logged />} />
-          <Route path={`${process.env.REACT_APP_PATH}/personal-info`} element={<PersonalInfo />} />
+          <Route path={"/signup"} element={<Signup />} />
+          <Route path={"/login"} element={<Login />} />
+          <Route path={"/logged"} element={<Logged />} />
+          <Route path={"/personal-info"} element={<PersonalInfo />} />
 
           {/* ----- Admin Routes ----- */}
-          <Route path={`${process.env.REACT_APP_PATH}/admin`} element={<AdminLogin />} />
-          <Route path={`${process.env.REACT_APP_PATH}/admin-logged`} element={<AdminLogged />} />
-          <Route path={`${process.env.REACT_APP_PATH}/merchants-list`} element={<AdminMerchantsList />} />
-          <Route path={`${process.env.REACT_APP_PATH}/admin-logged/edit/merchant/:id`} element={<AdminEditMerchant />} />
-          <Route path={`${process.env.REACT_APP_PATH}/admin-logged/add-merchant`} element={<AdminAddMerchant />} />
+          <Route path={"/admin"} element={<AdminLogin />} />
+          <Route path={"/admin-logged"} element={<AdminLogged />} />
+          <Route path={"/merchants-list"} element={<AdminMerchantsList />} />
+          <Route path={"/admin-logged/edit/merchant/:id"} element={<AdminEditMerchant />} />
+          <Route path={"/admin-logged/add-merchant"} element={<AdminAddMerchant />} />
 
           {/* ----- Vote Routes ----- */}
-          <Route path={`${process.env.REACT_APP_PATH}/vote`} element={<Vote />} />
-          <Route path={`${process.env.REACT_APP_PATH}/vote/merchant/:id`} element={<MerchantInfo />} />
+          <Route path={"/vote"} element={<Vote />} />
+          <Route path={"/vote/merchant/:id"} element={<MerchantInfo />} />
         </Routes>
       </main>
     </div>
