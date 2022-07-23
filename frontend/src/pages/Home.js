@@ -6,7 +6,7 @@ const Home = () => {
 
   return (
     <div>
-      <h1>Welcome!</h1>
+      <h1>Welcome, Merchant!</h1>
       <div className="side-by-side-buttons">
         <button onClick={() => navigate("/signup")}>Signup</button>
         <button onClick={() => navigate("/login")}>Login</button>
