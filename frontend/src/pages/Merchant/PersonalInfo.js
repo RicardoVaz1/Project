@@ -1,69 +1,101 @@
-import React, { useState, useEffect } from 'react'
-import { useNavigate } from "react-router-dom";
-import Sidebar from '../../components/Sidebar';
+import { useState, useEffect } from 'react'
+import * as constants from '../../constants'
 
-const PersonalInfo = () => {
-    const navigate = useNavigate();
+import Sidebar from '../../components/Sidebar'
 
-    const [walletAddress, setWalletAddress] = useState("");
-    const [name, setName] = useState("");
-    const [escrowAmount, setEscrowAmount] = useState("");
-    const [balance, setBalance] = useState("");
+import { ethers } from "ethers"
+import MerchantContractABI from "../../abis/MerchantContract.json"
+const ContractAddress = constants.CONTRACTADDRESS
 
+
+const PersonalInfo = ({ currentAccount }) => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum)
+    const signer = provider.getSigner()
+    const instanceMerchantContract = new ethers.Contract(ContractAddress, MerchantContractABI.abi, signer)
+
+    const [walletAddress, setWalletAddress] = useState("")
+    const [name, setName] = useState("")
+    const [escrowAmount, setEscrowAmount] = useState("")
+    const [balance, setBalance] = useState("")
 
     useEffect(() => {
-        // MerchantContract > checkMyAddress()
-        setWalletAddress("123456789")
+        getMerchantInfo()
+    })
 
-        // MerchantContract > checkMyName()
-        setName("qwer")
+    async function getMerchantInfo() {
+        try {
+            const merchantAddress = await instanceMerchantContract.hello() // checkMyAddress().call({from: currentAccount})
+            const merchantName = await instanceMerchantContract.hello() // checkMyName().call({from: currentAccount})
+            const merchantEscrowAmount = await instanceMerchantContract.hello() // checkMyEscrowAmount().call({from: currentAccount})
+            const merchantBalance = await instanceMerchantContract.hello() // checkMyBalance().call({from: currentAccount})
 
-        // MerchantContract > checkMyEscrowAmount()
-        setEscrowAmount(1000000000000000000)
+            console.log("Merchant Address: ", merchantAddress)
+            console.log("Merchant Name: ", merchantName)
+            console.log("Merchant EscrowAmount: ", merchantEscrowAmount)
+            console.log("Merchant Balance: ", merchantBalance)
 
-        // MerchantContract > checkMyBalance()
-        setBalance(5000000000000000000)
-    }, []);
+            setWalletAddress(merchantAddress)
+            setName(merchantName)
+            setEscrowAmount(merchantEscrowAmount)
+            setBalance(merchantBalance)
+        } catch (error) {
+            console.log("ERROR AT GETTING MERCHANT INFO: ", error)
+        }
+    }
 
-    function changeAddress() {
+    async function changeAddress() {
         if (walletAddress === "") {
             alert("Fill the wallet address!")
-            return;
+            return
         }
 
         console.log("Done!")
-        console.log("Wallet Ãddress: ", walletAddress)
+        console.log("Wallet Address: ", walletAddress)
 
-        document.getElementById("done-successfully").style.display = '';
+        document.getElementById("done-successfully").style.display = ''
 
-        // MerchantContract > changeMyAddress(walletAddress)
+        try {
+            const merchantNewAddress = await instanceMerchantContract.hello() // changeMyAddress(walletAddress).call({from: currentAccount})
+            console.log("Merchant New Address: ", merchantNewAddress)
+
+            setWalletAddress(merchantNewAddress)
+        } catch (error) {
+            console.log("ERROR AT GETTING MERCHANT INFO: ", error)
+        }
 
         setTimeout(function () {
-            navigate("/logged")
-        }, 5000);
+            document.getElementById("done-successfully").style.display = 'none'
+        }, 2000)
     }
 
-    function changeName() {
+    /* async function changeName() {
         if (name === "") {
             alert("Fill the name!")
-            return;
+            return
         }
 
         console.log("Done!")
         console.log("Name: ", name)
 
-        document.getElementById("done-successfully").style.display = '';
+        document.getElementById("done-successfully").style.display = ''
 
-        // MerchantContract > changeMyName(name)
+        try {
+            const merchantNewName = await instanceMerchantContract.hello() // changeMyName(name).call({from: currentAccount})
+            console.log("Merchant New Name: ", merchantNewName)
+
+            setName(merchantNewName)
+        } catch (error) {
+            console.log("ERROR AT GETTING MERCHANT INFO: ", error)
+        }
 
         setTimeout(function () {
-            navigate("/logged")
-        }, 5000);
-    }
+            document.getElementById("done-successfully").style.display = 'none'
+        }, 2000)
+    } */
 
     return (
-        <div>
-            <h1>Personal Info</h1>
+        <>
+            <h3>My Smart Contract Info</h3>
 
             <Sidebar logged={"merchant"} />
 
@@ -80,7 +112,8 @@ const PersonalInfo = () => {
             <br />
 
             <label htmlFor="name">Name: </label>
-            <input
+            <span>{name}</span>
+            {/* <input
                 type="text"
                 id="name"
                 name="fname"
@@ -88,7 +121,7 @@ const PersonalInfo = () => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
             />
-            <button onClick={() => changeName()}>Change</button>
+            <button onClick={() => changeName()}>Change</button> */}
             <br />
 
             <label htmlFor="escrowAmount">Escrow Amount: </label>
@@ -97,12 +130,9 @@ const PersonalInfo = () => {
 
             <label htmlFor="balance">Balance: </label>
             <span>{balance >= 10 ** 18 ? balance / 10 ** 18 + " ETH" : balance + " ETH"}</span>
-            <br />
 
-            <br />
-            <span id="done-successfully" style={{ "display": "none" }}>Done successfully! <br /> Redirecting ...</span>
-
-        </div>
+            <span id="done-successfully" style={{ "display": "none" }}>Done successfully!</span>
+        </>
     )
 }
 

@@ -1,136 +1,81 @@
-import React, { useState } from 'react'
-// import { useNavigate } from "react-router-dom";
-import Sidebar from '../../components/Sidebar';
+import { useState } from 'react'
+// import { useNavigate } from "react-router-dom"
+import * as constants from '../../constants'
 
-import { ethers } from "ethers";
+import Sidebar from '../../components/Sidebar'
 
-import ContractABI from "../../abis/MainContract.json"
-const MainContractABI = ContractABI.abi
-const ContractAddress = '0xb06454D8cC52965bce1fDaE5AdD42aD9BFe4DF17'
-
-const AddMerchant = () => {
-    // const navigate = useNavigate();
-
-    const [walletAddress, setWalletAddress] = useState("");
-    const [name, setName] = useState("");
+import { ethers } from "ethers"
+import MainContractABI from "../../abis/MainContract.json"
+const ContractAddress = constants.CONTRACTADDRESS
 
 
-    /* --- Owner Wallet --- */
-    /* async function connectWallet() {
-        const provider = new ethers.providers.Web3Provider(window.ethereum)
-        const accounts = await provider.send("eth_requestAccounts", []);
-        const balance = await provider.getBalance(accounts[0]);
+const AddMerchant = ({ currentAccount }) => {
+    // const navigate = useNavigate()
 
-        const daiContract = new ethers.Contract(ContractAddress, MainContractABI, provider);
-    }
+    const provider = new ethers.providers.Web3Provider(window.ethereum)
+    const signer = provider.getSigner()
+    const instanceMainContract = new ethers.Contract(ContractAddress, MainContractABI.abi, signer)
 
-    async function sendDaiTo(to, amountInEther) {
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const signer = provider.getSigner()
+    const [merchantAddress, setMerchantAddress] = useState("")
+    const [merchantName, setMerchantName] = useState("")
 
-        const daiContract = new ethers.Contract(ContractAddress, MainContractABI, provider);
+    async function createMerchant() {
+        if (merchantAddress === "" || merchantName === "") {
+            alert("Fill all fields!")
+            return
+        }
 
-        const tokenUnits = await daiContract.decimals();
-        const tokenAmountInEther = ethers.utils.parseUnits(amountInEther, tokenUnits);
+        console.log("Done!")
+        console.log("merchantAddress: ", merchantAddress)
+        console.log("merchantName: ", merchantName)
 
-        const daiContractWithSigner = daiContract.connect(signer);
-        daiContractWithSigner.transfer("0x708Ef16bF16Bb9f14CfE36075E9ae17bCd1C5B40", tokenAmountInEther);
-    } */
-
-    async function hello() {
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        
-        // const account = await window.ethereum.request({
-        //     method: "eth_requestAccounts",
-        // });
-
-        const signer = provider.getSigner();
-
-        const erc20 = new ethers.Contract(
-            ContractAddress,
-            MainContractABI,
-            signer
-        );
+        document.getElementById("done-successfully").style.display = ''
 
         try {
-            const user = await erc20.hello();
-            console.log("Solidity: ", user);
+            const ownerAddMerchant = await instanceMainContract.hello() // addMerchantContract(merchantAddress, merchantName).call({from: currentAccount})
+            console.log("Owner Add Merchant: ", ownerAddMerchant)
         } catch (error) {
-            console.log("ERROR AT GETTING USER: ", error);
-        }
-    }
-
-
-    function submit() {
-        if (walletAddress === "" || name === "") {
-            alert("Fill all fields!")
-            return;
+            console.log("ERROR AT CREATING NEW MERCHANT: ", error)
         }
 
-        // connectWallet()
-        // sendDaiTo()
-
-        if (!window.ethereum) return
-
-        // const provider = new ethers.providers.Web3Provider(window.ethereum)
-        // const contractInstance = new ethers.Contract(ContractAddress, MainContractABI, provider);
-
-        // const result = contractInstance.hello()
-        //     .then((result) => console.log(result))
-        //     .catch('error', console.error)
-
-        // console.log(provider)
-        // console.log(contractInstance)
-        // console.log(result)
-
-        hello()
-
-        // console.log("Done!")
-        // console.log("Wallet Ãddress: ", walletAddress)
-        // console.log("Name: ", name)
-
-        document.getElementById("done-successfully").style.display = '';
-
-        // MainContract > addMerchantContract(walletAddress, name)
-
-        // setTimeout(function () {
-        //     navigate("/admin-logged")
-        // }, 3000);
+        setTimeout(function () {
+            document.getElementById("done-successfully").style.display = 'none'
+        }, 2000)
     }
 
     return (
-        <div>
-            <h1>Add Merchant</h1>
+        <>
+            <h1>Create Merchant</h1>
 
             <Sidebar logged={"admin"} />
 
             <div id="page-wrap">
-                <label htmlFor="walletAddress">Address:</label>
+                <label htmlFor="merchantAddress">Merchant Address:</label>
                 <input
                     type="text"
-                    id="walletAddress"
+                    id="merchantAddress"
                     name="fname"
-                    placeholder="Insert Merchant wallet address"
-                    onChange={(e) => setWalletAddress(e.target.value)}
+                    placeholder="Insert Merchant address"
+                    onChange={(e) => setMerchantAddress(e.target.value)}
                 />
                 <br />
 
-                <label htmlFor="merchantName">Name: </label>
+                <label htmlFor="merchantName">Merchant Name: </label>
                 <input
                     type="text"
                     id="merchantName"
                     name="lname"
                     placeholder="Insert Merchant name"
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={(e) => setMerchantName(e.target.value)}
                 />
                 <br />
 
-                <button onClick={() => submit()}>Submit</button>
+                <button onClick={() => createMerchant()}>Create Merchant</button>
                 <br />
 
                 <span id="done-successfully" style={{ "display": "none" }}>Merchant added successfully!</span>
             </div>
-        </div>
+        </>
     )
 }
 
