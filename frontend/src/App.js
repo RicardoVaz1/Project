@@ -1,33 +1,40 @@
-import { Routes, Route } from "react-router-dom";
-import "./App.css";
+import { Routes, Route } from "react-router-dom"
+import "./App.css"
 
-import MainHeader from "./components/MainHeader";
+import MainHeader from "./components/MainHeader"
+
+/* ----- Buyer Routes ----- */
+import Buy from "./pages/Buyer/Buy"
 
 /* ----- Merchant Routes ----- */
-import Home from "./pages/Home";
-import Signup from "./pages/Merchant/Signup";
-import Login from "./pages/Merchant/Login";
-import Logged from "./pages/Merchant/Logged";
-import PersonalInfo from "./pages/Merchant/PersonalInfo";
+import Home from "./pages/Home"
+import Signup from "./pages/Merchant/Signup"
+import Login from "./pages/Merchant/Login"
+import Logged from "./pages/Merchant/Logged"
+import PersonalInfo from "./pages/Merchant/PersonalInfo"
 
 /* ----- Admin Routes ----- */
-import AdminLogin from "./pages/Admin/Login";
-import AdminLogged from "./pages/Admin/Logged";
-import AdminMerchantsList from "./pages/Admin/MerchantsList";
-import AdminEditMerchant from "./pages/Admin/EditMerchant";
-import AdminAddMerchant from "./pages/Admin/AddMerchant";
+import AdminLogin from "./pages/Admin/Login"
+import AdminLogged from "./pages/Admin/Logged"
+import AdminMerchantsList from "./pages/Admin/MerchantsList"
+import AdminEditMerchant from "./pages/Admin/EditMerchant"
+import AdminAddMerchant from "./pages/Admin/AddMerchant"
 
 /* ----- Merchant Routes ----- */
-import Vote from "./pages/Vote/Vote";
-import MerchantInfo from "./pages/Vote/MerchantInfo";
+import Vote from "./pages/Vote/Vote"
+import MerchantInfo from "./pages/Vote/MerchantInfo"
+
 
 function App() {
   return (
-    <div>
+    <>
       <MainHeader />
 
       <main className="center">
         <Routes>
+          {/* ----- Buyer Routes ----- */}
+          <Route path="/buyer" element={<Buy />} />
+
           {/* ----- Merchant Routes ----- */}
           <Route path="/" element={<Home />} />
           <Route path={"/signup"} element={<Signup />} />
@@ -47,8 +54,8 @@ function App() {
           <Route path={"/vote/merchant/:id"} element={<MerchantInfo />} />
         </Routes>
       </main>
-    </div>
-  );
+    </>
+  )
 }
 
-export default App;
+export default App

@@ -110,3 +110,13 @@
   background: rgba(0, 0, 0, 0.3);
 }
 /* --------------- */
+
+#done-successfully, 
+#done-successfully-1, 
+#done-successfully-2, 
+#done-successfully-3, 
+#done-successfully-4, 
+#done-successfully-5 { 
+  margin-top: 20px;
+  display: block;
+}
