@@ -1,17 +1,15 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { ethers } from "ethers"
-// import { useNavigate } from "react-router-dom";
+import { createSearchParams, useNavigate } from "react-router-dom"
 
-
-const ConnectWallet = (props) => {
-  // const navigate = useNavigate();
+const ConnectWallet = ({ nextPage }) => {
+  const navigate = useNavigate()
 
   const [balance, setBalance] = useState("")
   const [currentAccount, setCurrentAccount] = useState("")
   const [chainID, setChainID] = useState(0)
   const [chainName, setChainName] = useState("")
   const [currentBlock, setCurrentBlock] = useState(0)
-
 
   useEffect(() => {
     if (!currentAccount || !ethers.utils.isAddress(currentAccount)) return
@@ -29,7 +27,6 @@ const ConnectWallet = (props) => {
     })
 
     provider.getBlockNumber(currentAccount).then((result) => {
-      console.log(result)
       setCurrentBlock(result)
     })
   }, [currentAccount])
@@ -46,48 +43,55 @@ const ConnectWallet = (props) => {
 
     provider.send("eth_requestAccounts", [])
       .then((accounts) => {
-        if (accounts.length > 0) setCurrentAccount(accounts[0])
-
-        // if (props.nextPage === "/logged") navigate("/logged", { state: { query: ' your-query ' } })
-        // if (props.nextPage === "/admin-logged") navigate("/admin-logged")
+        if (accounts.length > 0) {
+          setCurrentAccount(accounts[0])
+        }
       })
       .catch((e) => console.log(e))
   }
 
-  function onClickDisconnect() {
+  /* function onClickDisconnect() {
     console.log("Disconnect!")
     setBalance(undefined)
     setCurrentAccount(undefined)
     setChainID(0)
     setChainName(undefined)
     setCurrentBlock(0)
-  }
+  } */
 
   return (
-    <div>
+    <>
       {!currentAccount || !ethers.utils.isAddress(currentAccount) ?
         <button onClick={() => onClickConnect()}>Connect Metamask</button> :
-        <div>
-          <button onClick={() => onClickDisconnect()}>Disconnect</button>
+        <>
+          <span><b>Address: </b>{currentAccount}</span>
           <br />
 
-          <span>Current Account: {currentAccount}</span>
+          <span><b>Balance: </b>{balance}</span>
           <br />
 
-          <span>Balance: {balance}</span>
+          <span><b>Chain ID: </b>{chainID}</span>
           <br />
 
-          <span>Chain ID: {chainID}</span>
+          <span><b>Chain Name: </b>{chainName}</span>
           <br />
 
-          <span>Chain Name: {chainName}</span>
+          <span><b>Current Block: </b>{currentBlock}</span>
+          <br />
           <br />
 
-          <span>Current Block: {currentBlock}</span>
-          <br />
-        </div>
+          <button onClick={() => navigate({
+            pathname: nextPage,
+            search: createSearchParams({
+              CurrentAccount: currentAccount,
+              Balance: balance
+            }).toString()
+          })}>
+            Next
+          </button>
+        </>
       }
-    </div>
+    </>
   )
 }
 

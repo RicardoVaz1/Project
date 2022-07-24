@@ -1,5 +1,4 @@
-import React from 'react'
-import { slide as Menu } from 'react-burger-menu';
+import { slide as Menu } from 'react-burger-menu'
 
 const Sidebar = ({ logged }) => {
     let items
@@ -21,7 +20,7 @@ const Sidebar = ({ logged }) => {
                     <a className="menu-item" href={item.route}>
                         {item.label}
                     </a>
-                );
+                )
             })}
         </Menu>
     )
