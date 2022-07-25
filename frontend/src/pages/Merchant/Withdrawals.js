@@ -13,7 +13,7 @@ const Withdrawals = ({ currentAccount }) => {
 
     useEffect(() => {
         getMerchantBalance()
-    }, [])
+    })
 
     async function getMerchantBalance() {
         try {

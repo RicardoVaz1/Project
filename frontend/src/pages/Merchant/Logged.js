@@ -27,7 +27,7 @@ const Logged = () => {
 
     useEffect(() => {
         getMerchantInfo()
-    }, [])
+    })
 
     async function getMerchantInfo() {
         try {

@@ -22,7 +22,7 @@ const PersonalInfo = ({ currentAccount }) => {
 
     useEffect(() => {
         getMerchantInfo()
-    }, [])
+    })
 
     async function getMerchantInfo() {
         try {
