@@ -1,15 +1,14 @@
 import { useState } from 'react'
-import * as constants from '../../constants'
 
 import { ethers } from "ethers"
 import MerchantContractABI from "../../abis/MerchantContract.json"
-const ContractAddress = constants.CONTRACTADDRESS
+import { MERCHANTCONTRACTADDRESS } from '../../constants'
 
 
 const TopUpMyContract = ({ currentAccount }) => {
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
-    const instanceMerchantContract = new ethers.Contract(ContractAddress, MerchantContractABI.abi, signer)
+    const instanceMerchantContract = new ethers.Contract(MERCHANTCONTRACTADDRESS, MerchantContractABI.abi, signer)
 
     const [amount, setAmount] = useState(0)
 
@@ -19,14 +18,13 @@ const TopUpMyContract = ({ currentAccount }) => {
             return
         }
 
-        console.log("Done!")
-        console.log("amount: ", amount)
-
-        document.getElementById("done-successfully-5").style.display = ''
-
         try {
-            const merchantTopUpContract = await instanceMerchantContract.hello() // topUpMyContract().call({from: currentAccount, value: amount})
+            // console.log("amount: ", amount)
+
+            const merchantTopUpContract = await instanceMerchantContract.topUpMyContract({ from: currentAccount, value: amount })
             console.log("Merchant Top Up Contract: ", merchantTopUpContract)
+
+            document.getElementById("done-successfully-5").style.display = ''
         } catch (error) {
             console.log("ERROR DURING TOP UP CONTRACT: ", error)
         }

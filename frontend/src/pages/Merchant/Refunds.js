@@ -1,15 +1,14 @@
 import { useState } from 'react'
-import * as constants from '../../constants'
 
 import { ethers } from "ethers"
 import MerchantContractABI from "../../abis/MerchantContract.json"
-const ContractAddress = constants.CONTRACTADDRESS
+import { MERCHANTCONTRACTADDRESS } from '../../constants'
 
 
 const Refunds = ({ currentAccount }) => {
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
-    const instanceMerchantContract = new ethers.Contract(ContractAddress, MerchantContractABI.abi, signer)
+    const instanceMerchantContract = new ethers.Contract(MERCHANTCONTRACTADDRESS, MerchantContractABI.abi, signer)
 
     const [idPurchase, setIDPurchase] = useState(0)
     const [buyerAddress, setBuyerAddress] = useState("")
@@ -21,16 +20,15 @@ const Refunds = ({ currentAccount }) => {
             return
         }
 
-        console.log("Done!")
-        console.log("idPurchase: ", idPurchase)
-        console.log("buyerAddress: ", buyerAddress)
-        console.log("refundAmount: ", refundAmount)
-
-        document.getElementById("done-successfully-4").style.display = ''
-
         try {
-            const merchantNewRefund = await instanceMerchantContract.hello() // refund(idPurchase, buyerAddress, refundAmount).call({from: currentAccount})
+            // console.log("idPurchase: ", idPurchase)
+            // console.log("buyerAddress: ", buyerAddress)
+            // console.log("refundAmount: ", refundAmount)
+
+            const merchantNewRefund = await instanceMerchantContract.refund(idPurchase, buyerAddress, refundAmount, { from: currentAccount, gasLimit: 1500000 })
             console.log("Merchant New Refund: ", merchantNewRefund)
+
+            document.getElementById("done-successfully-4").style.display = ''
         } catch (error) {
             console.log("ERROR DURING REFUND: ", error)
         }

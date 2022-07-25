@@ -1,41 +1,38 @@
 import { useState, useEffect } from 'react'
-import * as constants from '../../constants'
 
 import { ethers } from "ethers"
 import MerchantContractABI from "../../abis/MerchantContract.json"
-const ContractAddress = constants.CONTRACTADDRESS
+import { MERCHANTCONTRACTADDRESS } from '../../constants'
 
 const Withdrawals = ({ currentAccount }) => {
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
-    const instanceMerchantContract = new ethers.Contract(ContractAddress, MerchantContractABI.abi, signer)
+    const instanceMerchantContract = new ethers.Contract(MERCHANTCONTRACTADDRESS, MerchantContractABI.abi, signer)
 
-    const [balance, setBalance] = useState("")
+    const [balance, setBalance] = useState(0)
 
     useEffect(() => {
-        getMerchantInfo()
-    })
+        getMerchantBalance()
+    }, [])
 
-    async function getMerchantInfo() {
+    async function getMerchantBalance() {
         try {
-            const merchantBalance = await instanceMerchantContract.hello() // checkMyBalance().call({from: currentAccount})
+            const merchantBalance = await instanceMerchantContract.checkMyBalance([], { from: currentAccount })
 
             console.log("Merchant Balance: ", merchantBalance)
 
             setBalance(merchantBalance)
         } catch (error) {
-            console.log("ERROR AT GETTING MERCHANT INFO: ", error)
+            console.log("ERROR AT GETTING MERCHANT BALANCE: ", error)
         }
     }
 
     async function withdrawal() {
-        console.log("Done!")
-
-        document.getElementById("done-successfully-3").style.display = ''
-
         try {
-            const merchantWithdrawal = await instanceMerchantContract.hello() // withdrawal().call({from: currentAccount})
+            const merchantWithdrawal = await instanceMerchantContract.withdrawal({ from: currentAccount, gasLimit: 1500000 })
             console.log("Merchant Withdrawal: ", merchantWithdrawal)
+
+            document.getElementById("done-successfully-3").style.display = ''
         } catch (error) {
             console.log("ERROR DURING WITHDRAWAL: ", error)
         }

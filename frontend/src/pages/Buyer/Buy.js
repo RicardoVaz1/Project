@@ -1,27 +1,56 @@
-import * as constants from '../../constants'
-
 import { ethers } from "ethers"
+import { useEffect, useState } from "react"
+
 import MerchantContractABI from "../../abis/MerchantContract.json"
-const ContractAddress = constants.CONTRACTADDRESS
+import { MERCHANTCONTRACTADDRESS } from '../../constants'
 
 
 const Buy = () => {
-    const provider = new ethers.providers.Web3Provider(window.ethereum)
-    const signer = provider.getSigner()
-    const instanceMerchantContract = new ethers.Contract(ContractAddress, MerchantContractABI.abi, signer)
+    const [currentAccount, setCurrentAccount] = useState("")
+
+    let provider
+    let signer
+    let instanceMerchantContract
+
+    useEffect(() => {
+        if (!currentAccount || !ethers.utils.isAddress(currentAccount)) return
+        if (!window.ethereum) return
+    }, [currentAccount])
+
+
+    async function connectWallet() {
+        if (!window.ethereum) {
+            alert("Please install MetaMask!")
+            console.log("Please install MetaMask!")
+            return
+        }
+
+        provider = new ethers.providers.Web3Provider(window.ethereum)
+
+        provider.send("eth_requestAccounts", [])
+            .then((accounts) => {
+                if (accounts.length > 0) {
+                    setCurrentAccount(accounts[0])
+                }
+            })
+            .catch((e) => console.log(e))
+    }
 
     async function buy(ID, purchaseAmount) {
-        console.log("Done!")
-        console.log("ID Purchase: ", ID)
-        console.log("purchaseAmount: ", purchaseAmount)
-
-        document.getElementById("done-successfully").style.display = ''
+        provider = new ethers.providers.Web3Provider(window.ethereum)
+        signer = provider.getSigner()
+        instanceMerchantContract = new ethers.Contract(MERCHANTCONTRACTADDRESS, MerchantContractABI.abi, signer)
 
         try {
-            const buyerNewBuy = await instanceMerchantContract.hello() // buy(ID).call({from: currentAccount, value: purchaseAmount})
+            // console.log("ID Purchase: ", ID)
+            // console.log("purchaseAmount: ", purchaseAmount)
+
+            const buyerNewBuy = await instanceMerchantContract.buy(ID, { from: currentAccount, value: purchaseAmount, gasLimit: 1500000 })
             console.log("Buyer New Buy: ", buyerNewBuy)
+
+            document.getElementById("done-successfully").style.display = ''
         } catch (error) {
-            console.log("ERROR DURING BUYING THE PURCHASE: ", error)
+            console.log("ERROR AT BUYING THE PURCHASE: ", error)
         }
 
         setTimeout(function () {
@@ -37,7 +66,10 @@ const Buy = () => {
             <label htmlFor="escrowTime">20 €</label>
             <br />
 
-            <button onClick={() => buy(1, 20)}>Buy</button>
+            {!currentAccount ?
+                <button onClick={() => connectWallet()}>Connect Wallet</button> :
+                <button onClick={() => buy(1, 20)}>Buy</button>
+            }
 
             <span id="done-successfully" style={{ "display": "none" }}>Done successfully!</span>
         </>

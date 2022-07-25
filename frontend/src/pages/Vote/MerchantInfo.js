@@ -1,9 +1,9 @@
+import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import * as constants from '../../constants'
 
 import { ethers } from "ethers"
 import MainContractABI from "../../abis/MainContract.json"
-const ContractAddress = constants.CONTRACTADDRESS
+import { MAINCONTRACTADDRESS } from '../../constants'
 
 const MerchantInfo = () => {
     const navigate = useNavigate()
@@ -12,9 +12,11 @@ const MerchantInfo = () => {
     const locationArray = location.split("/")
     const MerchantID = locationArray[3]
 
-    const provider = new ethers.providers.Web3Provider(window.ethereum)
-    const signer = provider.getSigner()
-    const instanceMainContract = new ethers.Contract(ContractAddress, MainContractABI.abi, signer)
+    const [currentAccount, setCurrentAccount] = useState("")
+
+    let provider
+    let signer
+    let instanceMainContract
 
     const merchantsList = [
         { id: 0, merchantAddress: "1234", merchantName: "zxc", numberOfVotes: 50 },
@@ -24,14 +26,42 @@ const MerchantInfo = () => {
         { id: 4, merchantAddress: "1234", merchantName: "zxc", numberOfVotes: 1500 },
     ]
 
-    async function vote(ID) {
-        console.log("ID: ", ID)
+    useEffect(() => {
+        if (!currentAccount || !ethers.utils.isAddress(currentAccount)) return
+        if (!window.ethereum) return
+    }, [currentAccount])
 
-        document.getElementById("done-successfully").style.display = ''
+
+    async function connectWallet() {
+        if (!window.ethereum) {
+            alert("Please install MetaMask!")
+            console.log("Please install MetaMask!")
+            return
+        }
+
+        provider = new ethers.providers.Web3Provider(window.ethereum)
+
+        provider.send("eth_requestAccounts", [])
+            .then((accounts) => {
+                if (accounts.length > 0) {
+                    setCurrentAccount(accounts[0])
+                }
+            })
+            .catch((e) => console.log(e))
+    }
+
+    async function vote(ID) {
+        provider = new ethers.providers.Web3Provider(window.ethereum)
+        signer = provider.getSigner()
+        instanceMainContract = new ethers.Contract(MAINCONTRACTADDRESS, MainContractABI.abi, signer)
 
         try {
-            const userVote = await instanceMainContract.hello() // voteNewMerchantContractApproval(ID).call({from: currentAccount})
+            // console.log("ID: ", ID)
+
+            const userVote = await instanceMainContract.voteNewMerchantContractApproval(ID, { from: currentAccount })
             console.log("User Vote: ", userVote)
+
+            document.getElementById("done-successfully").style.display = ''
         } catch (error) {
             console.log("ERROR DURING VOTE: ", error)
         }
@@ -61,7 +91,10 @@ const MerchantInfo = () => {
 
             <div className="side-by-side-buttons">
                 <button onClick={() => navigate("/vote")}>Cancel</button>
-                <button onClick={() => vote(MerchantID)}>Vote</button>
+                {!currentAccount ?
+                    <button onClick={() => connectWallet()}>Connect Wallet</button> :
+                    <button onClick={() => vote(MerchantID)}>Vote</button>
+                }
             </div>
 
             <span id="done-successfully" style={{ "display": "none" }}>Thank you for your vote! <br /> Redirecting ...</span>

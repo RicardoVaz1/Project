@@ -1,15 +1,14 @@
 import { useState } from 'react'
-import * as constants from '../../constants'
 
 import { ethers } from "ethers"
 import MerchantContractABI from "../../abis/MerchantContract.json"
-const ContractAddress = constants.CONTRACTADDRESS
+import { MERCHANTCONTRACTADDRESS } from '../../constants'
 
 
 const CreatePurchase = ({ currentAccount }) => {
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
-    const instanceMerchantContract = new ethers.Contract(ContractAddress, MerchantContractABI.abi, signer)
+    const instanceMerchantContract = new ethers.Contract(MERCHANTCONTRACTADDRESS, MerchantContractABI.abi, signer)
 
     const [idPurchase, setIDPurchase] = useState(0)
     const [purchaseAmount, setPurchaseAmount] = useState(0)
@@ -21,16 +20,15 @@ const CreatePurchase = ({ currentAccount }) => {
             return
         }
 
-        console.log("Done!")
-        console.log("idPurchase: ", idPurchase)
-        console.log("purchaseAmount: ", purchaseAmount)
-        console.log("escrowTime: ", escrowTime)
-
-        document.getElementById("done-successfully-1").style.display = ''
-
         try {
-            const merchantNewPurchase = await instanceMerchantContract.hello() // createPurchase(idPurchase, purchaseAmount, escrowTime).call({from: currentAccount})
+            // console.log("idPurchase: ", idPurchase)
+            // console.log("purchaseAmount: ", purchaseAmount)
+            // console.log("escrowTime: ", escrowTime)
+
+            const merchantNewPurchase = await instanceMerchantContract.createPurchase(idPurchase, purchaseAmount, escrowTime, { from: currentAccount })
             console.log("Merchant New Purchase: ", merchantNewPurchase)
+
+            document.getElementById("done-successfully-1").style.display = ''
         } catch (error) {
             console.log("ERROR AT CREATING NEW PURCHASE: ", error)
         }

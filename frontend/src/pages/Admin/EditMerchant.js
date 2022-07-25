@@ -1,11 +1,10 @@
 import { useNavigate } from "react-router-dom"
-import * as constants from '../../constants'
 
 import { ethers } from "ethers"
 import MainContractABI from "../../abis/MainContract.json"
-const ContractAddress = constants.CONTRACTADDRESS
+import { MAINCONTRACTADDRESS } from '../../constants'
 
-const EditMerchant = () => {
+const EditMerchant = ({ currentAccount }) => {
     const navigate = useNavigate()
 
     const location = new URL(window.location.href).pathname
@@ -14,7 +13,7 @@ const EditMerchant = () => {
 
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
-    const instanceMainContract = new ethers.Contract(ContractAddress, MainContractABI.abi, signer)
+    const instanceMainContract = new ethers.Contract(MAINCONTRACTADDRESS, MainContractABI.abi, signer)
 
     const merchantsList = [
         { id: 0, merchantAddress: "1234", merchantName: "zxc", numberOfVotes: 50, approved: false, pausedWithdrawls: true },
@@ -26,13 +25,13 @@ const EditMerchant = () => {
     ]
 
     async function disapprove(ID) {
-        console.log("ID: ", ID)
-
-        document.getElementById("done-successfully-1").style.display = ''
-
         try {
-            const ownerDisapproveMerchant = await instanceMainContract.hello() // disapproveMerchantContract(ID).call({from: currentAccount})
+            // console.log("ID: ", ID)
+
+            const ownerDisapproveMerchant = await instanceMainContract.disapproveMerchantContract(ID, { from: currentAccount, gasLimit: 1500000 })
             console.log("Owner Disapprove Merchant: ", ownerDisapproveMerchant)
+
+            document.getElementById("done-successfully-1").style.display = ''
         } catch (error) {
             console.log("ERROR AT DISAPPROVING MERCHANT: ", error)
         }
@@ -44,13 +43,13 @@ const EditMerchant = () => {
     }
 
     async function pauseWithdrawls(ID) {
-        console.log("ID: ", ID)
-
-        document.getElementById("done-successfully-2").style.display = ''
-
         try {
-            const ownerPauseWithdrawls = await instanceMainContract.hello() // freezeWithdrawalsMerchantContract(ID).call({from: currentAccount})
+            // console.log("ID: ", ID)
+
+            const ownerPauseWithdrawls = await instanceMainContract.freezeWithdrawalsMerchantContract(ID, { from: currentAccount, gasLimit: 1500000 })
             console.log("Owner Pause Withdrawls: ", ownerPauseWithdrawls)
+
+            document.getElementById("done-successfully-2").style.display = ''
         } catch (error) {
             console.log("ERROR AT PAUSING WITHDRAWLS: ", error)
         }
@@ -62,13 +61,13 @@ const EditMerchant = () => {
     }
 
     async function unpauseWithdrawls(ID) {
-        console.log("ID: ", ID)
-
-        document.getElementById("done-successfully-3").style.display = ''
-
         try {
-            const ownerUnpauseWithdrawls = await instanceMainContract.hello() // unfreezeWithdrawalsMerchantContract(ID).call({from: currentAccount})
+            // console.log("ID: ", ID)
+
+            const ownerUnpauseWithdrawls = await instanceMainContract.unfreezeWithdrawalsMerchantContract(ID, { from: currentAccount, gasLimit: 1500000 })
             console.log("Owner Unpause Withdrawls: ", ownerUnpauseWithdrawls)
+
+            document.getElementById("done-successfully-3").style.display = ''
         } catch (error) {
             console.log("ERROR AT UNPAUSING WITHDRAWLS: ", error)
         }
