@@ -1,38 +1,40 @@
 import { useState, useEffect } from 'react'
-import * as constants from '../../constants'
+import { useNavigate } from "react-router-dom"
 
 import Sidebar from '../../components/Sidebar'
 
 import { ethers } from "ethers"
 import MerchantContractABI from "../../abis/MerchantContract.json"
-const ContractAddress = constants.CONTRACTADDRESS
+import { MERCHANTCONTRACTADDRESS } from '../../constants'
 
 
 const PersonalInfo = ({ currentAccount }) => {
+    const navigate = useNavigate()
+
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
-    const instanceMerchantContract = new ethers.Contract(ContractAddress, MerchantContractABI.abi, signer)
+    const instanceMerchantContract = new ethers.Contract(MERCHANTCONTRACTADDRESS, MerchantContractABI.abi, signer)
 
     const [walletAddress, setWalletAddress] = useState("")
     const [name, setName] = useState("")
-    const [escrowAmount, setEscrowAmount] = useState("")
-    const [balance, setBalance] = useState("")
+    const [escrowAmount, setEscrowAmount] = useState(0)
+    const [balance, setBalance] = useState(0)
 
     useEffect(() => {
         getMerchantInfo()
-    })
+    }, [])
 
     async function getMerchantInfo() {
         try {
-            const merchantAddress = await instanceMerchantContract.hello() // checkMyAddress().call({from: currentAccount})
-            const merchantName = await instanceMerchantContract.hello() // checkMyName().call({from: currentAccount})
-            const merchantEscrowAmount = await instanceMerchantContract.hello() // checkMyEscrowAmount().call({from: currentAccount})
-            const merchantBalance = await instanceMerchantContract.hello() // checkMyBalance().call({from: currentAccount})
+            const merchantAddress = await instanceMerchantContract.checkMyAddress({ from: currentAccount })
+            const merchantName = await instanceMerchantContract.checkMyName({ from: currentAccount })
+            const merchantEscrowAmount = await instanceMerchantContract.checkMyEscrowAmount({ from: currentAccount })
+            const merchantBalance = await instanceMerchantContract.checkMyBalance({ from: currentAccount })
 
-            console.log("Merchant Address: ", merchantAddress)
-            console.log("Merchant Name: ", merchantName)
-            console.log("Merchant EscrowAmount: ", merchantEscrowAmount)
-            console.log("Merchant Balance: ", merchantBalance)
+            // console.log("Merchant Address: ", merchantAddress)
+            // console.log("Merchant Name: ", merchantName)
+            // console.log("Merchant EscrowAmount: ", merchantEscrowAmount)
+            // console.log("Merchant Balance: ", merchantBalance)
 
             setWalletAddress(merchantAddress)
             setName(merchantName)
@@ -49,22 +51,21 @@ const PersonalInfo = ({ currentAccount }) => {
             return
         }
 
-        console.log("Done!")
-        console.log("Wallet Address: ", walletAddress)
-
-        document.getElementById("done-successfully").style.display = ''
-
         try {
-            const merchantNewAddress = await instanceMerchantContract.hello() // changeMyAddress(walletAddress).call({from: currentAccount})
+            // console.log("Wallet Address: ", walletAddress)
+
+            const merchantNewAddress = await instanceMerchantContract.changeMyAddress(walletAddress, { from: currentAccount })
             console.log("Merchant New Address: ", merchantNewAddress)
 
             setWalletAddress(merchantNewAddress)
+            document.getElementById("done-successfully").style.display = ''
         } catch (error) {
             console.log("ERROR AT GETTING MERCHANT INFO: ", error)
         }
 
         setTimeout(function () {
             document.getElementById("done-successfully").style.display = 'none'
+            navigate("/")
         }, 2000)
     }
 
@@ -74,16 +75,13 @@ const PersonalInfo = ({ currentAccount }) => {
             return
         }
 
-        console.log("Done!")
-        console.log("Name: ", name)
-
-        document.getElementById("done-successfully").style.display = ''
-
         try {
-            const merchantNewName = await instanceMerchantContract.hello() // changeMyName(name).call({from: currentAccount})
+            // console.log("Name: ", name)
+            const merchantNewName = await instanceMerchantContract.changeMyName(name, { from: currentAccount })
             console.log("Merchant New Name: ", merchantNewName)
 
             setName(merchantNewName)
+            document.getElementById("done-successfully").style.display = ''
         } catch (error) {
             console.log("ERROR AT GETTING MERCHANT INFO: ", error)
         }

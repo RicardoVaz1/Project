@@ -1,12 +1,11 @@
 import { useState } from 'react'
 // import { useNavigate } from "react-router-dom"
-import * as constants from '../../constants'
 
 import Sidebar from '../../components/Sidebar'
 
 import { ethers } from "ethers"
 import MainContractABI from "../../abis/MainContract.json"
-const ContractAddress = constants.CONTRACTADDRESS
+import { MAINCONTRACTADDRESS } from '../../constants'
 
 
 const AddMerchant = ({ currentAccount }) => {
@@ -14,7 +13,7 @@ const AddMerchant = ({ currentAccount }) => {
 
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
-    const instanceMainContract = new ethers.Contract(ContractAddress, MainContractABI.abi, signer)
+    const instanceMainContract = new ethers.Contract(MAINCONTRACTADDRESS, MainContractABI.abi, signer)
 
     const [merchantAddress, setMerchantAddress] = useState("")
     const [merchantName, setMerchantName] = useState("")
@@ -25,15 +24,14 @@ const AddMerchant = ({ currentAccount }) => {
             return
         }
 
-        console.log("Done!")
-        console.log("merchantAddress: ", merchantAddress)
-        console.log("merchantName: ", merchantName)
-
-        document.getElementById("done-successfully").style.display = ''
-
         try {
-            const ownerAddMerchant = await instanceMainContract.hello() // addMerchantContract(merchantAddress, merchantName).call({from: currentAccount})
+            // console.log("merchantAddress: ", merchantAddress)
+            // console.log("merchantName: ", merchantName)
+
+            const ownerAddMerchant = await instanceMainContract.addMerchantContract(merchantAddress, merchantName, { from: currentAccount })
             console.log("Owner Add Merchant: ", ownerAddMerchant)
+
+            document.getElementById("done-successfully").style.display = ''
         } catch (error) {
             console.log("ERROR AT CREATING NEW MERCHANT: ", error)
         }

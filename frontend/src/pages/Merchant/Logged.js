@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import * as constants from '../../constants'
 
 import Sidebar from '../../components/Sidebar'
 import PersonalInfo from './PersonalInfo'
@@ -12,7 +11,7 @@ import Withdrawals from './Withdrawals'
 
 import { ethers } from "ethers"
 import MerchantContractABI from "../../abis/MerchantContract.json"
-const ContractAddress = constants.CONTRACTADDRESS
+import { MERCHANTCONTRACTADDRESS } from '../../constants'
 
 
 const Logged = () => {
@@ -24,16 +23,16 @@ const Logged = () => {
 
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
-    const instanceMerchantContract = new ethers.Contract(ContractAddress, MerchantContractABI.abi, signer)
+    const instanceMerchantContract = new ethers.Contract(MERCHANTCONTRACTADDRESS, MerchantContractABI.abi, signer)
 
     useEffect(() => {
         getMerchantInfo()
-    })
+    }, [])
 
     async function getMerchantInfo() {
         try {
-            const merchantName = await instanceMerchantContract.hello() // checkMyName().call({from: currentAccount})
-            console.log("Merchant Name: ", merchantName)
+            const merchantName = await instanceMerchantContract.checkMyName({ from: CurrentAccount })
+            // console.log("Merchant Name: ", merchantName)
 
             setName(merchantName)
         } catch (error) {

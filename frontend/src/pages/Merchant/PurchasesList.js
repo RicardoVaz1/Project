@@ -1,14 +1,12 @@
-import * as constants from '../../constants'
-
 import { ethers } from "ethers"
 import MerchantContractABI from "../../abis/MerchantContract.json"
-const ContractAddress = constants.CONTRACTADDRESS
+import { MERCHANTCONTRACTADDRESS } from '../../constants'
 
 
 const PurchasesList = ({ currentAccount }) => {
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
-    const instanceMerchantContract = new ethers.Contract(ContractAddress, MerchantContractABI.abi, signer)
+    const instanceMerchantContract = new ethers.Contract(MERCHANTCONTRACTADDRESS, MerchantContractABI.abi, signer)
 
     const purchasesList = [
         { id: 0, purchaseAmount: 123, escrowAmount: 4567897, status: false },
@@ -19,13 +17,13 @@ const PurchasesList = ({ currentAccount }) => {
     ]
 
     async function completePurchase(ID) {
-        console.log("ID: ", ID)
-
-        document.getElementById("done-successfully-2").style.display = ''
-
         try {
-            const merchantPurchaseComplete = await instanceMerchantContract.hello() // complete(ID).call({from: currentAccount})
+            // console.log("ID: ", ID)
+
+            const merchantPurchaseComplete = await instanceMerchantContract.complete(ID, { from: currentAccount })
             console.log("Merchant Purchase Complete: ", merchantPurchaseComplete)
+
+            document.getElementById("done-successfully-2").style.display = ''
         } catch (error) {
             console.log("ERROR AT COMPLETING PURCHASE: ", error)
         }

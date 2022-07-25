@@ -78,8 +78,9 @@ contract MerchantContract is Ownable {
         name = MerchantName;
         total_escrow_amount = 0;
         balance = 0;
-        
-        approved = false;
+
+        // approved = false;
+        approved = true;
     }
 
 
@@ -126,6 +127,11 @@ contract MerchantContract is Ownable {
         merchant_address = NewAddress;
         console.log("My new address is: ", merchant_address);
         // emit ChangedMyAddress(merchant_address);
+    }
+
+    function checkMyName() public view onlyMerchant approvedMerchant returns(string memory) {
+        console.log("My name is: ", name);
+        return name;
     }
 
     function checkMyEscrowAmount() public view onlyMerchant approvedMerchant returns(uint256) {
@@ -278,7 +284,7 @@ contract MerchantContract is Ownable {
             // console.log("Msg.sender 1 is: ", msg.sender);
             // console.log("MerchantContract address: ", address(this));
 
-            mainContract.saveHistoric(merchant_address, BuyerAddress, 0);
+            // mainContract.saveHistoric(merchant_address, BuyerAddress, 0);
         }
         else {
             // purchase refunded
@@ -288,7 +294,7 @@ contract MerchantContract is Ownable {
             // console.log("Msg.sender 3 is: ", msg.sender);
             // console.log("MerchantContract address: ", address(this));
 
-            mainContract.saveHistoric(merchant_address, BuyerAddress, 1);
+            // mainContract.saveHistoric(merchant_address, BuyerAddress, 1);
         }
 
         // MerchantContractAddress | MerchantSells | MerchantRefunds

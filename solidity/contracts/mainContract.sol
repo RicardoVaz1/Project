@@ -39,7 +39,7 @@ contract MainContract {
     mapping(address => mapping(address => Votes)) saveVoters;
 
     // Historic
-    struct MerchantHistoric {
+    /* struct MerchantHistoric {
         uint Sells;
         uint Refunds;
     }
@@ -54,15 +54,15 @@ contract MainContract {
     }
 
     // BuyerAddress => BuyersHistoric
-    mapping(address => BuyersHistoric) private buyersHistoric;
+    mapping(address => BuyersHistoric) private buyersHistoric; */
 
 
 
     /* ========== CONSTRUCTOR ========== */
-    /*constructor() {
+    /* constructor() {
         owner_address = msg.sender;
         merchantsCounter = 0;
-    }*/
+    } */
 
     constructor(address OWNER) {
         owner_address = OWNER;
@@ -124,7 +124,7 @@ contract MainContract {
         emit PausedMerchantContract(address(merchants[MerchantContractID].merchantContract), false);
     }
 
-    function voteNewMerchantContractApproval(uint MerchantContractID) public {
+    /* function voteNewMerchantContractApproval(uint MerchantContractID) public {
         if(merchants[MerchantContractID].status == 0) revert("Merchant doesn't exist!");
         // if(merchants[MerchantContractID].status == 1) revert("Merchant exist but not approved!");
         if(merchants[MerchantContractID].status == 2) revert("Merchant has already been approved!");
@@ -169,11 +169,11 @@ contract MainContract {
     }
 
     function saveHistoric(address MerchantAddress, address BuyerAddress, uint PurchaseStatus) public {
-        /*teste = true;
-        console.log("teste: ", teste);
+        // teste = true;
+        // console.log("teste: ", teste);
 
-        console.log("Msg.sender 2 is: ", msg.sender);
-        console.log("MainContract address: ", address(this));*/
+        // console.log("Msg.sender 2 is: ", msg.sender);
+        // console.log("MainContract address: ", address(this));
 
         address MerchantContractAddress = address(merchants2[msg.sender].merchantContract);
         uint MerchantContractStatus = merchants2[msg.sender].status;
@@ -205,12 +205,12 @@ contract MainContract {
         }
 
         console.log("y = ", y);
-    }
+    } */
 
 
 
     /* ========== Tests ========== */
-    function MerchantContractCreatePurchase(uint MerchantContractID, uint idPurchase, uint256 purchaseAmount, uint escrowTime) public {
+    /* function MerchantContractCreatePurchase(uint MerchantContractID, uint idPurchase, uint256 purchaseAmount, uint escrowTime) public {
         merchants[MerchantContractID].merchantContract.createPurchase(idPurchase, purchaseAmount, escrowTime);
         console.log("MerchantContract ", address(merchants[MerchantContractID].merchantContract), " - purchase created!");
     }
@@ -223,7 +223,7 @@ contract MainContract {
     function MerchantContractHistoric(uint MerchantContractID, address BuyerAddress, uint purchaseStatus) public {
         merchants[MerchantContractID].merchantContract.historic(BuyerAddress, purchaseStatus);
         console.log("MerchantContract ", address(merchants[MerchantContractID].merchantContract), " - historic saved!");
-    }
+    } */
 
 
     /* ========== EVENTS ========== */
