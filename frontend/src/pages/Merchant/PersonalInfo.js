@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from "react-router-dom"
 
-import Sidebar from '../../components/Sidebar'
+// import Sidebar from '../../components/Sidebar'
 
 import { ethers } from "ethers"
 import MerchantContractABI from "../../abis/MerchantContract.json"
@@ -13,23 +13,22 @@ const PersonalInfo = ({ currentAccount }) => {
 
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
-    const instanceMerchantContract = new ethers.Contract(MERCHANTCONTRACTADDRESS, MerchantContractABI.abi, signer)
+    const instanceMerchantContract = useRef(new ethers.Contract(MERCHANTCONTRACTADDRESS, MerchantContractABI.abi, signer))
 
     const [walletAddress, setWalletAddress] = useState("")
     const [name, setName] = useState("")
     const [escrowAmount, setEscrowAmount] = useState(0)
     const [balance, setBalance] = useState(0)
 
-    useEffect(() => {
-        getMerchantInfo()
-    })
 
-    async function getMerchantInfo() {
+    const getMerchantInfo = useCallback(async () => {
+        const instanceMerchantContract2 = instanceMerchantContract.current
+
         try {
-            const merchantAddress = await instanceMerchantContract.checkMyAddress({ from: currentAccount })
-            const merchantName = await instanceMerchantContract.checkMyName({ from: currentAccount })
-            const merchantEscrowAmount = await instanceMerchantContract.checkMyEscrowAmount({ from: currentAccount })
-            const merchantBalance = await instanceMerchantContract.checkMyBalance({ from: currentAccount })
+            const merchantAddress = await instanceMerchantContract2.checkMyAddress({ from: currentAccount })
+            const merchantName = await instanceMerchantContract2.checkMyName({ from: currentAccount })
+            const merchantEscrowAmount = await instanceMerchantContract2.checkMyEscrowAmount({ from: currentAccount })
+            const merchantBalance = await instanceMerchantContract2.checkMyBalance({ from: currentAccount })
 
             // console.log("Merchant Address: ", merchantAddress)
             // console.log("Merchant Name: ", merchantName)
@@ -43,7 +42,12 @@ const PersonalInfo = ({ currentAccount }) => {
         } catch (error) {
             console.log("ERROR AT GETTING MERCHANT INFO: ", error)
         }
-    }
+    }, [currentAccount])
+
+    useEffect(() => {
+        getMerchantInfo()
+    }, [getMerchantInfo])
+
 
     async function changeAddress() {
         if (walletAddress === "") {
@@ -95,7 +99,7 @@ const PersonalInfo = ({ currentAccount }) => {
         <>
             <h3>My Smart Contract Info</h3>
 
-            <Sidebar logged={"merchant"} />
+            {/* <Sidebar logged={"merchant"} /> */}
 
             <label htmlFor="walletAddress">Address:</label>
             <input
