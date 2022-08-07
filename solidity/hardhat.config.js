@@ -27,11 +27,18 @@ module.exports = {
       runs: 200
     }
   },
-  defaultNetwork: "rinkeby",
+  // defaultNetwork: "goerli",
   networks: {
+    hardhat: {
+      allowUnlimitedContractSize: true,
+    },
+    goerli: {
+      url: process.env.GOERLI_RPC_URL,
+      accounts: [process.env.OWNER_PRIVATE_KEY]
+    },
     rinkeby: {
       url: process.env.RINKEBY_RPC_URL,
-      accounts: [process.env.PRIVATE_KEY]
+      accounts: [process.env.OWNER_PRIVATE_KEY]
     }
   }
 }
