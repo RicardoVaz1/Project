@@ -79,39 +79,45 @@ contract MerchantContract is Ownable {
         total_escrow_amount = 0;
         balance = 0;
 
-        // approved = false;
-        approved = true;
+        approved = false;
     }
 
 
 
     /* ========== SYSTEM ========== */
-    function getMerchantAddress() public view onlyOwner returns(address) {
-        console.log("Merchant Address: ", merchant_address);
+    function getOwnerAddress() public view onlyOwner returns(address) {
+        address owner_address = owner();
+        console.log("OwnerAddress: ", owner_address);
+        return owner_address;
+    }
+
+    function getMerchantWalletAddress() public view onlyOwner returns(address) {
+        // This function it is being used for testing only
+        console.log("MerchantWalletAddress: ", merchant_address);
         return merchant_address;
     }
 
     function approveMerchant() public onlyOwner {
         approved = true;
-        console.log("Merchant ", merchant_address, " is approved!");
+        console.log("MerchantContractAddress ", address(this), " is approved!");
         emit ApprovedMerchant(address(this), approved);
     }
 
     function disapproveMerchant() public onlyOwner {
         approved = false;
-        console.log("Merchant ", merchant_address, " is disapproved!");
+        console.log("MerchantContractAddress ", address(this), " is disapproved!");
         emit ApprovedMerchant(address(this), approved);
     }
 
     function pauseWithdrawals() public onlyOwner {
         paused = true;
-        console.log(merchant_address, " --> Merchant withdrawals are paused!");
+        console.log("Withdrawals from MerchantContractAddress ", address(this), " are paused!");
         emit PausedWithdrawals(address(this), paused);
     }
 
     function unpauseWithdrawals() public onlyOwner {
         paused = false;
-        console.log(merchant_address, " --> Merchant withdrawals are unpaused!");
+        console.log("Withdrawals from MerchantContractAddress ", address(this), " are unpaused!");
         emit PausedWithdrawals(address(this), paused);
     }
 
@@ -182,19 +188,6 @@ contract MerchantContract is Ownable {
         emit Withdrawal(address(this), balance);
         balance = 0;
     }
-
-    /*function withdrawalToThisAddress(address payable ThisAddress) public onlyMerchant pausedWithdrawals approvedMerchant {
-        require(balance > 0, "Balance should be greater than 0!!");
-
-        ThisAddress.transfer(balance);
-
-        console.log("Address: ", ThisAddress);
-        console.log("Balance Sent: ", balance);
-
-        // From | Amount
-        emit Withdrawal(address(this), balance);
-        balance = 0;
-    }*/
 
     function refund(uint idPurchase, address payable BuyerAddress, uint256 refundAmount) public onlyMerchant pausedWithdrawals approvedMerchant {
         require(refundAmount > 0, "Refund amount should be greater than 0!!");
@@ -269,32 +262,26 @@ contract MerchantContract is Ownable {
         emit Buy(idPurchase, purchases[idPurchase].dateF, msg.sender, address(this), msg.value);
     }
 
+
+
     /* ========== HISTORICs ========== */
     function historic(address BuyerAddress, uint purchaseStatus) private {
         // struct MerchantHistoric { uint Sells; uint Refunds; }
         // struct BuyersHistoric { uint Purchases; uint Cancellations; }
-
-        // MainContract mainContract;
 
         if(purchaseStatus == 0) {
             // purchase completed
             merchantHistoric[merchant_address].Sells += 1;
             buyersHistoric[BuyerAddress].Purchases += 1;
 
-            // console.log("Msg.sender 1 is: ", msg.sender);
-            // console.log("MerchantContract address: ", address(this));
-
-            // mainContract.saveHistoric(merchant_address, BuyerAddress, 0);
+            mainContract.saveHistoric(merchant_address, BuyerAddress, 0);
         }
         else {
             // purchase refunded
             merchantHistoric[merchant_address].Refunds += 1;
             buyersHistoric[BuyerAddress].Cancellations += 1;
 
-            // console.log("Msg.sender 3 is: ", msg.sender);
-            // console.log("MerchantContract address: ", address(this));
-
-            // mainContract.saveHistoric(merchant_address, BuyerAddress, 1);
+            mainContract.saveHistoric(merchant_address, BuyerAddress, 1);
         }
 
         // MerchantContractAddress | MerchantSells | MerchantRefunds
