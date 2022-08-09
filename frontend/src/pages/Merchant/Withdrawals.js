@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 
 import { ethers } from "ethers"
 import MerchantContractABI from "../../abis/MerchantContract.json"
@@ -7,25 +7,28 @@ import { MERCHANTCONTRACTADDRESS } from '../../constants'
 const Withdrawals = ({ currentAccount }) => {
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
-    const instanceMerchantContract = new ethers.Contract(MERCHANTCONTRACTADDRESS, MerchantContractABI.abi, signer)
+    const instanceMerchantContract = useRef(new ethers.Contract(MERCHANTCONTRACTADDRESS, MerchantContractABI.abi, signer))
 
     const [balance, setBalance] = useState(0)
 
-    useEffect(() => {
-        getMerchantBalance()
-    })
 
-    async function getMerchantBalance() {
+    const getMerchantBalance = useCallback(async () => {
+        const instanceMerchantContract2 = instanceMerchantContract.current
+
         try {
-            const merchantBalance = await instanceMerchantContract.checkMyBalance([], { from: currentAccount })
+            const merchantBalance = await instanceMerchantContract2.checkMyBalance({ from: currentAccount })
+            // console.log("Merchant Balance: ", merchantBalance)
 
-            console.log("Merchant Balance: ", merchantBalance)
-
-            setBalance(merchantBalance)
+            setBalance(parseInt(merchantBalance._hex, 16))
         } catch (error) {
             console.log("ERROR AT GETTING MERCHANT BALANCE: ", error)
         }
-    }
+    }, [currentAccount])
+
+    useEffect(() => {
+        getMerchantBalance()
+    }, [getMerchantBalance])
+
 
     async function withdrawal() {
         try {

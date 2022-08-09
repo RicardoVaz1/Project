@@ -13,7 +13,7 @@ const MainHeader = () => {
             </NavLink>
           </li>
           <li>
-            <NavLink activeClassName={classes.active} to="/">
+            <NavLink activeClassName={classes.active} to="/login">
               Merchant
             </NavLink>
           </li>

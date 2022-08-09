@@ -1,7 +1,7 @@
 import { useState } from 'react'
 // import { useNavigate } from "react-router-dom"
 
-import Sidebar from '../../components/Sidebar'
+// import Sidebar from '../../components/Sidebar'
 
 import { ethers } from "ethers"
 import MainContractABI from "../../abis/MainContract.json"
@@ -45,7 +45,7 @@ const AddMerchant = ({ currentAccount }) => {
         <>
             <h1>Create Merchant</h1>
 
-            <Sidebar logged={"admin"} />
+            {/* <Sidebar logged={"admin"} /> */}
 
             <div id="page-wrap">
                 <label htmlFor="merchantAddress">Merchant Address:</label>

@@ -1,13 +1,26 @@
 import { useEffect, useState } from "react"
+// import { useNavigate } from "react-router-dom"
 
 import { ethers } from "ethers"
 import MerchantContractABI from "../../abis/MerchantContract.json"
 import { MERCHANTCONTRACTADDRESS } from '../../constants'
 
-import MerchantsList from "./MerchantsList"
 
+const ProductsList = () => {
+    // const navigate = useNavigate()
 
-const Buy = () => {
+    const productsList = [
+        { idPurchase: 0, purchaseAmount: 3, escrowTime: 1234 },
+        { idPurchase: 1, purchaseAmount: 5, escrowTime: 1234 },
+        { idPurchase: 2, purchaseAmount: 10, escrowTime: 1234 },
+        { idPurchase: 3, purchaseAmount: 1, escrowTime: 1234 },
+        { idPurchase: 4, purchaseAmount: 8, escrowTime: 1234 },
+    ]
+
+    const location = new URL(window.location.href).pathname
+    const locationArray = location.split("/")
+    const MerchantID = locationArray[3]
+
     const [currentAccount, setCurrentAccount] = useState("")
 
     let provider
@@ -62,22 +75,34 @@ const Buy = () => {
 
     return (
         <>
-            <h1>Buy</h1>
+            <h1>Merchant #{MerchantID}: Products List</h1>
 
-            <label htmlFor="productName">T-shirt: </label>
-            <label htmlFor="escrowTime">20 €</label>
-            <br />
+            <table className="table">
+                <tr>
+                    <th>ID Purchase</th>
+                    <th>Purchase Amount</th>
+                    <th>Escrow Time</th>
+                    <th></th>
+                </tr>
 
-            {!currentAccount ?
-                <button onClick={() => connectWallet()}>Connect Wallet</button> :
-                <button onClick={() => buy(1, 20)}>Buy</button>
-            }
-
-            <span id="done-successfully" style={{ "display": "none" }}>Done successfully!</span>
-
-            <MerchantsList />
+                {productsList.map((item) => {
+                    return (
+                        <tr className="item" key={item.idPurchase}>
+                            <td className="itemDisplay">{item.idPurchase}</td>
+                            <td className="itemDisplay">{item.purchaseAmount} ETH</td>
+                            <td className="itemDisplay">{item.escrowTime}</td>
+                            <td className="itemButton">
+                                {!currentAccount ?
+                                    <button onClick={() => connectWallet()}>Connect Wallet</button> :
+                                    <button onClick={() => buy(item.idPurchase, item.purchaseAmount)}>Buy</button>
+                                }
+                            </td>
+                        </tr>
+                    )
+                })}
+            </table>
         </>
     )
 }
 
-export default Buy
+export default ProductsList

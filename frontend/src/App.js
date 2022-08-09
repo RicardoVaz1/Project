@@ -1,14 +1,13 @@
-import { Routes, Route } from "react-router-dom"
+import { Routes, Route, Navigate } from "react-router-dom"
 import "./App.css"
 
 import MainHeader from "./components/MainHeader"
 
 /* ----- Buyer Routes ----- */
 import Buy from "./pages/Buyer/Buy"
+import ProductsList from "./pages/Buyer/ProductsList"
 
 /* ----- Merchant Routes ----- */
-import Home from "./pages/Home"
-import Signup from "./pages/Merchant/Signup"
 import Login from "./pages/Merchant/Login"
 import Logged from "./pages/Merchant/Logged"
 import PersonalInfo from "./pages/Merchant/PersonalInfo"
@@ -34,10 +33,10 @@ function App() {
         <Routes>
           {/* ----- Buyer Routes ----- */}
           <Route path="/buyer" element={<Buy />} />
+          <Route path={"/buyer/merchant/:id/products-list"} element={<ProductsList />} />
 
           {/* ----- Merchant Routes ----- */}
-          <Route path="/" element={<Home />} />
-          <Route path={"/signup"} element={<Signup />} />
+          <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path={"/login"} element={<Login />} />
           <Route path={"/logged"} element={<Logged />} />
           <Route path={"/personal-info"} element={<PersonalInfo />} />
