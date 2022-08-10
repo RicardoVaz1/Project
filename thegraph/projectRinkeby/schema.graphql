@@ -1,0 +1,102 @@
+type ApprovedMerchantContract @entity {
+  id: ID!
+  MerchantContractAddress: Bytes! # address
+  Approved: Boolean! # bool
+}
+
+type CreateMerchantContract @entity {
+  id: ID!
+  MerchantContractAddress: Bytes! # address
+  MerchantAddress: Bytes! # address
+  MerchantName: String! # string
+}
+
+type NewMerchantContractApproved @entity {
+  id: ID!
+  MerchantContractAddress: Bytes! # address
+}
+
+type PausedMerchantContract @entity {
+  id: ID!
+  MerchantContractAddress: Bytes! # address
+  Paused: Boolean! # bool
+}
+
+type SaveHistoric @entity {
+  id: ID!
+  MerchantContractAddress: Bytes! # address
+  Sells: BigInt! # uint256
+  Refunds: BigInt! # uint256
+  Purchases: BigInt! # uint256
+  Cancellations: BigInt! # uint256
+}
+
+type VoteNewMerchantContractApproval @entity {
+  id: ID!
+  Voter: Bytes! # address
+  MerchantContractAddress: Bytes! # address
+}
+type ApprovedMerchant @entity {
+  id: ID!
+  MerchantContractAddress: Bytes! # address
+  ApprovedMerchant: Boolean! # bool
+}
+
+type Buy @entity {
+  id: ID!
+  PurchaseID: BigInt! # uint256
+  DateF: BigInt! # uint256
+  BuyerAddress: Bytes! # address
+  MerchantContractAddress: Bytes! # address
+  Amount: BigInt! # uint256
+}
+
+type Complete @entity {
+  id: ID!
+  PurchaseID: BigInt! # uint256
+}
+
+type CreatePurchase @entity {
+  id: ID!
+  Date: BigInt! # uint256
+  Amount: BigInt! # uint256
+  EscrowTime: BigInt! # uint256
+}
+
+type Historic @entity {
+  id: ID!
+  MerchantContractAddress: Bytes! # address
+  Sells: BigInt! # uint256
+  Refunds: BigInt! # uint256
+}
+
+type OwnershipTransferred @entity {
+  id: ID!
+  previousOwner: Bytes! # address
+  newOwner: Bytes! # address
+}
+
+type PausedWithdrawals @entity {
+  id: ID!
+  MerchantContractAddress: Bytes! # address
+  PausedWithdrawals: Boolean! # bool
+}
+
+type Refund @entity {
+  id: ID!
+  MerchantContractAddress: Bytes! # address
+  BuyerAddress: Bytes! # address
+  Amount: BigInt! # uint256
+}
+
+type TopUpMyContract @entity {
+  id: ID!
+  MerchantContractAddress: Bytes! # address
+  Amount: BigInt! # uint256
+}
+
+type Withdrawal @entity {
+  id: ID!
+  MerchantContractAddress: Bytes! # address
+  Amount: BigInt! # uint256
+}
