@@ -1,0 +1,11 @@
+Commands:
+npm install -g @graphprotocol/graph-cli
+
+graph init --contract-name [contractName] --index-events --product subgraph-studio \
+--from-contract [contractAddress]
+
+graph auth --studio [deployKey]
+
+graph codegen && graph build
+
+graph deploy --studio [subgraphName]

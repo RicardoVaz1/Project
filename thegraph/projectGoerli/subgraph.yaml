@@ -1,0 +1,75 @@
+specVersion: 0.0.4
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: MainContract
+    network: goerli
+    source:
+      address: "0x01546245044fBfb22019b44A188D5B785Afa853E"
+      abi: MainContract
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - ApprovedMerchantContract
+        - CreateMerchantContract
+        - PausedMerchantContract
+      abis:
+        - name: MainContract
+          file: ./abis/MainContract.json
+      eventHandlers:
+        - event: ApprovedMerchantContract(address,bool)
+          handler: handleApprovedMerchantContract
+        - event: CreateMerchantContract(address,address,string)
+          handler: handleCreateMerchantContract
+        - event: PausedMerchantContract(address,bool)
+          handler: handlePausedMerchantContract
+      file: ./src/main-contract.ts
+  - kind: ethereum
+    name: MerchantContract
+    network: goerli
+    source:
+      address: "0x2B293e57f211Ae3443Cdf4F72076Bf3f315801FD"
+      abi: MerchantContract
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - ApprovedMerchant
+        - Buy
+        - Complete
+        - CreatePurchase
+        - Historic
+        - OwnershipTransferred
+        - PausedWithdrawals
+        - Refund
+        - TopUpMyContract
+        - Withdrawal
+      abis:
+        - name: MerchantContract
+          file: ./abis/MerchantContract.json
+      eventHandlers:
+        - event: ApprovedMerchant(address,bool)
+          handler: handleApprovedMerchant
+        - event: Buy(uint256,uint256,address,address,uint256)
+          handler: handleBuy
+        - event: Complete(uint256)
+          handler: handleComplete
+        - event: CreatePurchase(uint256,uint256,uint256)
+          handler: handleCreatePurchase
+        - event: Historic(address,uint256,uint256)
+          handler: handleHistoric
+        - event: OwnershipTransferred(indexed address,indexed address)
+          handler: handleOwnershipTransferred
+        - event: PausedWithdrawals(address,bool)
+          handler: handlePausedWithdrawals
+        - event: Refund(address,address,uint256)
+          handler: handleRefund
+        - event: TopUpMyContract(address,uint256)
+          handler: handleTopUpMyContract
+        - event: Withdrawal(address,uint256)
+          handler: handleWithdrawal
+      file: ./src/merchant-contract.ts
