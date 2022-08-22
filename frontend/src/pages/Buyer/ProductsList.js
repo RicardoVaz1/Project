@@ -4,33 +4,58 @@ import { useEffect, useState } from "react"
 import { ethers } from "ethers"
 import MerchantContractABI from "../../abis/MerchantContract.json"
 import { MERCHANTCONTRACTADDRESS } from '../../constants'
+const axios = require("axios")
 
 
 const ProductsList = () => {
     // const navigate = useNavigate()
 
-    const productsList = [
-        { idPurchase: 0, purchaseAmount: 3, escrowTime: 1234 },
-        { idPurchase: 1, purchaseAmount: 5, escrowTime: 1234 },
-        { idPurchase: 2, purchaseAmount: 10, escrowTime: 1234 },
-        { idPurchase: 3, purchaseAmount: 1, escrowTime: 1234 },
-        { idPurchase: 4, purchaseAmount: 8, escrowTime: 1234 },
-    ]
-
     const location = new URL(window.location.href).pathname
     const locationArray = location.split("/")
-    const MerchantID = locationArray[3]
+    const MerchantContractAddress = locationArray[2]
 
     const [currentAccount, setCurrentAccount] = useState("")
+    const [productsList, setProductsList] = useState([])
 
     let provider
     let signer
     let instanceMerchantContract
 
+    async function getProductsList(MerchantContractAddress) {
+        try {
+            const result = await axios.post(
+                `${process.env.REACT_APP_THE_GRAPH_API}`,
+                {
+                    query: `
+                    {
+                        createPurchases(where: {MerchantAddress: "${MerchantContractAddress}"}) {
+                            id
+                            Date
+                            Amount
+                            EscrowTime
+                        }
+                    }
+                    `
+                }
+            )
+
+            let PurchasesList = result.data.data.createPurchases
+            console.log("PurchasesList: ", PurchasesList)
+
+            setProductsList(PurchasesList)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     useEffect(() => {
         if (!currentAccount || !ethers.utils.isAddress(currentAccount)) return
         if (!window.ethereum) return
     }, [currentAccount])
+
+    useEffect(() => {
+        getProductsList(MerchantContractAddress)
+    }, [MerchantContractAddress])
 
 
     async function connectWallet() {
@@ -75,7 +100,7 @@ const ProductsList = () => {
 
     return (
         <>
-            <h1>Merchant #{MerchantID}: Products List</h1>
+            <h1>Merchant #{MerchantContractAddress.slice(0, 5)}...{MerchantContractAddress.slice(38)}: Products List</h1>
 
             <table className="table">
                 <tr>
@@ -87,14 +112,14 @@ const ProductsList = () => {
 
                 {productsList.map((item) => {
                     return (
-                        <tr className="item" key={item.idPurchase}>
-                            <td className="itemDisplay">{item.idPurchase}</td>
-                            <td className="itemDisplay">{item.purchaseAmount} ETH</td>
-                            <td className="itemDisplay">{item.escrowTime}</td>
+                        <tr className="item" key={item.IDPurchase}>
+                            <td className="itemDisplay">{item.IDPurchase}</td>
+                            <td className="itemDisplay">{item.PurchaseAmount} ETH</td>
+                            <td className="itemDisplay">{item.EscrowTime}</td>
                             <td className="itemButton">
                                 {!currentAccount ?
                                     <button onClick={() => connectWallet()}>Connect Wallet</button> :
-                                    <button onClick={() => buy(item.idPurchase, item.purchaseAmount)}>Buy</button>
+                                    <button onClick={() => buy(item.IDPurchase, item.PurchaseAmount)}>Buy</button>
                                 }
                             </td>
                         </tr>

@@ -36,3 +36,8 @@
   padding-bottom: 0.25rem;
   border-bottom: 4px solid #95bcf0;
 }
+
+[aria-current] {
+  font-weight: bold;
+  color: yellow !important;
+}

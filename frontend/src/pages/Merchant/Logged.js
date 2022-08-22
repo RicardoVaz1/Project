@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { useSearchParams } from 'react-router-dom'
 
 // import Sidebar from '../../components/Sidebar'
 import PersonalInfo from './PersonalInfo'
@@ -15,15 +14,16 @@ import { MERCHANTCONTRACTADDRESS } from '../../constants'
 
 
 const Logged = () => {
-    const [searchparams] = useSearchParams()
-    let CurrentAccount = searchparams.get("CurrentAccount")
-    // let Balance = searchparams.get("Balance")
+    const data = JSON.parse(localStorage.getItem("userData"))
+    const CurrentAccount = data.currentAccount
+    // const Balance = data.balance
+    // const MerchantContractAddress = data.MerchantContractAddress
 
     const [name, setName] = useState("")
 
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
-    const instanceMerchantContract = useRef(new ethers.Contract(MERCHANTCONTRACTADDRESS, MerchantContractABI.abi, signer));
+    const instanceMerchantContract = useRef(new ethers.Contract(MERCHANTCONTRACTADDRESS, MerchantContractABI.abi, signer))
 
 
     const getMerchantInfo = useCallback(async () => {
@@ -51,12 +51,12 @@ const Logged = () => {
             {/* <Sidebar logged={"merchant"} /> */}
 
             <div id="page-wrap">
-                <PersonalInfo currentAccount={CurrentAccount} />
-                <CreatePurchase currentAccount={CurrentAccount} />
-                <PurchasesList currentAccount={CurrentAccount} />
-                <Withdrawals currentAccount={CurrentAccount} />
-                <Refunds currentAccount={CurrentAccount} />
-                <TopUpMyContract currentAccount={CurrentAccount} />
+                <PersonalInfo />
+                <CreatePurchase />
+                <PurchasesList />
+                <Withdrawals />
+                <Refunds />
+                <TopUpMyContract />
             </div>
 
             <br />

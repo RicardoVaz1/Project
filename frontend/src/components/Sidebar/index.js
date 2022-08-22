@@ -5,11 +5,11 @@ const Sidebar = ({ logged }) => {
 
     logged === "admin" ?
         (items = [
-            { label: 'Merchants List', route: "/admin-logged" },
-            { label: 'Add Merchant', route: "/admin-logged/add-merchant" }
+            { label: 'Merchants List', route: "/admin" },
+            { label: 'Add Merchant', route: "/admin/add-merchant" }
         ]) :
         (items = [
-            { label: 'Home', route: "/logged" },
+            { label: 'Home', route: "/dashboard" },
             { label: 'Personal Info', route: "/personal-info" }
         ])
 
