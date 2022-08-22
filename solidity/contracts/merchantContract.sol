@@ -132,7 +132,7 @@ contract MerchantContract is Ownable {
     function changeMyAddress(address payable NewAddress) public onlyMerchant approvedMerchant {
         merchant_address = NewAddress;
         console.log("My new address is: ", merchant_address);
-        // emit ChangedMyAddress(merchant_address);
+        // emit ChangedMyAddress(address(this), merchant_address);
     }
 
     function checkMyName() public view onlyMerchant approvedMerchant returns(string memory) {
@@ -157,8 +157,18 @@ contract MerchantContract is Ownable {
         console.log("Puchase w/ id ", idPurchase);
         console.log(" and amount ", purchaseAmount, " was created!");
 
-        // Date | Amount | EscrowTime 
-        emit CreatePurchase(block.timestamp, purchaseAmount, escrowTime);
+        // MerchantContractAddress | IDPurchase ! DateC | PurchaseAmount | EscrowTime | PurchaseStatus
+        emit CreatePurchase(address(this), idPurchase, block.timestamp, purchaseAmount, escrowTime, 1);
+    }
+
+    function getPurchaseStatus(uint idPurchase) public view onlyMerchant approvedMerchant returns(uint) {
+        // Purchase { uint256 dateF, uint256 amount, uint status, uint256 escrow_amount, uint escrow_time }
+        uint purchaseStatus = purchases[idPurchase].status;
+
+        console.log("IDPuchase: ", idPurchase);
+        console.log("Purchase status: ", purchaseStatus);
+
+        return purchaseStatus;
     }
 
     function complete(uint idPurchase) public onlyMerchant approvedMerchant {
@@ -173,7 +183,8 @@ contract MerchantContract is Ownable {
         console.log("TotalEscrowAmount: ", total_escrow_amount);
         console.log("Balance: ", balance);
 
-        emit Complete(idPurchase);
+        // MerchantContractAddress | IDPurchase
+        emit Complete(address(this), idPurchase);
     }
 
     function withdrawal() public onlyMerchant pausedWithdrawals approvedMerchant {
@@ -184,7 +195,7 @@ contract MerchantContract is Ownable {
         console.log("Address: ", merchant_address);
         console.log("Balance Sent: ", balance);
 
-        // From | Amount
+        // From | Balance
         emit Withdrawal(address(this), balance);
         balance = 0;
     }
@@ -222,8 +233,8 @@ contract MerchantContract is Ownable {
         console.log("Address: ", BuyerAddress);
         console.log("RefundAmount: ", refundAmount);
 
-        // From | To | Amount
-        emit Refund(address(this), BuyerAddress, refundAmount);
+        // From | To | Amount | PurchaseStatus
+        emit Refund(address(this), BuyerAddress, refundAmount, 3);
     }
 
     function topUpMyContract() external payable onlyMerchant approvedMerchant {
@@ -258,8 +269,8 @@ contract MerchantContract is Ownable {
 
         historic(msg.sender, 0);
 
-        // ID | DateF | From | To | Amount
-        emit Buy(idPurchase, purchases[idPurchase].dateF, msg.sender, address(this), msg.value);
+        // IDPurchase | DateF | From | To | PurchaseAmount | PurchaseStatus
+        emit Buy(idPurchase, purchases[idPurchase].dateF, msg.sender, address(this), msg.value, 2);
     }
 
 
@@ -293,14 +304,14 @@ contract MerchantContract is Ownable {
     /* ========== EVENTS ========== */
     event PausedWithdrawals(address MerchantContractAddress, bool PausedWithdrawals); // true = withdrawals paused; false = withdrawals unpaused
     event ApprovedMerchant(address MerchantContractAddress, bool ApprovedMerchant); // true = approved; false = not approved
-    // event ChangedMyAddress(NewAddress);
-    event CreatePurchase(uint256 Date, uint256 Amount, uint EscrowTime);
+    // event ChangedMyAddress(address MerchantContractAddress, address NewAddress);
     event TopUpMyContract(address MerchantContractAddress, uint256 Amount);
     event Historic(address MerchantContractAddress, uint Sells, uint Refunds);
 
     // Purchase Flow
-    event Buy(uint PurchaseID, uint256 DateF, address BuyerAddress, address MerchantContractAddress, uint256 Amount);
-    event Complete(uint PurchaseID);
-    event Withdrawal(address MerchantContractAddress, uint256 Amount);
-    event Refund(address MerchantContractAddress, address BuyerAddress, uint256 Amount);
+    event CreatePurchase(address MerchantContractAddress, uint IDPurchase, uint256 DateC, uint256 PurchaseAmount, uint EscrowTime, uint PurchaseStatus);
+    event Buy(uint IDPurchase, uint256 DateF, address BuyerAddress, address MerchantContractAddress, uint256 PurchaseAmount, uint PurchaseStatus);
+    event Complete(address MerchantContractAddress, uint IDPurchase);
+    event Withdrawal(address MerchantContractAddress, uint256 Balance);
+    event Refund(address MerchantContractAddress, address BuyerAddress, uint256 RefundAmount, uint PurchaseStatus);
 }
