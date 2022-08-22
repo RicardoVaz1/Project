@@ -1,28 +1,36 @@
+import { useState, useEffect } from 'react'
+// import { useCallback, useRef } from 'react'
 import { useNavigate } from "react-router-dom"
 
 import { ethers } from "ethers"
 import MainContractABI from "../../abis/MainContract.json"
 import { MAINCONTRACTADDRESS } from '../../constants'
+const axios = require("axios")
 
-const EditMerchant = ({ currentAccount }) => {
+const EditMerchant = () => {
     const navigate = useNavigate()
 
     const location = new URL(window.location.href).pathname
     const locationArray = location.split("/")
-    const MerchantID = locationArray[4]
+    const MerchantContractAddress = locationArray[4]
+
+    const { currentAccount } = JSON.parse(localStorage.getItem("userData"))
 
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
     const instanceMainContract = new ethers.Contract(MAINCONTRACTADDRESS, MainContractABI.abi, signer)
+    // const instanceMainContract = useRef(new ethers.Contract(MAINCONTRACTADDRESS, MainContractABI.abi, signer))
 
-    const merchantsList = [
-        { id: 0, merchantAddress: "1234", merchantName: "zxc", numberOfVotes: 50, approved: false, pausedWithdrawls: true },
-        { id: 1, merchantAddress: "1234", merchantName: "zxc", numberOfVotes: 50, approved: false, pausedWithdrawls: true },
-        { id: 2, merchantAddress: "1234", merchantName: "zxc", numberOfVotes: 500, approved: false, pausedWithdrawls: true },
-        { id: 3, merchantAddress: "1234", merchantName: "zxc", numberOfVotes: 200, approved: false, pausedWithdrawls: true },
-        { id: 4, merchantAddress: "1234", merchantName: "zxc", numberOfVotes: 1500, approved: true, pausedWithdrawls: false },
-        { id: 5, merchantAddress: "1234", merchantName: "zxc", numberOfVotes: 1500, approved: true, pausedWithdrawls: false },
-    ]
+    const [merchantContractInfo, setMerchantContractInfo] = useState("")
+
+    /* const merchantsList = [
+        { id: 0, MerchantContractAddress: "1234", MerchantName: "zxc", numberOfVotes: 50, approved: false, pausedWithdrawls: true },
+        { id: 1, MerchantContractAddress: "1234", MerchantName: "zxc", numberOfVotes: 50, approved: false, pausedWithdrawls: true },
+        { id: 2, MerchantContractAddress: "1234", MerchantName: "zxc", numberOfVotes: 500, approved: false, pausedWithdrawls: true },
+        { id: 3, MerchantContractAddress: "1234", MerchantName: "zxc", numberOfVotes: 200, approved: false, pausedWithdrawls: true },
+        { id: 4, MerchantContractAddress: "1234", MerchantName: "zxc", numberOfVotes: 1500, approved: true, pausedWithdrawls: false },
+        { id: 5, MerchantContractAddress: "1234", MerchantName: "zxc", numberOfVotes: 1500, approved: true, pausedWithdrawls: false },
+    ] */
 
     async function disapprove(ID) {
         try {
@@ -38,7 +46,7 @@ const EditMerchant = ({ currentAccount }) => {
 
         setTimeout(function () {
             document.getElementById("done-successfully-1").style.display = 'none'
-            // navigate("/admin-logged")
+            // navigate("/admin")
         }, 2000)
     }
 
@@ -56,7 +64,7 @@ const EditMerchant = ({ currentAccount }) => {
 
         setTimeout(function () {
             document.getElementById("done-successfully-2").style.display = 'none'
-            // navigate("/admin-logged")
+            // navigate("/admin")
         }, 2000)
     }
 
@@ -74,25 +82,92 @@ const EditMerchant = ({ currentAccount }) => {
 
         setTimeout(function () {
             document.getElementById("done-successfully-3").style.display = 'none'
-            // navigate("/admin-logged")
+            // navigate("/admin")
         }, 2000)
     }
 
+
+    async function getMerchantContractInfo(MerchantContractAddress) {
+        try {
+            const result = await axios.post(
+                `${process.env.REACT_APP_THE_GRAPH_API}`, // (where: {MerchantAddress: "${MerchantContractAddress}"})
+                {
+                    query: `
+                    {
+                        createMerchantContracts {
+                            id
+                            MerchantContractAddress
+                            MerchantAddress
+                            MerchantName
+                        }
+                    }
+                    `
+                }
+            )
+
+            let MerchantsList = result.data.data.createMerchantContracts[0]
+            // console.log("MerchantsList: ", MerchantsList)
+
+            setMerchantContractInfo(MerchantsList)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    useEffect(() => {
+        getMerchantContractInfo(MerchantContractAddress)
+    }, [MerchantContractAddress])
+
+    /* const getMerchantContractInfo = useCallback(async () => {
+        const instanceMainContract2 = instanceMainContract.current
+
+        try {
+            const merchantContractInfo = await instanceMainContract2.merchants(MerchantContractAddress)
+
+            console.log("Merchant Address: ", merchantContractInfo)
+
+            setMerchantContractInfo(merchantContractInfo)
+        } catch (error) {
+            console.log("ERROR AT GETTING MERCHANT INFO: ", error)
+        }
+    }, [MerchantContractAddress])
+
+    useEffect(() => {
+        getMerchantContractInfo()
+    }, [getMerchantContractInfo]) */
+
     return (
         <>
-            <h1>Edit Merchant #{MerchantID}</h1>
+            <h1>Edit Merchant #{MerchantContractAddress.slice(0, 5)}...{MerchantContractAddress.slice(38)}</h1>
+
+            <span>Merchant Contract Address: {merchantContractInfo.MerchantContractAddress}</span>
+            <br />
+
+            <span>Merchant Name: {merchantContractInfo.MerchantName}</span>
+            <br />
+
+            <span>No. of Votes: {merchantContractInfo.numberOfVotes}</span>
+            <br />
+
+            <span>Approved: {merchantContractInfo.approved}</span>
+            <br />
+
+            <span>Withdrawls: {merchantContractInfo.pausedWithdrawls}</span>
+            <br />
+            <br />
+
             <div className="side-by-side-buttons">
-                <button onClick={() => navigate("/admin-logged")}>Cancel</button>
+                <button onClick={() => navigate("/admin")}>Cancel</button>
 
                 { // IF Merchant approved -> disapprove()
-                    (merchantsList[MerchantID].approved === true) ? <button onClick={() => disapprove(MerchantID)}>Disapprove</button> : ""
+                    (merchantContractInfo.approved === true) ? <button onClick={() => disapprove(MerchantContractAddress)}>Disapprove</button> : ""
                 }
 
                 { // IF Merchant approved and unpausedWithdrawls -> pauseWithdrawls() 
-                    (merchantsList[MerchantID].approved === true) && (merchantsList[MerchantID].pausedWithdrawls === false) ? <button onClick={() => pauseWithdrawls(MerchantID)}>PauseWithdrawls</button> :
+                    (merchantContractInfo.approved === true) && (merchantContractInfo.pausedWithdrawls === false) ? <button onClick={() => pauseWithdrawls(MerchantContractAddress)}>PauseWithdrawls</button> :
 
                         // ElseIF Merchant approved and pausedWithdrawls -> unpauseWithdrawls()
-                        (merchantsList[MerchantID].approved === true) && (merchantsList[MerchantID].pausedWithdrawls === true) ? <button onClick={() => unpauseWithdrawls(MerchantID)}>UnpauseWithdrawls</button> : ""
+                        (merchantContractInfo.approved === true) && (merchantContractInfo.pausedWithdrawls === true) ? <button onClick={() => unpauseWithdrawls(MerchantContractAddress)}>UnpauseWithdrawls</button> : ""
                 }
             </div>
 

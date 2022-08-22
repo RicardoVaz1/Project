@@ -8,8 +8,9 @@ import MainContractABI from "../../abis/MainContract.json"
 import { MAINCONTRACTADDRESS } from '../../constants'
 
 
-const AddMerchant = ({ currentAccount }) => {
+const AddMerchant = () => {
     // const navigate = useNavigate()
+    const { currentAccount } = JSON.parse(localStorage.getItem("userData"))
 
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()

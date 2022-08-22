@@ -4,20 +4,17 @@ import "./App.css"
 import MainHeader from "./components/MainHeader"
 
 /* ----- Buyer Routes ----- */
-import Buy from "./pages/Buyer/Buy"
+import MerchantsList from "./pages/Buyer/MerchantsList"
 import ProductsList from "./pages/Buyer/ProductsList"
 
 /* ----- Merchant Routes ----- */
 import Login from "./pages/Merchant/Login"
-import Logged from "./pages/Merchant/Logged"
-import PersonalInfo from "./pages/Merchant/PersonalInfo"
+import Dashboard from "./pages/Merchant/Logged"
 
 /* ----- Admin Routes ----- */
 import AdminLogin from "./pages/Admin/Login"
-import AdminLogged from "./pages/Admin/Logged"
-import AdminMerchantsList from "./pages/Admin/MerchantsList"
+import AdminDashboard from "./pages/Admin/Logged"
 import AdminEditMerchant from "./pages/Admin/EditMerchant"
-import AdminAddMerchant from "./pages/Admin/AddMerchant"
 
 /* ----- Merchant Routes ----- */
 import Vote from "./pages/Vote/Vote"
@@ -32,21 +29,18 @@ function App() {
       <main className="center">
         <Routes>
           {/* ----- Buyer Routes ----- */}
-          <Route path="/buyer" element={<Buy />} />
-          <Route path={"/buyer/merchant/:id/products-list"} element={<ProductsList />} />
+          <Route path="/buyer" element={<MerchantsList />} />
+          <Route path={"/merchant/:id/products-list"} element={<ProductsList />} />
 
           {/* ----- Merchant Routes ----- */}
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path={"/login"} element={<Login />} />
-          <Route path={"/logged"} element={<Logged />} />
-          <Route path={"/personal-info"} element={<PersonalInfo />} />
+          <Route path={"/dashboard"} element={<Dashboard />} />
 
           {/* ----- Admin Routes ----- */}
-          <Route path={"/admin"} element={<AdminLogin />} />
-          <Route path={"/admin-logged"} element={<AdminLogged />} />
-          <Route path={"/merchants-list"} element={<AdminMerchantsList />} />
-          <Route path={"/admin-logged/edit/merchant/:id"} element={<AdminEditMerchant />} />
-          <Route path={"/admin-logged/add-merchant"} element={<AdminAddMerchant />} />
+          <Route path={"/console"} element={<AdminLogin />} />
+          <Route path={"/admin"} element={<AdminDashboard />} />
+          <Route path={"/admin/edit/merchant/:id"} element={<AdminEditMerchant />} />
 
           {/* ----- Vote Routes ----- */}
           <Route path={"/vote"} element={<Vote />} />

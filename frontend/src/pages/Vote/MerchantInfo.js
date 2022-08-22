@@ -4,13 +4,14 @@ import { useNavigate } from "react-router-dom"
 import { ethers } from "ethers"
 import MainContractABI from "../../abis/MainContract.json"
 import { MAINCONTRACTADDRESS } from '../../constants'
+const axios = require("axios")
 
 const MerchantInfo = () => {
     const navigate = useNavigate()
 
     const location = new URL(window.location.href).pathname
     const locationArray = location.split("/")
-    const MerchantID = locationArray[3]
+    const MerchantContractAddress = locationArray[3]
 
     const [currentAccount, setCurrentAccount] = useState("")
 
@@ -18,13 +19,16 @@ const MerchantInfo = () => {
     let signer
     let instanceMainContract
 
-    const merchantsList = [
-        { id: 0, merchantAddress: "1234", merchantName: "zxc", numberOfVotes: 50 },
-        { id: 1, merchantAddress: "1234", merchantName: "zxc", numberOfVotes: 50 },
-        { id: 2, merchantAddress: "1234", merchantName: "zxc", numberOfVotes: 500 },
-        { id: 3, merchantAddress: "1234", merchantName: "zxc", numberOfVotes: 200 },
-        { id: 4, merchantAddress: "1234", merchantName: "zxc", numberOfVotes: 1500 },
-    ]
+    const [merchantContractInfo, setMerchantContractInfo] = useState("")
+
+
+    // const merchantsList = [
+    //     { id: 0, merchantAddress: "1234", merchantName: "zxc", numberOfVotes: 50 },
+    //     { id: 1, merchantAddress: "1234", merchantName: "zxc", numberOfVotes: 50 },
+    //     { id: 2, merchantAddress: "1234", merchantName: "zxc", numberOfVotes: 500 },
+    //     { id: 3, merchantAddress: "1234", merchantName: "zxc", numberOfVotes: 200 },
+    //     { id: 4, merchantAddress: "1234", merchantName: "zxc", numberOfVotes: 1500 },
+    // ]
 
     useEffect(() => {
         if (!currentAccount || !ethers.utils.isAddress(currentAccount)) return
@@ -72,28 +76,56 @@ const MerchantInfo = () => {
         }, 2000)
     }
 
+    async function getMerchantContractInfo(MerchantContractAddress) {
+        try {
+            const result = await axios.post(
+                `${process.env.REACT_APP_THE_GRAPH_API}`, // (where: {MerchantAddress: "${MerchantContractAddress}"})
+                {
+                    query: `
+                    {
+                        createMerchantContracts {
+                            id
+                            MerchantContractAddress
+                            MerchantAddress
+                            MerchantName
+                        }
+                    }
+                    `
+                }
+            )
+
+            let MerchantsList = result.data.data.createMerchantContracts[0]
+            // console.log("MerchantsList: ", MerchantsList)
+
+            setMerchantContractInfo(MerchantsList)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    useEffect(() => {
+        getMerchantContractInfo(MerchantContractAddress)
+    }, [MerchantContractAddress])
+
     return (
         <>
-            <h1>Merchant #{MerchantID}</h1>
+            <h1>Merchant #{MerchantContractAddress.slice(0, 5)}...{MerchantContractAddress.slice(38)}</h1>
 
-            <span>ID: {merchantsList[MerchantID].id}</span>
+            <span>Merchant Contract Address: {merchantContractInfo.MerchantContractAddress}</span>
             <br />
 
-            <span>Merchant Address: {merchantsList[MerchantID].merchantAddress}</span>
+            <span>Merchant Name: {merchantContractInfo.MerchantName}</span>
             <br />
 
-            <span>Merchant Name: {merchantsList[MerchantID].merchantName}</span>
+            <span>Number of Votes: {merchantContractInfo.numberOfVotes}</span>
             <br />
-
-            <span>Number of Votes: {merchantsList[MerchantID].numberOfVotes}</span>
             <br />
-
 
             <div className="side-by-side-buttons">
                 <button onClick={() => navigate("/vote")}>Cancel</button>
                 {!currentAccount ?
                     <button onClick={() => connectWallet()}>Connect Wallet</button> :
-                    <button onClick={() => vote(MerchantID)}>Vote</button>
+                    <button onClick={() => vote(MerchantContractAddress)}>Vote</button>
                 }
             </div>
 

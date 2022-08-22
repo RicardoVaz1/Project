@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { ethers } from "ethers"
-import { createSearchParams, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
+const axios = require("axios")
+
 
 const ConnectWallet = ({ nextPage }) => {
   const navigate = useNavigate()
@@ -59,6 +61,39 @@ const ConnectWallet = ({ nextPage }) => {
     setCurrentBlock(0)
   } */
 
+  async function pageNext() {
+    const MerchantContractAddress = await getMerchantContractAddress(currentAccount)
+    localStorage.setItem("userData", JSON.stringify({ currentAccount, balance, chainID, chainName, currentBlock, MerchantContractAddress }))
+    navigate(nextPage)
+  }
+
+  const getMerchantContractAddress = async (MerchantAddress) => {
+    try {
+      const result = await axios.post(
+        `${process.env.REACT_APP_THE_GRAPH_API}`,
+        {
+          query: `
+                {
+                    createMerchantContracts(first: 1, where: {MerchantAddress: "${MerchantAddress}"}) {
+                        id
+                        MerchantContractAddress
+                        MerchantAddress
+                        MerchantName
+                    }
+                }
+                `
+        }
+      )
+
+      let MerchantContractAddress = result.data.data.createMerchantContracts[0].MerchantContractAddress
+      // console.log("MerchantContractAddress: ", MerchantContractAddress)
+
+      return MerchantContractAddress
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   return (
     <>
       {!currentAccount || !ethers.utils.isAddress(currentAccount) ?
@@ -80,13 +115,7 @@ const ConnectWallet = ({ nextPage }) => {
           <br />
           <br />
 
-          <button onClick={() => navigate({
-            pathname: nextPage,
-            search: createSearchParams({
-              CurrentAccount: currentAccount,
-              Balance: balance
-            }).toString()
-          })}>
+          <button onClick={pageNext}>
             Next
           </button>
         </>

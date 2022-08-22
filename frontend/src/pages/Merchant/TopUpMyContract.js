@@ -5,7 +5,9 @@ import MerchantContractABI from "../../abis/MerchantContract.json"
 import { MERCHANTCONTRACTADDRESS } from '../../constants'
 
 
-const TopUpMyContract = ({ currentAccount }) => {
+const TopUpMyContract = () => {
+    const { currentAccount, /*MerchantContractAddress*/ } = JSON.parse(localStorage.getItem("userData"))
+
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
     const instanceMerchantContract = new ethers.Contract(MERCHANTCONTRACTADDRESS, MerchantContractABI.abi, signer)
