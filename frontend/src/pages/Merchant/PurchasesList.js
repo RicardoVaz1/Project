@@ -21,13 +21,11 @@ const PurchasesList = () => {
                 {
                     query: `
                     {
-                        createPurchases(where: {MerchantAddress: "${MerchantContractAddress}"}) {
-                            MerchantContractAddress
-                            IDPurchase
-                            DateC
-                            PurchaseAmount
+                        createPurchases {
+                            id
+                            Date
+                            Amount
                             EscrowTime
-                            PurchaseStatus
                         }
                     }
                     `
@@ -105,9 +103,9 @@ const PurchasesList = () => {
 
                 {purchasesList.map((item) => {
                     return (
-                        <tr className="item" key={item.IDPurchase}>
-                            <td className="itemDisplay">{item.IDPurchase}</td>
-                            <td className="itemDisplay">{item.PurchaseAmount}</td>
+                        <tr className="item" key={item.id}>
+                            <td className="itemDisplay">{item.id}</td>
+                            <td className="itemDisplay">{item.Amount}</td>
                             <td className="itemDisplay">{item.EscrowTime}</td>
                             <td className="itemDisplay">{item.PurchaseStatus}</td>
                             <td className="removeItemButton">
