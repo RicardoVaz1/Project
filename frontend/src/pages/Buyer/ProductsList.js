@@ -28,7 +28,7 @@ const ProductsList = () => {
                 {
                     query: `
                     {
-                        createPurchases(where: {MerchantAddress: "${MerchantContractAddress}"}) {
+                        createPurchases {
                             id
                             Date
                             Amount
@@ -112,14 +112,14 @@ const ProductsList = () => {
 
                 {productsList.map((item) => {
                     return (
-                        <tr className="item" key={item.IDPurchase}>
-                            <td className="itemDisplay">{item.IDPurchase}</td>
-                            <td className="itemDisplay">{item.PurchaseAmount} ETH</td>
+                        <tr className="item" key={item.id}>
+                            <td className="itemDisplay">{item.id}</td>
+                            <td className="itemDisplay">{item.Amount} ETH</td>
                             <td className="itemDisplay">{item.EscrowTime}</td>
                             <td className="itemButton">
                                 {!currentAccount ?
                                     <button onClick={() => connectWallet()}>Connect Wallet</button> :
-                                    <button onClick={() => buy(item.IDPurchase, item.PurchaseAmount)}>Buy</button>
+                                    <button onClick={() => buy(item.id, item.Amount)}>Buy</button>
                                 }
                             </td>
                         </tr>
