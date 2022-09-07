@@ -10,20 +10,22 @@ import Withdrawals from './Withdrawals'
 
 import { ethers } from "ethers"
 import MerchantContractABI from "../../abis/MerchantContract.json"
-import { MERCHANTCONTRACTADDRESS } from '../../constants'
+// import AdminApproveMerchant from './AdminApproveMerchant'
+// import { MERCHANTCONTRACTADDRESS } from '../../constants'
 
 
 const Logged = () => {
     const data = JSON.parse(localStorage.getItem("userData"))
     const CurrentAccount = data.currentAccount
     // const Balance = data.balance
-    // const MerchantContractAddress = data.MerchantContractAddress
+    const MerchantContractAddress = data.MerchantContractAddress
+    const MerchantContractApprovedStatus = data.MerchantContractApprovedStatus
 
     const [name, setName] = useState("")
 
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
-    const instanceMerchantContract = useRef(new ethers.Contract(MERCHANTCONTRACTADDRESS, MerchantContractABI.abi, signer))
+    const instanceMerchantContract = useRef(new ethers.Contract(MerchantContractAddress, MerchantContractABI.abi, signer))
 
 
     const getMerchantInfo = useCallback(async () => {
@@ -44,9 +46,21 @@ const Logged = () => {
     }, [getMerchantInfo])
 
 
+    useEffect(() => {
+        document.getElementById("Merchant").setAttribute("style", "font-weight: bold; color: yellow !important;")
+        document.getElementById("Admin").setAttribute("style", "font-weight: normal; color: white !important;")
+    }, [])
+
+
     return (
         <>
-            <h1>Welcome {name}, {CurrentAccount.slice(0, 5)}...{CurrentAccount.slice(38)}!</h1>
+            {MerchantContractApprovedStatus ?
+                <h1>Welcome {name}, {CurrentAccount.slice(0, 5)}...{CurrentAccount.slice(38)}!</h1> :
+                <>
+                    <h1>Welcome, {CurrentAccount.slice(0, 5)}...{CurrentAccount.slice(38)}!</h1>
+                    <h4 style={{ color: "red", textDecoration: "underline" }}>MerchantContract not approved!</h4>
+                </>
+            }
 
             {/* <Sidebar logged={"merchant"} /> */}
 
@@ -57,6 +71,7 @@ const Logged = () => {
                 <Withdrawals />
                 <Refunds />
                 <TopUpMyContract />
+                {/* <AdminApproveMerchant /> */}
             </div>
 
             <br />

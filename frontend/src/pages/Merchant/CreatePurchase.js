@@ -2,15 +2,15 @@ import { useState } from 'react'
 
 import { ethers } from "ethers"
 import MerchantContractABI from "../../abis/MerchantContract.json"
-import { MERCHANTCONTRACTADDRESS } from '../../constants'
+// import { MERCHANTCONTRACTADDRESS } from '../../constants'
 
 
 const CreatePurchase = () => {
-    const { currentAccount, /*MerchantContractAddress*/ } = JSON.parse(localStorage.getItem("userData"))
+    const { currentAccount, MerchantContractAddress } = JSON.parse(localStorage.getItem("userData"))
 
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
-    const instanceMerchantContract = new ethers.Contract(MERCHANTCONTRACTADDRESS, MerchantContractABI.abi, signer)
+    const instanceMerchantContract = new ethers.Contract(MerchantContractAddress, MerchantContractABI.abi, signer)
 
     const [idPurchase, setIDPurchase] = useState(0)
     const [purchaseAmount, setPurchaseAmount] = useState(0)
@@ -27,7 +27,7 @@ const CreatePurchase = () => {
             // console.log("purchaseAmount: ", purchaseAmount)
             // console.log("escrowTime: ", escrowTime)
 
-            const merchantNewPurchase = await instanceMerchantContract.createPurchase(idPurchase, purchaseAmount, escrowTime, { from: currentAccount })
+            const merchantNewPurchase = await instanceMerchantContract.createPurchase(idPurchase, purchaseAmount, escrowTime, { from: currentAccount, gasLimit: 1500000 })
             console.log("Merchant New Purchase: ", merchantNewPurchase)
 
             document.getElementById("done-successfully-1").style.display = ''

@@ -29,7 +29,7 @@ const AddMerchant = () => {
             // console.log("merchantAddress: ", merchantAddress)
             // console.log("merchantName: ", merchantName)
 
-            const ownerAddMerchant = await instanceMainContract.addMerchantContract(merchantAddress, merchantName, { from: currentAccount })
+            const ownerAddMerchant = await instanceMainContract.createMerchantContract(merchantAddress, merchantName, { from: currentAccount })
             console.log("Owner Add Merchant: ", ownerAddMerchant)
 
             document.getElementById("done-successfully").style.display = ''
@@ -44,7 +44,7 @@ const AddMerchant = () => {
 
     return (
         <>
-            <h1>Create Merchant</h1>
+            <h1>Create MerchantContract</h1>
 
             {/* <Sidebar logged={"admin"} /> */}
 
@@ -54,7 +54,7 @@ const AddMerchant = () => {
                     type="text"
                     id="merchantAddress"
                     name="fname"
-                    placeholder="Insert Merchant address"
+                    placeholder="Insert Merchant Address"
                     onChange={(e) => setMerchantAddress(e.target.value)}
                 />
                 <br />
@@ -64,12 +64,12 @@ const AddMerchant = () => {
                     type="text"
                     id="merchantName"
                     name="lname"
-                    placeholder="Insert Merchant name"
+                    placeholder="Insert Merchant Name"
                     onChange={(e) => setMerchantName(e.target.value)}
                 />
                 <br />
 
-                <button onClick={() => createMerchant()}>Create Merchant</button>
+                <button onClick={() => createMerchant()}>Create MerchantContract</button>
                 <br />
 
                 <span id="done-successfully" style={{ "display": "none" }}>Merchant added successfully!</span>

@@ -8,6 +8,7 @@ const axios = require("axios")
 
 const MerchantInfo = () => {
     const navigate = useNavigate()
+    const { numberOfVotes } = JSON.parse(localStorage.getItem("MerchantContractData"))
 
     const location = new URL(window.location.href).pathname
     const locationArray = location.split("/")
@@ -62,7 +63,7 @@ const MerchantInfo = () => {
         try {
             // console.log("ID: ", ID)
 
-            const userVote = await instanceMainContract.voteNewMerchantContractApproval(ID, { from: currentAccount })
+            const userVote = await instanceMainContract.voteNewMerchantContractApproval(ID, { from: currentAccount, gasLimit: 1500000 })
             console.log("User Vote: ", userVote)
 
             document.getElementById("done-successfully").style.display = ''
@@ -79,11 +80,11 @@ const MerchantInfo = () => {
     async function getMerchantContractInfo(MerchantContractAddress) {
         try {
             const result = await axios.post(
-                `${process.env.REACT_APP_THE_GRAPH_API}`, // (where: {MerchantAddress: "${MerchantContractAddress}"})
+                `${process.env.REACT_APP_THE_GRAPH_API}`,
                 {
                     query: `
                     {
-                        createMerchantContracts {
+                        createdMerchantContracts(where: {MerchantContractAddress: "${MerchantContractAddress}"}) {
                             id
                             MerchantContractAddress
                             MerchantAddress
@@ -94,7 +95,7 @@ const MerchantInfo = () => {
                 }
             )
 
-            let MerchantsList = result.data.data.createMerchantContracts[0]
+            let MerchantsList = result.data.data.createdMerchantContracts[0]
             // console.log("MerchantsList: ", MerchantsList)
 
             setMerchantContractInfo(MerchantsList)
@@ -107,17 +108,24 @@ const MerchantInfo = () => {
         getMerchantContractInfo(MerchantContractAddress)
     }, [MerchantContractAddress])
 
+    useEffect(() => {
+        document.getElementById("Buyer").setAttribute("style", "font-weight: normal; color: white !important;")
+        document.getElementById("Merchant").setAttribute("style", "font-weight: normal; color: white !important;")
+        document.getElementById("Admin").setAttribute("style", "font-weight: normal; color: white !important;")
+        document.getElementById("Vote").setAttribute("style", "font-weight: bold; color: yellow !important;")
+    }, [])
+
     return (
         <>
             <h1>Merchant #{MerchantContractAddress.slice(0, 5)}...{MerchantContractAddress.slice(38)}</h1>
 
-            <span>Merchant Contract Address: {merchantContractInfo.MerchantContractAddress}</span>
+            <span>Merchant Contract Address: <a href={`https://rinkeby.etherscan.io/address/${merchantContractInfo.MerchantContractAddress}`} target="_blank" rel="noreferrer" >{merchantContractInfo.MerchantContractAddress}</a></span>
             <br />
 
             <span>Merchant Name: {merchantContractInfo.MerchantName}</span>
             <br />
 
-            <span>Number of Votes: {merchantContractInfo.numberOfVotes}</span>
+            <span>Number of Votes: {numberOfVotes}</span>
             <br />
             <br />
 

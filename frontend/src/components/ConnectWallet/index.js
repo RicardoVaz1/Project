@@ -1,17 +1,42 @@
-import { useState, useEffect } from 'react'
-import { ethers } from "ethers"
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from "react-router-dom"
+
+import { ethers } from "ethers"
+import MainContractABI from "../../abis/MainContract.json"
+import { MAINCONTRACTADDRESS } from '../../constants'
 const axios = require("axios")
 
 
 const ConnectWallet = ({ nextPage }) => {
   const navigate = useNavigate()
+  // const OwnerAddress = process.env.REACT_APP_OWNER_ADDRESS
+  const [ownerAddress, setOwnerAddress] = useState("")
 
   const [balance, setBalance] = useState("")
   const [currentAccount, setCurrentAccount] = useState("")
   const [chainID, setChainID] = useState(0)
   const [chainName, setChainName] = useState("")
   const [currentBlock, setCurrentBlock] = useState(0)
+
+  const provider = new ethers.providers.Web3Provider(window.ethereum)
+  const signer = provider.getSigner(process.env.REACT_APP_OWNER_ADDRESS)
+  // const instanceMainContract = new ethers.Contract(MAINCONTRACTADDRESS, MainContractABI.abi, signer)
+  const instanceMainContract = useRef(new ethers.Contract(MAINCONTRACTADDRESS, MainContractABI.abi, signer))
+
+
+
+  const checkIsAdmin = useCallback(async () => {
+    const instanceMainContract2 = instanceMainContract.current
+
+    try {
+      const OwnerAddress = await instanceMainContract2.getOwnerAddress({ from: process.env.REACT_APP_OWNER_ADDRESS })
+      // console.log("Owner Address: ", OwnerAddress)
+
+      setOwnerAddress(OwnerAddress)
+    } catch (error) {
+      console.log(error)
+    }
+  }, [])
 
   useEffect(() => {
     if (!currentAccount || !ethers.utils.isAddress(currentAccount)) return
@@ -32,6 +57,10 @@ const ConnectWallet = ({ nextPage }) => {
       setCurrentBlock(result)
     })
   }, [currentAccount])
+
+  useEffect(() => {
+    checkIsAdmin()
+  }, [checkIsAdmin])
 
 
   function onClickConnect() {
@@ -62,9 +91,39 @@ const ConnectWallet = ({ nextPage }) => {
   } */
 
   async function pageNext() {
-    const MerchantContractAddress = await getMerchantContractAddress(currentAccount)
-    localStorage.setItem("userData", JSON.stringify({ currentAccount, balance, chainID, chainName, currentBlock, MerchantContractAddress }))
-    navigate(nextPage)
+    let MerchantContractAddress
+    let MerchantContractApprovedStatus
+    let isAdmin
+
+    // console.log("x: ", currentAccount)
+    // console.log("y: ", ownerAddress)
+    // console.log("result: ", currentAccount.toLowerCase() === ownerAddress.toLowerCase())
+
+    if (currentAccount.toLowerCase() === ownerAddress.toLowerCase() && nextPage === "/admin") {
+      isAdmin = true
+      localStorage.setItem("userData", JSON.stringify({ currentAccount, balance, chainID, chainName, currentBlock, isAdmin }))
+      navigate(nextPage)
+    }
+    else {
+      MerchantContractAddress = await getMerchantContractAddress(currentAccount)
+      MerchantContractApprovedStatus = await getMerchantContractApprovedStatus(MerchantContractAddress)
+
+      if (MerchantContractApprovedStatus !== true) MerchantContractApprovedStatus = false
+      // console.log("MerchantContractAddress: ", MerchantContractAddress)
+      // console.log("MerchantContractApprovedStatus: ", MerchantContractApprovedStatus)
+
+      if (MerchantContractAddress) {
+        isAdmin = false
+        localStorage.setItem("userData", JSON.stringify({ currentAccount, balance, chainID, chainName, currentBlock, MerchantContractAddress, MerchantContractApprovedStatus, isAdmin }))
+        navigate(nextPage)
+      } else {
+        document.getElementById("done-successfully").style.display = ''
+
+        setTimeout(function () {
+          document.getElementById("done-successfully").style.display = 'none'
+        }, 2000)
+      }
+    }
   }
 
   const getMerchantContractAddress = async (MerchantAddress) => {
@@ -74,7 +133,7 @@ const ConnectWallet = ({ nextPage }) => {
         {
           query: `
                 {
-                    createMerchantContracts(first: 1, where: {MerchantAddress: "${MerchantAddress}"}) {
+                    createdMerchantContracts(first: 1, where: {MerchantAddress: "${MerchantAddress}"}) {
                         id
                         MerchantContractAddress
                         MerchantAddress
@@ -85,7 +144,7 @@ const ConnectWallet = ({ nextPage }) => {
         }
       )
 
-      let MerchantContractAddress = result.data.data.createMerchantContracts[0].MerchantContractAddress
+      let MerchantContractAddress = result.data.data.createdMerchantContracts[0].MerchantContractAddress
       // console.log("MerchantContractAddress: ", MerchantContractAddress)
 
       return MerchantContractAddress
@@ -93,6 +152,47 @@ const ConnectWallet = ({ nextPage }) => {
       console.log(error)
     }
   }
+
+  const getMerchantContractApprovedStatus = async (MerchantContractAddress) => {
+    try {
+      const result = await axios.post(
+        `${process.env.REACT_APP_THE_GRAPH_API}`,
+        {
+          query: `
+                {
+                  approvedMerchantContracts(first: 1, where: {MerchantContractAddress: "${MerchantContractAddress}"}) {
+                        id
+                        MerchantContractAddress
+                        Approved
+                    }
+                }
+                `
+        }
+      )
+
+      let MerchantContractApprovedStatus = result.data.data.approvedMerchantContracts[0].Approved
+      // console.log("MerchantContractApprovedStatus: ", MerchantContractApprovedStatus)
+
+      return MerchantContractApprovedStatus
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+    if (nextPage === "/admin") {
+      document.getElementById("Buyer").setAttribute("style", "font-weight: normal; color: white !important;")
+      document.getElementById("Merchant").setAttribute("style", "font-weight: normal; color: white !important;")
+      document.getElementById("Admin").setAttribute("style", "font-weight: bold; color: yellow !important;")
+      document.getElementById("Vote").setAttribute("style", "font-weight: normal; color: white !important;")
+    }
+    else {
+      document.getElementById("Buyer").setAttribute("style", "font-weight: normal; color: white !important;")
+      document.getElementById("Merchant").setAttribute("style", "font-weight: bold; color: yellow !important;")
+      document.getElementById("Admin").setAttribute("style", "font-weight: normal; color: white !important;")
+      document.getElementById("Vote").setAttribute("style", "font-weight: normal; color: white !important;")
+    }
+  }, [nextPage])
 
   return (
     <>
@@ -118,6 +218,8 @@ const ConnectWallet = ({ nextPage }) => {
           <button onClick={pageNext}>
             Next
           </button>
+
+          <span id="done-successfully" style={{ display: "none", color: "red" }}>Merchant doesn't exist!</span>
         </>
       }
     </>

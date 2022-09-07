@@ -5,17 +5,17 @@ import { useNavigate } from "react-router-dom"
 
 import { ethers } from "ethers"
 import MerchantContractABI from "../../abis/MerchantContract.json"
-import { MERCHANTCONTRACTADDRESS } from '../../constants'
+// import { MERCHANTCONTRACTADDRESS } from '../../constants'
 
 
 const PersonalInfo = () => {
     const navigate = useNavigate()
 
-    const { currentAccount, /*MerchantContractAddress*/ } = JSON.parse(localStorage.getItem("userData"))
+    const { currentAccount, MerchantContractAddress } = JSON.parse(localStorage.getItem("userData"))
 
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
-    const instanceMerchantContract = useRef(new ethers.Contract(MERCHANTCONTRACTADDRESS, MerchantContractABI.abi, signer))
+    const instanceMerchantContract = useRef(new ethers.Contract(MerchantContractAddress, MerchantContractABI.abi, signer))
 
     const [walletAddress, setWalletAddress] = useState("")
     const [name, setName] = useState("")
@@ -99,7 +99,7 @@ const PersonalInfo = () => {
 
     return (
         <>
-            <h3>My Smart Contract Info</h3>
+            <h3>MerchantContract Info</h3>
 
             {/* <Sidebar logged={"merchant"} /> */}
 
@@ -129,11 +129,13 @@ const PersonalInfo = () => {
             <br />
 
             <label htmlFor="escrowAmount">Escrow Amount: </label>
-            <span>{escrowAmount >= 10 ** 18 ? escrowAmount / 10 ** 18 + " ETH" : escrowAmount + " ETH"}</span>
+            {/* <span>{escrowAmount >= 10 ** 18 ? escrowAmount / 10 ** 18 + " ETH" : escrowAmount + " ETH"}</span> */}
+            <span>{escrowAmount + ""}</span>
             <br />
 
             <label htmlFor="balance">Balance: </label>
-            <span>{balance >= 10 ** 18 ? balance / 10 ** 18 + " ETH" : balance + " ETH"}</span>
+            {/* <span>{balance >= 10 ** 18 ? balance / 10 ** 18 + " ETH" : balance + " ETH"}</span> */}
+            <span>{balance + ""}</span>
 
             <span id="done-successfully" style={{ "display": "none" }}>Done successfully!</span>
         </>
