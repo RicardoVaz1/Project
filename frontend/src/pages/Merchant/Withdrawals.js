@@ -2,14 +2,14 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 
 import { ethers } from "ethers"
 import MerchantContractABI from "../../abis/MerchantContract.json"
-import { MERCHANTCONTRACTADDRESS } from '../../constants'
+// import { MERCHANTCONTRACTADDRESS } from '../../constants'
 
 const Withdrawals = () => {
-    const { currentAccount, /*MerchantContractAddress*/ } = JSON.parse(localStorage.getItem("userData"))
+    const { currentAccount, MerchantContractAddress } = JSON.parse(localStorage.getItem("userData"))
 
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
-    const instanceMerchantContract = useRef(new ethers.Contract(MERCHANTCONTRACTADDRESS, MerchantContractABI.abi, signer))
+    const instanceMerchantContract = useRef(new ethers.Contract(MerchantContractAddress, MerchantContractABI.abi, signer))
 
     const [balance, setBalance] = useState(0)
 
@@ -51,7 +51,7 @@ const Withdrawals = () => {
         <>
             <h1>Withdrawals</h1>
             <label htmlFor="total">Total: </label>
-            <label htmlFor="balance">{balance} ETH</label>
+            <label htmlFor="balance">{balance}</label>
             <br />
 
             <button onClick={() => withdrawal()}>Withdrawal</button>

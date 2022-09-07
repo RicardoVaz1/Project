@@ -3,23 +3,31 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "hardhat/console.sol";
 import "./mainContract.sol";
+// import "hardhat/console.sol";
 
 contract MerchantContract is Ownable {
     /* ========== SYSTEM ========== */
-    MainContract mainContract;
+    MainContract public mainContract;
 
     bool public approved; // true = approved; false = not approved
     bool public paused; // true = withdrawals paused; false = withdrawals unpaused
 
-    modifier approvedMerchant() {
+    function _approvedMerchant() private view {
         require(approved == true, "Merchant not approved!");
+    }
+
+    function _pausedWithdrawals() private view {
+        require(paused == false, "Withdrawals are paused!");
+    }
+
+    modifier approvedMerchant() {
+        _approvedMerchant();
         _;
     }
 
     modifier pausedWithdrawals() {
-        require(paused == false, "Withdrawals are paused!");
+        _pausedWithdrawals();
         _;
     }
 
@@ -31,8 +39,12 @@ contract MerchantContract is Ownable {
     uint256 private total_escrow_amount;        // total amount in escrow
     uint256 private balance;                    // amount verified and ready to withdrawal
 
-    modifier onlyMerchant() {
+    function _onlyMerchant() private view {
         require(msg.sender == merchant_address, "Only Merchant can call this function");
+    }
+
+    modifier onlyMerchant() {
+        _onlyMerchant();
         _;
     }
 
@@ -42,7 +54,7 @@ contract MerchantContract is Ownable {
     struct Purchase {
         uint256 dateF;
         uint256 amount;
-        uint status; // 0: default, purchase wasn't created; 1: purchase created, but not paid; 2: purchase created and paid; 3: purchase refunded
+        uint status; // 0: default, purchase wasn't created; 1: purchase created, but not paid; 2: purchase created and paid; 3: purchase completed; 4: purchase refunded
         uint256 escrow_amount; // amount waiting for escrow_time to end to be added to balance
         uint escrow_time; // time the merchant has to wait, for the money to be sent to his wallet
     }
@@ -73,13 +85,15 @@ contract MerchantContract is Ownable {
 
 
     /* ========== CONSTRUCTOR ========== */
-    constructor(address payable MerchantAddress, string memory MerchantName) {
+    constructor(address payable MerchantAddress, string memory MerchantName, address MainContractAddress) {
         merchant_address = MerchantAddress;
         name = MerchantName;
+        mainContract = MainContract(MainContractAddress);
+
         total_escrow_amount = 0;
         balance = 0;
-
         approved = false;
+        paused = true;
     }
 
 
@@ -87,88 +101,92 @@ contract MerchantContract is Ownable {
     /* ========== SYSTEM ========== */
     function getOwnerAddress() public view onlyOwner returns(address) {
         address owner_address = owner();
-        console.log("OwnerAddress: ", owner_address);
+        // console.log("OwnerAddress: ", owner_address);
         return owner_address;
     }
 
     function getMerchantWalletAddress() public view onlyOwner returns(address) {
         // This function it is being used for testing only
-        console.log("MerchantWalletAddress: ", merchant_address);
+        // console.log("MerchantWalletAddress: ", merchant_address);
         return merchant_address;
     }
 
     function approveMerchant() public onlyOwner {
         approved = true;
-        console.log("MerchantContractAddress ", address(this), " is approved!");
-        emit ApprovedMerchant(address(this), approved);
+        paused = false;
+        // console.log("MerchantContractAddress ", address(this), " is approved!");
+        // emit ApprovedMerchant(address(this), approved);
+        // mainContract.eventsMerchantContracts(1, address(this), approved);
     }
 
     function disapproveMerchant() public onlyOwner {
         approved = false;
-        console.log("MerchantContractAddress ", address(this), " is disapproved!");
-        emit ApprovedMerchant(address(this), approved);
+        paused = true;
+        // console.log("MerchantContractAddress ", address(this), " is disapproved!");
+        // emit ApprovedMerchant(address(this), approved);
+        // mainContract.eventsMerchantContracts(1, address(this), approved);
     }
 
     function pauseWithdrawals() public onlyOwner {
         paused = true;
-        console.log("Withdrawals from MerchantContractAddress ", address(this), " are paused!");
-        emit PausedWithdrawals(address(this), paused);
+        // console.log("Withdrawals from MerchantContractAddress ", address(this), " are paused!");
+        // emit PausedWithdrawal(address(this), paused);
+        // mainContract.eventsMerchantContracts(2, address(this), paused);
     }
 
     function unpauseWithdrawals() public onlyOwner {
         paused = false;
-        console.log("Withdrawals from MerchantContractAddress ", address(this), " are unpaused!");
-        emit PausedWithdrawals(address(this), paused);
+        // console.log("Withdrawals from MerchantContractAddress ", address(this), " are unpaused!");
+        // emit PausedWithdrawal(address(this), paused);
+        // mainContract.eventsMerchantContracts(2, address(this), paused);
     }
 
 
 
     /* ========== MERCHANTs ========== */
     function checkMyAddress() public view onlyMerchant approvedMerchant returns(address) {
-        console.log("My address is: ", merchant_address);
+        // console.log("My address is: ", merchant_address);
         return merchant_address;
     }
 
     function changeMyAddress(address payable NewAddress) public onlyMerchant approvedMerchant {
         merchant_address = NewAddress;
-        console.log("My new address is: ", merchant_address);
+        // console.log("My new address is: ", merchant_address);
         // emit ChangedMyAddress(address(this), merchant_address);
     }
 
     function checkMyName() public view onlyMerchant approvedMerchant returns(string memory) {
-        console.log("My name is: ", name);
+        // console.log("My name is: ", name);
         return name;
     }
 
     function checkMyEscrowAmount() public view onlyMerchant approvedMerchant returns(uint256) {
-        console.log("My EscrowAmount: ", total_escrow_amount);
+        // console.log("My EscrowAmount: ", total_escrow_amount);
         return total_escrow_amount;
     }
 
     function checkMyBalance() public view onlyMerchant approvedMerchant returns(uint256) {
-        console.log("My Balance: ", balance);
+        // console.log("My Balance: ", balance);
         return balance;
+    }
+
+    function getPurchaseStatus(uint idPurchase) public view approvedMerchant returns(uint) {
+        // console.log("IDPuchase: ", idPurchase);
+        // console.log("Purchase Status: ", purchases[idPurchase].status);
+        return purchases[idPurchase].status;
     }
 
     function createPurchase(uint idPurchase, uint256 purchaseAmount, uint escrowTime) public onlyMerchant approvedMerchant {
         // Purchase { uint256 dateF, uint256 amount, uint status, uint256 escrow_amount, uint escrow_time }
         purchases[idPurchase] = Purchase(block.timestamp, purchaseAmount, 1, 0, escrowTime);
+        uint purchaseStatus = 1;
 
-        console.log("Puchase w/ id ", idPurchase);
-        console.log(" and amount ", purchaseAmount, " was created!");
+        // console.log("Puchase w/ id ", idPurchase);
+        // console.log(" and amount ", purchaseAmount, " was created!");
 
-        // MerchantContractAddress | IDPurchase ! DateC | PurchaseAmount | EscrowTime | PurchaseStatus
-        emit CreatePurchase(address(this), idPurchase, block.timestamp, purchaseAmount, escrowTime, 1);
-    }
-
-    function getPurchaseStatus(uint idPurchase) public view onlyMerchant approvedMerchant returns(uint) {
-        // Purchase { uint256 dateF, uint256 amount, uint status, uint256 escrow_amount, uint escrow_time }
-        uint purchaseStatus = purchases[idPurchase].status;
-
-        console.log("IDPuchase: ", idPurchase);
-        console.log("Purchase status: ", purchaseStatus);
-
-        return purchaseStatus;
+        // MerchantContractAddress | IDPurchase ! DateCreated | PurchaseAmount | EscrowTime | PurchaseStatus
+        // emit CreatePurchase(address(this), idPurchase, block.timestamp, purchaseAmount, escrowTime, purchaseStatus);
+        mainContract.eventsMerchantContracts4(1, address(this), idPurchase, block.timestamp, address(this), purchaseAmount, purchaseStatus, escrowTime);
     }
 
     function complete(uint idPurchase) public onlyMerchant approvedMerchant {
@@ -179,12 +197,15 @@ contract MerchantContract is Ownable {
         purchases[idPurchase].escrow_amount -= purchases[idPurchase].amount;
         balance += purchases[idPurchase].amount;
 
-        console.log("Puchase w/ id ", idPurchase, " was completed!");
-        console.log("TotalEscrowAmount: ", total_escrow_amount);
-        console.log("Balance: ", balance);
+        purchases[idPurchase].status = 3; // Purchase completed
+
+        // console.log("Puchase w/ id ", idPurchase, " was completed!");
+        // console.log("TotalEscrowAmount: ", total_escrow_amount);
+        // console.log("Balance: ", balance);
 
         // MerchantContractAddress | IDPurchase
-        emit Complete(address(this), idPurchase);
+        // emit Complete(address(this), idPurchase);
+        mainContract.eventsMerchantContracts3(1, address(this), idPurchase, 0, 0);
     }
 
     function withdrawal() public onlyMerchant pausedWithdrawals approvedMerchant {
@@ -192,11 +213,12 @@ contract MerchantContract is Ownable {
 
         merchant_address.transfer(balance);
 
-        console.log("Address: ", merchant_address);
-        console.log("Balance Sent: ", balance);
+        // console.log("Address: ", merchant_address);
+        // console.log("Balance Sent: ", balance);
 
         // From | Balance
-        emit Withdrawal(address(this), balance);
+        // emit Withdrawal(address(this), balance);
+        mainContract.eventsMerchantContracts2(1, address(this), balance);
         balance = 0;
     }
 
@@ -207,7 +229,8 @@ contract MerchantContract is Ownable {
         if(purchases[idPurchase].status == 0) revert("The purchase doesn't exist!"); // By default status is 0
         if(purchases[idPurchase].status == 1) revert("That purchase hasn't yet been paid!");
         // if(purchases[idPurchase].status == 2) revert("That purchase has already been paid!");
-        if(purchases[idPurchase].status == 3) revert("That purchase has already been refunded!");
+        // if(purchases[idPurchase].status == 3) revert("That purchase has already been completed!");
+        if(purchases[idPurchase].status == 4) revert("That purchase has already been refunded!");
 
         // if(address(this).balance < refundAmount) revert("You don't have enough money in the smart-contract!");
         if(total_escrow_amount+balance < refundAmount) revert("You don't have enough money in the smart-contract!");
@@ -215,36 +238,39 @@ contract MerchantContract is Ownable {
         if(purchases[idPurchase].escrow_amount >= refundAmount) {
             purchases[idPurchase].escrow_amount -= refundAmount;
             total_escrow_amount -= refundAmount;
-            console.log("EscrowAmount updated!");
+            // console.log("EscrowAmount updated!");
         }
         else if(balance >= refundAmount) {
             balance -= refundAmount;
-            console.log("Balance updated!");
+            // console.log("Balance updated!");
         }
         else revert("Error processing refund, check your smart-contract balance!");
 
         BuyerAddress.transfer(refundAmount);
 
-        purchases[idPurchase].status = 3; // Purchase refunded
+        purchases[idPurchase].status = 4; // Purchase refunded
 
         historic(BuyerAddress, 1);
+        uint purchaseStatus = 4;
 
-        console.log("idPurchase: ", idPurchase);
-        console.log("Address: ", BuyerAddress);
-        console.log("RefundAmount: ", refundAmount);
+        // console.log("idPurchase: ", idPurchase);
+        // console.log("Address: ", BuyerAddress);
+        // console.log("RefundAmount: ", refundAmount);
 
         // From | To | Amount | PurchaseStatus
-        emit Refund(address(this), BuyerAddress, refundAmount, 3);
+        // emit Refund(address(this), BuyerAddress, refundAmount, purchaseStatus);
+        mainContract.eventsMerchantContracts4(3, address(this), idPurchase, block.timestamp, BuyerAddress, refundAmount, purchaseStatus, 0);
     }
 
     function topUpMyContract() external payable onlyMerchant approvedMerchant {
         if(msg.value == 0) revert("Amount should be greater than 0!");
 
         balance += msg.value;
-        console.log("Balance: ", balance);
+        // console.log("Balance: ", balance);
 
         // To | Amount
-        emit TopUpMyContract(address(this), msg.value);
+        // emit TopUpMyContract(address(this), msg.value);
+        mainContract.eventsMerchantContracts2(2, address(this), msg.value);
     }
 
 
@@ -260,7 +286,7 @@ contract MerchantContract is Ownable {
         if(msg.value != purchases[idPurchase].amount) revert("Wrong amount!");
 
         total_escrow_amount += msg.value;
-        console.log("TotalEscrowAmount: ", total_escrow_amount);
+        // console.log("TotalEscrowAmount: ", total_escrow_amount);
 
         // Purchase { uint256 dateF, uint256 amount, uint status, uint256 escrow_amount, uint escrow_time }
         purchases[idPurchase].dateF = block.timestamp + purchases[idPurchase].escrow_time;
@@ -268,9 +294,11 @@ contract MerchantContract is Ownable {
         purchases[idPurchase].escrow_amount = msg.value;
 
         historic(msg.sender, 0);
+        uint purchaseStatus = 2;
 
-        // IDPurchase | DateF | From | To | PurchaseAmount | PurchaseStatus
-        emit Buy(idPurchase, purchases[idPurchase].dateF, msg.sender, address(this), msg.value, 2);
+        // IDPurchase | DateFinished | From | To | PurchaseAmount | PurchaseStatus
+        // emit Buy(idPurchase, purchases[idPurchase].dateF, msg.sender, address(this), msg.value, purchaseStatus);
+        mainContract.eventsMerchantContracts4(2, address(this), idPurchase, purchases[idPurchase].dateF, msg.sender, msg.value, purchaseStatus, 0);
     }
 
 
@@ -285,33 +313,34 @@ contract MerchantContract is Ownable {
             merchantHistoric[merchant_address].Sells += 1;
             buyersHistoric[BuyerAddress].Purchases += 1;
 
-            mainContract.saveHistoric(merchant_address, BuyerAddress, 0);
+            // mainContract.saveHistoric(merchant_address, BuyerAddress, 0);
         }
         else {
             // purchase refunded
             merchantHistoric[merchant_address].Refunds += 1;
             buyersHistoric[BuyerAddress].Cancellations += 1;
 
-            mainContract.saveHistoric(merchant_address, BuyerAddress, 1);
+            // mainContract.saveHistoric(merchant_address, BuyerAddress, 1);
         }
 
         // MerchantContractAddress | MerchantSells | MerchantRefunds
-        emit Historic(address(this), merchantHistoric[merchant_address].Sells, merchantHistoric[merchant_address].Refunds);
+        // emit Historic(address(this), merchantHistoric[merchant_address].Sells, merchantHistoric[merchant_address].Refunds);
+        mainContract.eventsMerchantContracts3(2, address(this), 0, merchantHistoric[merchant_address].Sells, merchantHistoric[merchant_address].Refunds);
     }
 
 
 
     /* ========== EVENTS ========== */
-    event PausedWithdrawals(address MerchantContractAddress, bool PausedWithdrawals); // true = withdrawals paused; false = withdrawals unpaused
-    event ApprovedMerchant(address MerchantContractAddress, bool ApprovedMerchant); // true = approved; false = not approved
-    // event ChangedMyAddress(address MerchantContractAddress, address NewAddress);
-    event TopUpMyContract(address MerchantContractAddress, uint256 Amount);
-    event Historic(address MerchantContractAddress, uint Sells, uint Refunds);
+    // event ApprovedMerchant(address MerchantContractAddress, bool ApprovedMerchant); // true = approved; false = not approved
+    // event PausedWithdrawal(address MerchantContractAddress, bool PausedWithdrawal); // true = withdrawals paused; false = withdrawals unpaused
+    // // event ChangedMyAddress(address MerchantContractAddress, address NewAddress);
+    // event TopUpMyContract(address MerchantContractAddress, uint256 Amount);
+    // event Historic(address MerchantContractAddress, uint Sells, uint Refunds);
 
-    // Purchase Flow
-    event CreatePurchase(address MerchantContractAddress, uint IDPurchase, uint256 DateC, uint256 PurchaseAmount, uint EscrowTime, uint PurchaseStatus);
-    event Buy(uint IDPurchase, uint256 DateF, address BuyerAddress, address MerchantContractAddress, uint256 PurchaseAmount, uint PurchaseStatus);
-    event Complete(address MerchantContractAddress, uint IDPurchase);
-    event Withdrawal(address MerchantContractAddress, uint256 Balance);
-    event Refund(address MerchantContractAddress, address BuyerAddress, uint256 RefundAmount, uint PurchaseStatus);
+    // // Purchase Flow
+    // event CreatePurchase(address MerchantContractAddress, uint IDPurchase, uint256 DateCreated, uint256 PurchaseAmount, uint EscrowTime, uint PurchaseStatus);
+    // event Buy(uint IDPurchase, uint256 DateFinished, address BuyerAddress, address MerchantContractAddress, uint256 PurchaseAmount, uint PurchaseStatus);
+    // event Complete(address MerchantContractAddress, uint IDPurchase);
+    // event Withdrawal(address MerchantContractAddress, uint256 Balance);
+    // event Refund(address MerchantContractAddress, address BuyerAddress, uint256 RefundAmount, uint PurchaseStatus);
 }

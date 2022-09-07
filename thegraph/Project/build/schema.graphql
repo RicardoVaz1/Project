@@ -1,0 +1,80 @@
+type ApprovedMerchantContract @entity {
+  id: ID!
+  MerchantContractAddress: Bytes! # address
+  MerchantName: String! # string
+  Approved: Boolean! # bool
+}
+
+type Buy @entity {
+  id: ID!
+  MerchantContractAddress: Bytes! # address
+  IDPurchase: BigInt! # uint256
+  DateFinished: BigInt! # uint256
+  BuyerAddress: Bytes! # address
+  PurchaseAmount: BigInt! # uint256
+  PurchaseStatus: BigInt! # uint256
+}
+
+type Complete @entity {
+  id: ID!
+  MerchantContractAddress: Bytes! # address
+  IDPurchase: BigInt! # uint256
+}
+
+type CreatePurchase @entity {
+  id: ID!
+  MerchantContractAddress: Bytes! # address
+  IDPurchase: BigInt! # uint256
+  DateCreated: BigInt! # uint256
+  PurchaseAmount: BigInt! # uint256
+  EscrowTime: BigInt! # uint256
+  PurchaseStatus: BigInt! # uint256
+}
+
+type CreatedMerchantContract @entity {
+  id: ID!
+  MerchantContractAddress: Bytes! # address
+  MerchantAddress: Bytes! # address
+  MerchantName: String! # string
+}
+
+type Historic @entity {
+  id: ID!
+  MerchantContractAddress: Bytes! # address
+  Sells: BigInt! # uint256
+  Refunds: BigInt! # uint256
+}
+
+type PausedMerchantContract @entity {
+  id: ID!
+  MerchantContractAddress: Bytes! # address
+  Paused: Boolean! # bool
+}
+
+type Refund @entity {
+  id: ID!
+  MerchantContractAddress: Bytes! # address
+  IDPurchase: BigInt! # uint256
+  Date: BigInt! # uint256
+  BuyerAddress: Bytes! # address
+  RefundAmount: BigInt! # uint256
+  PurchaseStatus: BigInt! # uint256
+}
+
+type TopUpMyContract @entity {
+  id: ID!
+  MerchantContractAddress: Bytes! # address
+  Amount: BigInt! # uint256
+}
+
+type VoteNewMerchantContract @entity {
+  id: ID!
+  Voter: Bytes! # address
+  MerchantContractAddress: Bytes! # address
+}
+
+type Withdrawal @entity {
+  id: ID!
+  MerchantContractAddress: Bytes! # address
+  Balance: BigInt! # uint256
+}

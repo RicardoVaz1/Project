@@ -4,6 +4,7 @@ const axios = require("axios")
 require("dotenv").config()
 const API_KEY = process.env.API_KEY
 const MerchantAddress = process.env.MERCHANTADDRESS
+const MerchantContractAddress = process.env.MERCHANTCONTRACTADDRESS
 
 const getMerchantContractAddress = async (MerchantAddress) => {
     try {
@@ -33,4 +34,33 @@ const getMerchantContractAddress = async (MerchantAddress) => {
     }
 }
 
-getMerchantContractAddress(MerchantAddress);
+const getMerchantContractBuysHistory = async (MerchantContractAddress) => {
+    // console.log("Buys in MerchantContractAddress: ", MerchantContractAddress)
+
+    try {
+        const result = await axios.post(
+            `https://api.studio.thegraph.com/query/25250/projectrinkeby/0.1`,
+            {
+                query: `
+                {
+                    buys(where: {MerchantContractAddress: "${MerchantContractAddress}"}) {
+                        id
+                        PurchaseID
+                        DateF
+                        BuyerAddress
+                        MerchantContractAddress
+                        Amount
+                    }
+                }
+                `
+            }
+        );
+
+        console.log(result.data.data.buys);
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+getMerchantContractAddress(MerchantAddress)
+getMerchantContractBuysHistory(MerchantContractAddress)

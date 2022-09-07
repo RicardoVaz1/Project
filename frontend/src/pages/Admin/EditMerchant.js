@@ -15,6 +15,8 @@ const EditMerchant = () => {
     const MerchantContractAddress = locationArray[4]
 
     const { currentAccount } = JSON.parse(localStorage.getItem("userData"))
+    const { numberOfVotes, statusContract, statusWithdrawals } = JSON.parse(localStorage.getItem("MerchantContractData"))
+
 
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
@@ -46,7 +48,7 @@ const EditMerchant = () => {
 
         setTimeout(function () {
             document.getElementById("done-successfully-1").style.display = 'none'
-            // navigate("/admin")
+            navigate("/admin")
         }, 2000)
     }
 
@@ -64,7 +66,7 @@ const EditMerchant = () => {
 
         setTimeout(function () {
             document.getElementById("done-successfully-2").style.display = 'none'
-            // navigate("/admin")
+            navigate("/admin")
         }, 2000)
     }
 
@@ -82,7 +84,7 @@ const EditMerchant = () => {
 
         setTimeout(function () {
             document.getElementById("done-successfully-3").style.display = 'none'
-            // navigate("/admin")
+            navigate("/admin")
         }, 2000)
     }
 
@@ -90,11 +92,11 @@ const EditMerchant = () => {
     async function getMerchantContractInfo(MerchantContractAddress) {
         try {
             const result = await axios.post(
-                `${process.env.REACT_APP_THE_GRAPH_API}`, // (where: {MerchantAddress: "${MerchantContractAddress}"})
+                `${process.env.REACT_APP_THE_GRAPH_API}`,
                 {
                     query: `
                     {
-                        createMerchantContracts {
+                        createdMerchantContracts(where: {MerchantContractAddress: "${MerchantContractAddress}"}) {
                             id
                             MerchantContractAddress
                             MerchantAddress
@@ -105,7 +107,7 @@ const EditMerchant = () => {
                 }
             )
 
-            let MerchantsList = result.data.data.createMerchantContracts[0]
+            let MerchantsList = result.data.data.createdMerchantContracts[0]
             // console.log("MerchantsList: ", MerchantsList)
 
             setMerchantContractInfo(MerchantsList)
@@ -117,6 +119,13 @@ const EditMerchant = () => {
     useEffect(() => {
         getMerchantContractInfo(MerchantContractAddress)
     }, [MerchantContractAddress])
+
+    useEffect(() => {
+        document.getElementById("Buyer").setAttribute("style", "font-weight: normal; color: white !important;")
+        document.getElementById("Merchant").setAttribute("style", "font-weight: normal; color: white !important;")
+        document.getElementById("Admin").setAttribute("style", "font-weight: bold; color: yellow !important;")
+        document.getElementById("Vote").setAttribute("style", "font-weight: normal; color: white !important;")
+    }, [])
 
     /* const getMerchantContractInfo = useCallback(async () => {
         const instanceMainContract2 = instanceMainContract.current
@@ -140,19 +149,19 @@ const EditMerchant = () => {
         <>
             <h1>Edit Merchant #{MerchantContractAddress.slice(0, 5)}...{MerchantContractAddress.slice(38)}</h1>
 
-            <span>Merchant Contract Address: {merchantContractInfo.MerchantContractAddress}</span>
+            <span>Merchant Contract Address: <a href={`https://rinkeby.etherscan.io/address/${MerchantContractAddress}`} target="_blank" rel="noreferrer" >{merchantContractInfo.MerchantContractAddress}</a></span>
             <br />
 
             <span>Merchant Name: {merchantContractInfo.MerchantName}</span>
             <br />
 
-            <span>No. of Votes: {merchantContractInfo.numberOfVotes}</span>
+            <span>No. of Votes: {numberOfVotes}</span>
             <br />
 
-            <span>Approved: {merchantContractInfo.approved}</span>
+            <span>Approved: {statusContract}</span>
             <br />
 
-            <span>Withdrawls: {merchantContractInfo.pausedWithdrawls}</span>
+            <span>Withdrawls: {statusWithdrawals}</span>
             <br />
             <br />
 
@@ -160,14 +169,14 @@ const EditMerchant = () => {
                 <button onClick={() => navigate("/admin")}>Cancel</button>
 
                 { // IF Merchant approved -> disapprove()
-                    (merchantContractInfo.approved === true) ? <button onClick={() => disapprove(MerchantContractAddress)}>Disapprove</button> : ""
+                    (statusContract === "Approved") ? <button onClick={() => disapprove(MerchantContractAddress)}>Disapprove</button> : ""
                 }
 
                 { // IF Merchant approved and unpausedWithdrawls -> pauseWithdrawls() 
-                    (merchantContractInfo.approved === true) && (merchantContractInfo.pausedWithdrawls === false) ? <button onClick={() => pauseWithdrawls(MerchantContractAddress)}>PauseWithdrawls</button> :
+                    (statusContract === "Approved") && (statusWithdrawals === "Unpaused") ? <button onClick={() => pauseWithdrawls(MerchantContractAddress)}>PauseWithdrawls</button> :
 
                         // ElseIF Merchant approved and pausedWithdrawls -> unpauseWithdrawls()
-                        (merchantContractInfo.approved === true) && (merchantContractInfo.pausedWithdrawls === true) ? <button onClick={() => unpauseWithdrawls(MerchantContractAddress)}>UnpauseWithdrawls</button> : ""
+                        (statusContract === "Approved") && (statusWithdrawals === "Paused") ? <button onClick={() => unpauseWithdrawls(MerchantContractAddress)}>UnpauseWithdrawls</button> : ""
                 }
             </div>
 

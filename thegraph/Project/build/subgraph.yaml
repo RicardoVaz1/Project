@@ -1,0 +1,53 @@
+specVersion: 0.0.4
+schema:
+  file: schema.graphql
+dataSources:
+  - kind: ethereum
+    name: MainContract
+    network: rinkeby
+    source:
+      address: "0x9B4E6AD2B2f4A6C8121157DB3E7eC40C571bEEF7"
+      abi: MainContract
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - ApprovedMerchantContract
+        - Buy
+        - Complete
+        - CreatePurchase
+        - CreatedMerchantContract
+        - Historic
+        - PausedMerchantContract
+        - Refund
+        - TopUpMyContract
+        - VoteNewMerchantContract
+        - Withdrawal
+      abis:
+        - name: MainContract
+          file: MainContract/abis/MainContract.json
+      eventHandlers:
+        - event: ApprovedMerchantContract(address,string,bool)
+          handler: handleApprovedMerchantContract
+        - event: Buy(address,uint256,uint256,address,uint256,uint256)
+          handler: handleBuy
+        - event: Complete(address,uint256)
+          handler: handleComplete
+        - event: CreatePurchase(address,uint256,uint256,uint256,uint256,uint256)
+          handler: handleCreatePurchase
+        - event: CreatedMerchantContract(address,address,string)
+          handler: handleCreatedMerchantContract
+        - event: Historic(address,uint256,uint256)
+          handler: handleHistoric
+        - event: PausedMerchantContract(address,bool)
+          handler: handlePausedMerchantContract
+        - event: Refund(address,uint256,uint256,address,uint256,uint256)
+          handler: handleRefund
+        - event: TopUpMyContract(address,uint256)
+          handler: handleTopUpMyContract
+        - event: VoteNewMerchantContract(address,address)
+          handler: handleVoteNewMerchantContract
+        - event: Withdrawal(address,uint256)
+          handler: handleWithdrawal
+      file: MainContract/MainContract.wasm

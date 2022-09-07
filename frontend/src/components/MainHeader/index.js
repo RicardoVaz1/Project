@@ -8,22 +8,22 @@ const MainHeader = () => {
       <nav>
         <ul>
           <li>
-            <NavLink activeClassName={classes.active} to="/buyer">
+            <NavLink activeClassName={classes.active} to="/buyer" id="Buyer">
               Buyer
             </NavLink>
           </li>
           <li>
-            <NavLink activeClassName={classes.active} to="/login">
+            <NavLink activeClassName={classes.active} to="/login" id="Merchant">
               Merchant
             </NavLink>
           </li>
           <li>
-            <NavLink activeClassName={classes.active} to="/console">
+            <NavLink activeClassName={classes.active} to="/console" id="Admin">
               Admin
             </NavLink>
           </li>
           <li>
-            <NavLink activeClassName={classes.active} to="/vote">
+            <NavLink activeClassName={classes.active} to="/vote" id="Vote">
               Vote
             </NavLink>
           </li>
