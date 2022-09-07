@@ -1,6 +1,6 @@
 const main = async () => {
   const MerchantContract = await hre.ethers.getContractFactory('MerchantContract')
-  const merchantcontract = await MerchantContract.deploy(/*process.env.OWNER_ADDRESS,*/ process.env.MERCHANT_ADDRESS, process.env.MERCHANT_NAME)
+  const merchantcontract = await MerchantContract.deploy(/*process.env.OWNER_ADDRESS,*/ process.env.MERCHANT_ADDRESS, process.env.MERCHANT_NAME, process.env.MAINCONTRACT_ADDRESS)
 
   await merchantcontract.deployed()
 

@@ -1,5 +1,6 @@
 require("@nomiclabs/hardhat-waffle")
 require("@nomiclabs/hardhat-ethers")
+require('hardhat-contract-sizer');
 require("dotenv").config()
 
 // This is a sample Hardhat task. To learn how to create your own go to
@@ -27,7 +28,14 @@ module.exports = {
       runs: 200
     }
   },
-  // defaultNetwork: "goerli",
+  contractSizer: {
+    alphaSort: true,
+    disambiguatePaths: false,
+    runOnCompile: true,
+    strict: true,
+    only: [],
+  },
+  defaultNetwork: "rinkeby",
   networks: {
     hardhat: {
       allowUnlimitedContractSize: true,
