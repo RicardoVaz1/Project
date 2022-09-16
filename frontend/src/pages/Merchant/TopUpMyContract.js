@@ -2,17 +2,16 @@ import { useState } from 'react'
 
 import { ethers } from "ethers"
 import MerchantContractABI from "../../abis/MerchantContract.json"
-// import { MERCHANTCONTRACTADDRESS } from '../../constants'
 
 
 const TopUpMyContract = () => {
     const { currentAccount, MerchantContractAddress } = JSON.parse(localStorage.getItem("userData"))
+    const [amount, setAmount] = useState(0)
 
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
     const instanceMerchantContract = new ethers.Contract(MerchantContractAddress, MerchantContractABI.abi, signer)
 
-    const [amount, setAmount] = useState(0)
 
     async function topUpMyContract() {
         if (amount === null) {
@@ -21,8 +20,6 @@ const TopUpMyContract = () => {
         }
 
         try {
-            // console.log("amount: ", amount)
-
             const merchantTopUpContract = await instanceMerchantContract.topUpMyContract({ from: currentAccount, value: amount })
             console.log("Merchant Top Up Contract: ", merchantTopUpContract)
 
@@ -36,9 +33,11 @@ const TopUpMyContract = () => {
         }, 2000)
     }
 
+
     return (
         <>
             <h1>Top Up My Contract</h1>
+
             <label htmlFor="amount">Amount:</label>
             <input
                 type="text"
