@@ -352,7 +352,7 @@
       },
       { "internalType": "uint256", "name": "Amount", "type": "uint256" }
     ],
-    "name": "eventsMerchantContracts2",
+    "name": "eventsMerchantContracts",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -369,7 +369,7 @@
       { "internalType": "uint256", "name": "Sells", "type": "uint256" },
       { "internalType": "uint256", "name": "Refunds", "type": "uint256" }
     ],
-    "name": "eventsMerchantContracts3",
+    "name": "eventsMerchantContracts2",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -393,7 +393,7 @@
       },
       { "internalType": "uint256", "name": "EscrowTime", "type": "uint256" }
     ],
-    "name": "eventsMerchantContracts4",
+    "name": "eventsMerchantContracts3",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
