@@ -1,7 +1,4 @@
 import { useState } from 'react'
-// import { useNavigate } from "react-router-dom"
-
-// import Sidebar from '../../components/Sidebar'
 
 import { ethers } from "ethers"
 import MainContractABI from "../../abis/MainContract.json"
@@ -9,15 +6,14 @@ import { MAINCONTRACTADDRESS } from '../../constants'
 
 
 const AddMerchant = () => {
-    // const navigate = useNavigate()
     const { currentAccount } = JSON.parse(localStorage.getItem("userData"))
+    const [merchantAddress, setMerchantAddress] = useState("")
+    const [merchantName, setMerchantName] = useState("")
 
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
     const instanceMainContract = new ethers.Contract(MAINCONTRACTADDRESS, MainContractABI.abi, signer)
 
-    const [merchantAddress, setMerchantAddress] = useState("")
-    const [merchantName, setMerchantName] = useState("")
 
     async function createMerchant() {
         if (merchantAddress === "" || merchantName === "") {
@@ -26,9 +22,6 @@ const AddMerchant = () => {
         }
 
         try {
-            // console.log("merchantAddress: ", merchantAddress)
-            // console.log("merchantName: ", merchantName)
-
             const ownerAddMerchant = await instanceMainContract.createMerchantContract(merchantAddress, merchantName, { from: currentAccount })
             console.log("Owner Add Merchant: ", ownerAddMerchant)
 
@@ -42,11 +35,10 @@ const AddMerchant = () => {
         }, 2000)
     }
 
+
     return (
         <>
             <h1>Create MerchantContract</h1>
-
-            {/* <Sidebar logged={"admin"} /> */}
 
             <div id="page-wrap">
                 <label htmlFor="merchantAddress">Merchant Address:</label>

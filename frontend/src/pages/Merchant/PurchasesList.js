@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 
 import { ethers } from "ethers"
 import MerchantContractABI from "../../abis/MerchantContract.json"
-// import { MERCHANTCONTRACTADDRESS } from '../../constants'
 const axios = require("axios")
 
 
@@ -11,10 +10,8 @@ const PurchasesList = () => {
     const [purchasesList, setPurchasesList] = useState([])
     const purchasesInfo = useState([])
 
-
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
-    // const instanceMerchantContract = new ethers.Contract(MerchantContractAddress, MerchantContractABI.abi, signer)
     const instanceMerchantContract = useRef(new ethers.Contract(MerchantContractAddress, MerchantContractABI.abi, signer))
 
 
@@ -25,7 +22,7 @@ const PurchasesList = () => {
                 {
                     query: `
                     {
-                        createPurchases(where: {MerchantContractAddress: "${MerchantContractAddress}"}) {
+                        createPurchases(orderBy: id, orderDirection: desc, where: {MerchantContractAddress: "${MerchantContractAddress}"}) {
                             id
                             MerchantContractAddress
                             IDPurchase
@@ -39,8 +36,6 @@ const PurchasesList = () => {
             )
 
             let PurchasesList = result.data.data.createPurchases
-            // console.log("PurchasesList: ", PurchasesList)
-
             setPurchasesList(PurchasesList)
         } catch (error) {
             console.log(error)
@@ -51,58 +46,48 @@ const PurchasesList = () => {
         const instanceMerchantContract2 = instanceMerchantContract.current
 
         for (let i = 0; i < purchasesList.length; i++) {
-            // console.log(purchasesList[i])
-            // console.log(purchasesList[i].PurchaseStatus)
-
             const IDPurchase = purchasesList[i].IDPurchase
 
             try {
-                const purchase_status = await instanceMerchantContract2.getPurchaseStatus(IDPurchase /*, { from: currentAccount }*/)
+                const purchase_status = await instanceMerchantContract2.getPurchaseStatus(IDPurchase)
                 let purchase_status_int = parseInt(purchase_status, 16)
 
-                purchasesInfo.push({ MerchantContractAddress: MerchantContractAddress, idPurchase: IDPurchase, purchaseStatus: purchase_status_int })
-
-                // console.log("purchasesInfo: ", purchasesInfo)
+                purchasesInfo.push({ id: purchasesList[i].id, MerchantContractAddress: MerchantContractAddress, idPurchase: IDPurchase, purchaseStatus: purchase_status_int })
 
                 for (let i = 0; i < purchasesInfo.length; i++) {
                     if (purchasesInfo[i].MerchantContractAddress) {
-                        // document.getElementById(`${purchasesInfo[i].MerchantContractAddress}_status`).textContent = `${purchasesInfo[i].purchaseStatus}`
-
                         if (purchasesInfo[i].purchaseStatus === 0) {
-                            document.getElementById(`${purchasesInfo[i].idPurchase}_status`).textContent = "Not Created"
+                            document.getElementById(`${purchasesInfo[i].id}_status`).textContent = "Not Created"
                         }
 
                         if (purchasesInfo[i].purchaseStatus === 1) {
-                            document.getElementById(`${purchasesInfo[i].idPurchase}_status`).textContent = "Not Paid"
+                            document.getElementById(`${purchasesInfo[i].id}_status`).textContent = "Not Paid"
                         }
 
                         if (purchasesInfo[i].purchaseStatus === 2) {
-                            document.getElementById(`${purchasesInfo[i].idPurchase}_status`).textContent = "Paid"
-                            document.getElementById(`${purchasesInfo[i].idPurchase}_button`).setAttribute("style", "display: table-cell;")
+                            document.getElementById(`${purchasesInfo[i].id}_status`).textContent = "Paid"
+                            document.getElementById(`${purchasesInfo[i].id}_button`).setAttribute("style", "display: table-cell;")
                         }
 
                         if (purchasesInfo[i].purchaseStatus === 3) {
-                            document.getElementById(`${purchasesInfo[i].idPurchase}_status`).textContent = "Completed"
+                            document.getElementById(`${purchasesInfo[i].id}_status`).textContent = "Completed"
                         }
 
                         if (purchasesInfo[i].purchaseStatus === 4) {
-                            document.getElementById(`${purchasesInfo[i].idPurchase}_status`).textContent = "Refunded"
+                            document.getElementById(`${purchasesInfo[i].id}_status`).textContent = "Refunded"
                         }
                     }
                 }
             } catch (error) {
                 console.log("ERROR AT GETTING MERCHANT CONTRACT INFO: ", error)
             }
-
         }
-    }, [purchasesInfo, purchasesList, MerchantContractAddress /*, currentAccount*/])
+    }, [purchasesInfo, purchasesList, MerchantContractAddress])
 
     async function completePurchase(ID) {
         const instanceMerchantContract2 = instanceMerchantContract.current
 
         try {
-            // console.log("ID: ", ID)
-
             const merchantPurchaseComplete = await instanceMerchantContract2.complete(ID, { from: currentAccount, gasLimit: 1500000 })
             console.log("Merchant Purchase Complete: ", merchantPurchaseComplete)
 
@@ -125,35 +110,39 @@ const PurchasesList = () => {
         getMerchantContractInfo()
     }, [getMerchantContractInfo])
 
+
     return (
         <>
             <h1>Purchases List</h1>
 
             <table className="table">
-                <tr>
-                    <th>ID</th>
-                    <th>ID Purchase</th>
-                    <th>Purchase Amount</th>
-                    <th>Escrow Time</th>
-                    <th>Status</th>
-                    <th></th>
-                </tr>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>ID Purchase</th>
+                        <th>Purchase Amount</th>
+                        <th>Escrow Time</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
 
-                {purchasesList.map((item, i) => {
-                    return (
-                        <tr className="item" key={item.IDPurchase}>
-                            <td className="itemDisplay">{i + 1}</td>
-                            <td className="itemDisplay">{item.IDPurchase}</td>
-                            <td className="itemDisplay">{item.PurchaseAmount}</td>
-                            <td className="itemDisplay">{item.EscrowTime}</td>
-                            <td className="itemDisplay"><span id={`${item.IDPurchase}_status`}></span></td>
-                            <td className="removeItemButton" id={`${item.IDPurchase}_button`} style={{ display: "none" }}>
-                                <button onClick={() => completePurchase(item.IDPurchase)}>Collect</button>
-                                {/* {item.PurchaseStatus === 2 ? <button onClick={() => completePurchase(item.IDPurchase)}>Collect</button> : ""} */}
-                            </td>
-                        </tr>
-                    )
-                })}
+                <tbody>
+                    {purchasesList.map((item, i) => {
+                        return (
+                            <tr className="item" key={item.IDPurchase}>
+                                <td className="itemDisplay">{i + 1}</td>
+                                <td className="itemDisplay">{item.IDPurchase}</td>
+                                <td className="itemDisplay">{item.PurchaseAmount}</td>
+                                <td className="itemDisplay">{item.EscrowTime}</td>
+                                <td className="itemDisplay"><span id={`${item.id}_status`}></span></td>
+                                <td className="removeItemButton" id={`${item.id}_button`} style={{ display: "none" }}>
+                                    <button onClick={() => completePurchase(item.IDPurchase)}>Collect</button>
+                                </td>
+                            </tr>
+                        )
+                    })}
+                </tbody>
             </table>
 
             <span id="done-successfully-2" style={{ "display": "none" }}>Done successfully!</span>

@@ -2,16 +2,15 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 
 import { ethers } from "ethers"
 import MerchantContractABI from "../../abis/MerchantContract.json"
-// import { MERCHANTCONTRACTADDRESS } from '../../constants'
+
 
 const Withdrawals = () => {
     const { currentAccount, MerchantContractAddress } = JSON.parse(localStorage.getItem("userData"))
+    const [balance, setBalance] = useState(0)
 
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
     const instanceMerchantContract = useRef(new ethers.Contract(MerchantContractAddress, MerchantContractABI.abi, signer))
-
-    const [balance, setBalance] = useState(0)
 
 
     const getMerchantBalance = useCallback(async () => {
@@ -19,22 +18,17 @@ const Withdrawals = () => {
 
         try {
             const merchantBalance = await instanceMerchantContract2.checkMyBalance({ from: currentAccount })
-            // console.log("Merchant Balance: ", merchantBalance)
-
             setBalance(parseInt(merchantBalance._hex, 16))
         } catch (error) {
             console.log("ERROR AT GETTING MERCHANT BALANCE: ", error)
         }
     }, [currentAccount])
 
-    useEffect(() => {
-        getMerchantBalance()
-    }, [getMerchantBalance])
-
-
     async function withdrawal() {
+        const instanceMerchantContract2 = instanceMerchantContract.current
+
         try {
-            const merchantWithdrawal = await instanceMerchantContract.withdrawal({ from: currentAccount, gasLimit: 1500000 })
+            const merchantWithdrawal = await instanceMerchantContract2.withdrawal({ from: currentAccount, gasLimit: 1500000 })
             console.log("Merchant Withdrawal: ", merchantWithdrawal)
 
             document.getElementById("done-successfully-3").style.display = ''
@@ -47,11 +41,18 @@ const Withdrawals = () => {
         }, 2000)
     }
 
+
+    useEffect(() => {
+        getMerchantBalance()
+    }, [getMerchantBalance])
+
+
     return (
         <>
             <h1>Withdrawals</h1>
+
             <label htmlFor="total">Total: </label>
-            <label htmlFor="balance">{balance}</label>
+            <label htmlFor="balance">{balance >= 10 ** 18 ? balance / 10 ** 18 + " ETH" : balance + " Wei"}</label>
             <br />
 
             <button onClick={() => withdrawal()}>Withdrawal</button>

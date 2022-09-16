@@ -4,9 +4,9 @@ schema:
 dataSources:
   - kind: ethereum
     name: MainContract
-    network: rinkeby
+    network: goerli
     source:
-      address: "0x9B4E6AD2B2f4A6C8121157DB3E7eC40C571bEEF7"
+      address: "0x4d327b1Aac27CAd018EB7389Ba0810f028EAbb20"
       abi: MainContract
     mapping:
       kind: ethereum/events

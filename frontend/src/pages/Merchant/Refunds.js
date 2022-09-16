@@ -2,19 +2,18 @@ import { useState } from 'react'
 
 import { ethers } from "ethers"
 import MerchantContractABI from "../../abis/MerchantContract.json"
-// import { MERCHANTCONTRACTADDRESS } from '../../constants'
 
 
 const Refunds = () => {
     const { currentAccount, MerchantContractAddress } = JSON.parse(localStorage.getItem("userData"))
+    const [idPurchase, setIDPurchase] = useState(0)
+    const [buyerAddress, setBuyerAddress] = useState("")
+    const [refundAmount, setRefundAmount] = useState(0)
 
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
     const instanceMerchantContract = new ethers.Contract(MerchantContractAddress, MerchantContractABI.abi, signer)
 
-    const [idPurchase, setIDPurchase] = useState(0)
-    const [buyerAddress, setBuyerAddress] = useState("")
-    const [refundAmount, setRefundAmount] = useState(0)
 
     async function refund() {
         if (idPurchase === null || buyerAddress === "" || refundAmount === null) {
@@ -23,10 +22,6 @@ const Refunds = () => {
         }
 
         try {
-            // console.log("idPurchase: ", idPurchase)
-            // console.log("buyerAddress: ", buyerAddress)
-            // console.log("refundAmount: ", refundAmount)
-
             const merchantNewRefund = await instanceMerchantContract.refund(idPurchase, buyerAddress, refundAmount, { from: currentAccount, gasLimit: 1500000 })
             console.log("Merchant New Refund: ", merchantNewRefund)
 
@@ -40,9 +35,11 @@ const Refunds = () => {
         }, 2000)
     }
 
+
     return (
         <>
             <h1>Refunds</h1>
+
             <label htmlFor="idPurchase">ID Purchase:</label>
             <input
                 type="text"

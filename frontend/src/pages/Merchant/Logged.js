@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 
-// import Sidebar from '../../components/Sidebar'
 import PersonalInfo from './PersonalInfo'
 import CreatePurchase from './CreatePurchase'
 import PurchasesList from './PurchasesList'
@@ -10,17 +9,13 @@ import Withdrawals from './Withdrawals'
 
 import { ethers } from "ethers"
 import MerchantContractABI from "../../abis/MerchantContract.json"
-// import AdminApproveMerchant from './AdminApproveMerchant'
-// import { MERCHANTCONTRACTADDRESS } from '../../constants'
 
 
 const Logged = () => {
     const data = JSON.parse(localStorage.getItem("userData"))
     const CurrentAccount = data.currentAccount
-    // const Balance = data.balance
     const MerchantContractAddress = data.MerchantContractAddress
     const MerchantContractApprovedStatus = data.MerchantContractApprovedStatus
-
     const [name, setName] = useState("")
 
     const provider = new ethers.providers.Web3Provider(window.ethereum)
@@ -33,23 +28,21 @@ const Logged = () => {
 
         try {
             const merchantName = await instanceMerchantContract2.checkMyName({ from: CurrentAccount })
-            // console.log("Merchant Name: ", merchantName)
-
             setName(merchantName)
         } catch (error) {
             console.log("ERROR AT GETTING MERCHANT NAME: ", error)
         }
     }, [CurrentAccount])
 
-    useEffect(() => {
-        getMerchantInfo()
-    }, [getMerchantInfo])
-
 
     useEffect(() => {
         document.getElementById("Merchant").setAttribute("style", "font-weight: bold; color: yellow !important;")
         document.getElementById("Admin").setAttribute("style", "font-weight: normal; color: white !important;")
     }, [])
+
+    useEffect(() => {
+        getMerchantInfo()
+    }, [getMerchantInfo])
 
 
     return (
@@ -62,8 +55,6 @@ const Logged = () => {
                 </>
             }
 
-            {/* <Sidebar logged={"merchant"} /> */}
-
             <div id="page-wrap">
                 <PersonalInfo />
                 <CreatePurchase />
@@ -71,7 +62,6 @@ const Logged = () => {
                 <Withdrawals />
                 <Refunds />
                 <TopUpMyContract />
-                {/* <AdminApproveMerchant /> */}
             </div>
 
             <br />
