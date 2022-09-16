@@ -1,13 +1,10 @@
 const main = async () => {
   const MainContract = await hre.ethers.getContractFactory('MainContract')
-  // const maincontract = await MainContract.deploy(process.env.OWNER_ADDRESS)
   const maincontract = await MainContract.deploy()
-
   await maincontract.deployed()
-
   console.log('MainContract deployed to:', maincontract.address)
 }
-  
+
 ;(async () => {
   try {
     await main()
