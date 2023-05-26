@@ -7,22 +7,15 @@ import "./mainContract.sol";
 contract MerchantContract {
     /* ========== OWNER ========== */
     MainContract public mainContract;
-    address private ownerAddress;
-    bool public approved;   // true = approved; false = not approved
-    bool public paused;     // true = withdrawals paused; false = withdrawals unpaused
+    uint public status;    // 0: default, Merchant doesn't exist; 1: Merchant exist, but not approved; 2: Merchant exist and approved/unpaused; 3: Merchant paused
 
     modifier onlyOwner() {
-        require(msg.sender == ownerAddress, "Only Owner can call this function");
+        require(msg.sender == address(mainContract), "Only Owner can call this function");
         _;
     }
 
-    modifier approvedMerchant() {
-        require(approved == true, "Merchant isn't approved!");
-        _;
-    }
-
-    modifier unpausedMerchant() {
-        require(paused == false, "Merchant is paused!");
+    modifier running() {
+        require(status == 2, "Merchant is not accepting operations!");
         _;
     }
 
@@ -46,7 +39,6 @@ contract MerchantContract {
         uint256 dateF;
         uint256 amount;
         uint status;             // 0: default, purchase isn't created; 1: purchase created, but not paid; 2: purchase created and paid; 3: purchase completed; 4: purchase refunded; 5: purchase canceled
-        uint256 escrowAmount;    // amount waiting for completeTime to end to be added to balance
         uint cancelTime;         // time the buyer has to cancel the purchase
         uint completeTime;       // time the merchant has to wait, for the money to be sent to his wallet
         address payable buyerAddress;
@@ -62,86 +54,80 @@ contract MerchantContract {
         merchantAddress = _merchantAddress;
         name = _merchantName;
         mainContract = MainContract(msg.sender);
-        ownerAddress = msg.sender;
 
         totalEscrowAmount = 0;
         balance = 0;
-        approved = false;
-        paused = true;
+        status = 1;
     }
 
 
 
-    /* ========== OWNER ========== */
+    /* ========== MAINCONTRACT ========== */
     function approveMerchant() public onlyOwner {
-        approved = true;
-        paused = false;
+        status = 2;
     }
 
     function pauseMerchant() public onlyOwner {
-        paused = true;
+        status = 3;
     }
 
     function unpauseMerchant() public onlyOwner {
-        paused = false;
+        status = 2;
     }
 
 
 
-    /* ========== MERCHANTs ========== */
-    function setAddress(address payable newAddress) public onlyMerchant approvedMerchant unpausedMerchant {
+    /* ========== MERCHANT ========== */
+    function setAddress(address payable newAddress) public onlyMerchant {
         merchantAddress = newAddress;
     }
 
-    function getName() public view approvedMerchant returns(string memory) {
+    function getName() public view returns(string memory) {
         return name;
     }
 
-    function getTotalEscrowAmount() public view onlyMerchant approvedMerchant returns(uint256) {
+    function getTotalEscrowAmount() public view onlyMerchant returns(uint256) {
         return totalEscrowAmount;
     }
 
-    function getBalance() public view onlyMerchant approvedMerchant returns(uint256) {
+    function getBalance() public view onlyMerchant returns(uint256) {
         return balance;
     }
 
-    function purchaseStatus(uint idPurchase) public view approvedMerchant returns(uint) {
+    function purchaseStatus(uint idPurchase) public view returns(uint) {
         return purchases[idPurchase].status;
     }
 
-    function createPurchase(uint idPurchase, uint256 purchaseAmount, uint cancelTime, uint completeTime) public onlyMerchant approvedMerchant unpausedMerchant {
-        purchases[idPurchase] = Purchase(block.timestamp, purchaseAmount, 1, 0, cancelTime, completeTime, payable(address(this)));
+    function createPurchase(uint idPurchase, uint256 purchaseAmount, uint cancelTime, uint completeTime) public onlyMerchant running {
+        purchases[idPurchase] = Purchase(block.timestamp, purchaseAmount, 1, cancelTime, completeTime, payable(0));
 
-        // From | IDPurchase | DateCreated | PurchaseAmount | PurchaseStatus | CancelTime | CompleteTime
-        mainContract.createPurchase(this, idPurchase, block.timestamp, purchaseAmount, 1, cancelTime, completeTime);
+        // IDPurchase | DateCreated | PurchaseAmount | CancelTime | CompleteTime
+        mainContract.createPurchase(idPurchase, block.timestamp, purchaseAmount, cancelTime, completeTime);
     }
 
-    function complete(uint idPurchase) public onlyMerchant approvedMerchant unpausedMerchant {
+    function complete(uint idPurchase) public onlyMerchant running {
         Purchase storage purchase = purchases[idPurchase];
-        require(purchase.dateF < block.timestamp, "The escrow time of this purchase isn't over yet!");
+        require(purchase.dateF < block.timestamp, "The escrow time of this purchase is not over yet!");
         require(purchase.status == 2, "Purchase must be in payed state!");
 
         totalEscrowAmount -= purchase.amount;
-        purchase.escrowAmount -= purchase.amount;
         balance += purchase.amount;
         purchase.status = 3; // Purchase completed
 
-        // MerchantContract | IDPurchase
-        mainContract.complete(this, idPurchase);
+        mainContract.complete(idPurchase);
     }
 
-    function withdrawal() public onlyMerchant approvedMerchant unpausedMerchant {
-        require(balance > 0, "Balance should be greater than 0!!");
+    function withdrawal() public onlyMerchant running {
+        require(balance > 0, "Balance should be greater than 0!");
         merchantAddress.transfer(balance);
 
-        // From | Balance
-        mainContract.withdrawal(this, balance);
+        mainContract.withdrawal(balance);
         balance = 0;
     }
 
-    function refund(uint idPurchase, uint256 refundAmount) public onlyMerchant approvedMerchant unpausedMerchant {
+    function refund(uint idPurchase, uint256 refundAmount) public onlyMerchant running {
         Purchase storage purchase = purchases[idPurchase];
-        require(refundAmount > 0, "Refund amount should be greater than 0!!");
+        require(refundAmount > 0, "Refund amount should be greater than 0!");
         require(refundAmount <= purchase.amount, "Refund amount shouldn't be greater than the purchaseAmount!");
         require(purchase.status == 2, "Purchase must be in payed state!");
 
@@ -158,17 +144,14 @@ contract MerchantContract {
 
         purchase.status = 4; // Purchase refunded
 
-        // From | IDPurchase | Date | To | RefundAmount | PurchaseStatus
-        mainContract.refund(this, idPurchase, block.timestamp, purchase.buyerAddress, refundAmount, 4);
-
-        // MerchantContract | BuyerAddress | PurchaseStatus
-        mainContract.historic(this, purchase.buyerAddress, 1);
+        // IDPurchase | Date | To | RefundAmount
+        mainContract.refund(idPurchase, block.timestamp, purchase.buyerAddress, refundAmount);
     }
 
 
 
     /* ========== BUYERS ========== */
-    function buy(uint idPurchase) external payable approvedMerchant unpausedMerchant {
+    function buy(uint idPurchase) external payable running {
         Purchase storage purchase = purchases[idPurchase];
         require(msg.value > 0, "Amount should be greater than 0!");
         require(msg.value == purchase.amount, "Wrong amount!");
@@ -177,17 +160,13 @@ contract MerchantContract {
         totalEscrowAmount += msg.value;
         purchase.dateF = block.timestamp + purchase.completeTime;
         purchase.status = 2;
-        purchase.escrowAmount = msg.value;
         purchase.buyerAddress = payable(msg.sender);
 
-        // From | IDPurchase | DateFinished | To | PurchaseAmount | PurchaseStatus
-        mainContract.buy(this, idPurchase, purchase.dateF, msg.sender, msg.value, 2);
-
-        // MerchantContract | BuyerAddress | PurchaseStatus
-        mainContract.historic(this, msg.sender, 0);
+        // IDPurchase | DateFinished | To | PurchaseAmount
+        mainContract.buy(idPurchase, purchase.dateF, msg.sender, msg.value);
     }
 
-    function cancel(uint idPurchase) public approvedMerchant unpausedMerchant {
+    function cancel(uint idPurchase) public running {
         Purchase storage purchase = purchases[idPurchase];
         require(purchase.cancelTime > block.timestamp, "The cancel time of this purchase is over!");
         require(purchase.buyerAddress == msg.sender, "The buyer address must be the same!");
@@ -196,7 +175,7 @@ contract MerchantContract {
         totalEscrowAmount -= purchase.amount;
         purchase.status = 5; // Purchase canceled
 
-        // MerchantContract | BuyerAddress | PurchaseStatus
-        mainContract.historic(this, purchase.buyerAddress, 1);
+        // BuyerAddress | IDPurchase
+        mainContract.cancel(purchase.buyerAddress, idPurchase);
     }
 }
