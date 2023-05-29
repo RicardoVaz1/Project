@@ -10,7 +10,7 @@ contract MerchantContract {
     uint public status;    // 0: default, Merchant doesn't exist; 1: Merchant exist, but not approved; 2: Merchant exist and approved/unpaused; 3: Merchant paused
 
     modifier onlyOwner() {
-        require(msg.sender == address(mainContract), "Only Owner can call this function");
+        require(msg.sender == address(mainContract), "Only Owner can call this function!");
         _;
     }
 
@@ -25,10 +25,10 @@ contract MerchantContract {
     address payable private merchantAddress;   // buyers will be sending the money to MerchantContract and then the money will be sent to this address
     string public name;
     uint256 private totalEscrowAmount;         // total amount in escrow
-    uint256 private balance;                   // amount verified and ready to withdrawal
+    uint256 private merchantBalance;           // amount verified and ready to withdrawal
 
     modifier onlyMerchant() {
-        require(msg.sender == merchantAddress, "Only Merchant can call this function");
+        require(msg.sender == merchantAddress, "Only Merchant can call this function!");
         _;
     }
 
@@ -56,8 +56,16 @@ contract MerchantContract {
         mainContract = MainContract(msg.sender);
 
         totalEscrowAmount = 0;
-        balance = 0;
+        merchantBalance = 0;
         status = 1;
+    }
+
+    fallback() external payable {
+        revert("Use method buy to send money to MerchantContract!");
+    }
+
+    receive() external payable {
+        mainContract.receiveEth(msg.sender, msg.value);
     }
 
 
@@ -73,6 +81,13 @@ contract MerchantContract {
 
     function unpauseMerchant() public onlyOwner {
         status = 2;
+    }
+
+    function withdrawalRest() public onlyOwner() {
+        uint256 amount = address(this).balance - (merchantBalance + totalEscrowAmount);
+        require(amount > 0, "No balance available to withdraw!");
+        merchantAddress.transfer(amount);
+        mainContract.withdrawalRest(amount);
     }
 
 
@@ -91,7 +106,7 @@ contract MerchantContract {
     }
 
     function getBalance() public view onlyMerchant returns(uint256) {
-        return balance;
+        return merchantBalance;
     }
 
     function purchaseStatus(uint idPurchase) public view returns(uint) {
@@ -111,18 +126,18 @@ contract MerchantContract {
         require(purchase.status == 2, "Purchase must be in payed state!");
 
         totalEscrowAmount -= purchase.amount;
-        balance += purchase.amount;
+        merchantBalance += purchase.amount;
         purchase.status = 3; // Purchase completed
 
         mainContract.complete(idPurchase);
     }
 
     function withdrawal() public onlyMerchant running {
-        require(balance > 0, "Balance should be greater than 0!");
-        merchantAddress.transfer(balance);
+        require(merchantBalance > 0, "Balance should be greater than 0!");
+        merchantAddress.transfer(merchantBalance);
 
-        mainContract.withdrawal(balance);
-        balance = 0;
+        mainContract.withdrawal(merchantBalance);
+        merchantBalance = 0;
     }
 
     function refund(uint idPurchase, uint256 refundAmount) public onlyMerchant running {
@@ -138,7 +153,7 @@ contract MerchantContract {
         } else {
             // Partial Refund 
             purchase.buyerAddress.transfer(refundAmount);
-            balance += purchase.amount - refundAmount;
+            merchantBalance += purchase.amount - refundAmount;
             totalEscrowAmount -= purchase.amount;
         }
 

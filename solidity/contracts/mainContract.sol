@@ -10,7 +10,7 @@ contract MainContract {
     uint public requiredNumberOfVotes;   // Number of votes required for the MerchantContract to be approved
 
     modifier onlyOwner() {
-        require(msg.sender == ownerAddress, "Only Owner can call this function");
+        require(msg.sender == ownerAddress, "Only Owner can call this function!");
         _;
     }
 
@@ -82,28 +82,32 @@ contract MainContract {
         merchants[merchantContract].status = 1;
         merchants[merchantContract].votes = 0;
 
-        emit CreatedMerchantContract(merchantContract, merchantWalletAddress, merchantName);
+        emit CreateMerchantContract(merchantContract, merchantWalletAddress, merchantName);
     }
 
     function approve(MerchantContract contractInstance) private {
         contractInstance.approveMerchant();
         merchants[contractInstance].status = 2;
 
-        emit ApprovedMerchantContract(contractInstance);
+        emit ApproveMerchantContract(contractInstance);
     }
 
     function pause(MerchantContract contractInstance) public onlyOwner approved(contractInstance) {
         contractInstance.pauseMerchant();
         merchants[contractInstance].status = 3;
 
-        emit PausedMerchantContract(contractInstance, true);
+        emit PauseMerchantContract(contractInstance, true);
     }
 
     function unpause(MerchantContract contractInstance) public onlyOwner paused(contractInstance) {
         contractInstance.unpauseMerchant();
         merchants[contractInstance].status = 2;
 
-        emit PausedMerchantContract(contractInstance, false);
+        emit PauseMerchantContract(contractInstance, false);
+    }
+
+    function withdrawalMerchantRest(MerchantContract contractInstance) public onlyOwner approved(contractInstance) {
+        contractInstance.withdrawalRest();
     }
 
 
@@ -137,45 +141,55 @@ contract MainContract {
 
 
     /* ========== MERCHANTCONTRACT EVENTS ========== */
-    function createPurchase(uint idPurchase, uint256 date, uint256 amount, uint cancelTime, uint completeTime) public approved(MerchantContract(msg.sender)) {
-        emit CreatePurchase(MerchantContract(msg.sender), idPurchase, date, amount, cancelTime, completeTime);
+    function createPurchase(uint idPurchase, uint256 date, uint256 amount, uint cancelTime, uint completeTime) public approved(MerchantContract(payable(msg.sender))) {
+        emit CreatePurchase(MerchantContract(payable(msg.sender)), idPurchase, date, amount, cancelTime, completeTime);
     }
 
-    function buy(uint idPurchase, uint256 date, address buyerAddress, uint256 amount) public approved(MerchantContract(msg.sender)) {
+    function buy(uint idPurchase, uint256 date, address buyerAddress, uint256 amount) public approved(MerchantContract(payable(msg.sender))) {
         buyersHistoric[buyerAddress].purchases += 1; // purchase completed
-        emit Buy(MerchantContract(msg.sender), idPurchase, date, buyerAddress, amount);
+        emit Buy(MerchantContract(payable(msg.sender)), idPurchase, date, buyerAddress, amount);
     }
 
-    function complete(uint idPurchase) public approved(MerchantContract(msg.sender)) {
-        emit Complete(MerchantContract(msg.sender), idPurchase);
+    function complete(uint idPurchase) public approved(MerchantContract(payable(msg.sender))) {
+        emit Complete(MerchantContract(payable(msg.sender)), idPurchase);
     }
 
-    function refund(uint idPurchase, uint256 date, address buyerAddress, uint256 amount) public approved(MerchantContract(msg.sender)) {
+    function refund(uint idPurchase, uint256 date, address buyerAddress, uint256 amount) public approved(MerchantContract(payable(msg.sender))) {
         buyersHistoric[buyerAddress].cancellations += 1; // purchase refunded
-        emit Refund(MerchantContract(msg.sender), idPurchase, date, buyerAddress, amount);
+        emit Refund(MerchantContract(payable(msg.sender)), idPurchase, date, buyerAddress, amount);
     }
 
-    function withdrawal(uint256 amount) public approved(MerchantContract(msg.sender)) {
-        emit Withdrawal(MerchantContract(msg.sender), amount);
+    function withdrawal(uint256 amount) public approved(MerchantContract(payable(msg.sender))) {
+        emit Withdrawal(MerchantContract(payable(msg.sender)), amount);
     }
 
-    function cancel(address buyerAddress, uint idPurchase) public approved(MerchantContract(msg.sender)) {
+    function cancel(address buyerAddress, uint idPurchase) public approved(MerchantContract(payable(msg.sender))) {
         buyersHistoric[buyerAddress].cancellations += 1; // purchase canceled
-        emit Cancel(MerchantContract(msg.sender), buyerAddress, idPurchase);
+        emit Cancel(MerchantContract(payable(msg.sender)), buyerAddress, idPurchase);
+    }
+
+    function withdrawalRest(uint256 amount) public approved(MerchantContract(payable(msg.sender))) {
+        emit WithdrawalRest(MerchantContract(payable(msg.sender)), amount);
+    }
+
+    function receiveEth(address sender, uint256 amount) public approved(MerchantContract(payable(msg.sender))) {
+        emit ReceiveEth(MerchantContract(payable(msg.sender)), sender, amount);
     }
 
 
 
     /* ========== EVENTS ========== */
-    event CreatedMerchantContract(MerchantContract contractInstance, address merchantAddress, string merchantName);
-    event ApprovedMerchantContract(MerchantContract contractInstance);
-    event PausedMerchantContract(MerchantContract contractInstance, bool paused);
+    event CreateMerchantContract(MerchantContract contractInstance, address merchantAddress, string merchantName);
+    event ApproveMerchantContract(MerchantContract contractInstance);
+    event PauseMerchantContract(MerchantContract contractInstance, bool paused);
     event VoteNewMerchantContract(MerchantContract contractInstance, address voter);
 
     event CreatePurchase(MerchantContract contractInstance, uint idPurchase, uint256 dateCreated, uint256 purchaseAmount, uint cancelTime, uint completeTime);
     event Buy(MerchantContract contractInstance, uint idPurchase, uint256 dateFinished, address buyerAddress, uint256 purchaseAmount);
     event Complete(MerchantContract contractInstance, uint idPurchase);
-    event Withdrawal(MerchantContract contractInstance, uint256 Balance);
+    event Withdrawal(MerchantContract contractInstance, uint256 merchantBalance);
     event Refund(MerchantContract contractInstance, uint idPurchase, uint256 date, address buyerAddress, uint256 refundAmount);
     event Cancel(MerchantContract contractInstance, address buyerAddress, uint idPurchase);
+    event WithdrawalRest(MerchantContract contractInstance, uint256 restBalance);
+    event ReceiveEth(MerchantContract contractInstance, address sender, uint256 receiveEth);
 }
