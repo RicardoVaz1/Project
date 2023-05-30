@@ -22,7 +22,7 @@ contract MerchantContract {
 
 
     /* ========== MERCHANT ========== */
-    address payable private merchantAddress;   // buyers will be sending the money to MerchantContract and then the money will be sent to this address
+    address payable public merchantAddress;   // buyers will be sending the money to MerchantContract and then the money will be sent to this address
     string public name;
     uint256 private totalEscrowAmount;         // total amount in escrow
     uint256 private merchantBalance;           // amount verified and ready to withdrawal
@@ -36,7 +36,6 @@ contract MerchantContract {
 
     /* ========== PURCHASEs ========== */
     struct Purchase {
-        uint256 dateF;
         uint256 amount;
         uint status;             // 0: default, purchase isn't created; 1: purchase created, but not paid; 2: purchase created and paid; 3: purchase completed; 4: purchase refunded; 5: purchase canceled
         uint cancelTime;         // time the buyer has to cancel the purchase
@@ -53,19 +52,11 @@ contract MerchantContract {
     constructor(address payable _merchantAddress, string memory _merchantName) {
         merchantAddress = _merchantAddress;
         name = _merchantName;
-        mainContract = MainContract(msg.sender);
+        mainContract = MainContract(payable(msg.sender));
 
         totalEscrowAmount = 0;
         merchantBalance = 0;
         status = 1;
-    }
-
-    fallback() external payable {
-        revert("Use method buy to send money to MerchantContract!");
-    }
-
-    receive() external payable {
-        mainContract.receiveEth(msg.sender, msg.value);
     }
 
 
@@ -83,11 +74,11 @@ contract MerchantContract {
         status = 2;
     }
 
-    function withdrawalRest() public onlyOwner() {
+    function withdrawRest() public onlyOwner() returns(uint256) {
         uint256 amount = address(this).balance - (merchantBalance + totalEscrowAmount);
         require(amount > 0, "No balance available to withdraw!");
-        merchantAddress.transfer(amount);
-        mainContract.withdrawalRest(amount);
+        payable(mainContract).transfer(amount);
+        return amount;
     }
 
 
@@ -114,16 +105,19 @@ contract MerchantContract {
     }
 
     function createPurchase(uint idPurchase, uint256 purchaseAmount, uint cancelTime, uint completeTime) public onlyMerchant running {
-        purchases[idPurchase] = Purchase(block.timestamp, purchaseAmount, 1, cancelTime, completeTime, payable(0));
+        Purchase storage purchase = purchases[idPurchase];
+        require(purchase.status == 0, "Purchase must be in not created state!");
 
-        // IDPurchase | DateCreated | PurchaseAmount | CancelTime | CompleteTime
-        mainContract.createPurchase(idPurchase, block.timestamp, purchaseAmount, cancelTime, completeTime);
+        purchases[idPurchase] = Purchase(purchaseAmount, 1, cancelTime, completeTime, payable(0));
+
+        // IDPurchase | PurchaseAmount | CancelTime | CompleteTime
+        mainContract.createPurchase(idPurchase, purchaseAmount, cancelTime, completeTime);
     }
 
     function complete(uint idPurchase) public onlyMerchant running {
         Purchase storage purchase = purchases[idPurchase];
-        require(purchase.dateF < block.timestamp, "The escrow time of this purchase is not over yet!");
         require(purchase.status == 2, "Purchase must be in payed state!");
+        require(purchase.completeTime < block.timestamp, "The escrow time of this purchase is not over yet!");
 
         totalEscrowAmount -= purchase.amount;
         merchantBalance += purchase.amount;
@@ -142,9 +136,9 @@ contract MerchantContract {
 
     function refund(uint idPurchase, uint256 refundAmount) public onlyMerchant running {
         Purchase storage purchase = purchases[idPurchase];
-        require(refundAmount > 0, "Refund amount should be greater than 0!");
-        require(refundAmount <= purchase.amount, "Refund amount shouldn't be greater than the purchaseAmount!");
         require(purchase.status == 2, "Purchase must be in payed state!");
+        require(refundAmount > 0, "Refund amount should be greater than 0!");
+        require(refundAmount <= purchase.amount, "Refund amount should not be greater than the purchase amount!");
 
         if(refundAmount == purchase.amount) {
             // Full Refund 
@@ -159,8 +153,8 @@ contract MerchantContract {
 
         purchase.status = 4; // Purchase refunded
 
-        // IDPurchase | Date | To | RefundAmount
-        mainContract.refund(idPurchase, block.timestamp, purchase.buyerAddress, refundAmount);
+        // IDPurchase | To | RefundAmount
+        mainContract.refund(idPurchase, purchase.buyerAddress, refundAmount);
     }
 
 
@@ -168,29 +162,31 @@ contract MerchantContract {
     /* ========== BUYERS ========== */
     function buy(uint idPurchase) external payable running {
         Purchase storage purchase = purchases[idPurchase];
+        require(purchase.status == 1, "Purchase must exist and has not yet been paid!");
         require(msg.value > 0, "Amount should be greater than 0!");
         require(msg.value == purchase.amount, "Wrong amount!");
-        require(purchase.status == 1, "Purchase must exist and hasn't yet been paid!");
 
         totalEscrowAmount += msg.value;
-        purchase.dateF = block.timestamp + purchase.completeTime;
         purchase.status = 2;
+        purchase.cancelTime += block.timestamp;
+        purchase.completeTime += block.timestamp;
         purchase.buyerAddress = payable(msg.sender);
 
-        // IDPurchase | DateFinished | To | PurchaseAmount
-        mainContract.buy(idPurchase, purchase.dateF, msg.sender, msg.value);
+        // IDPurchase | CancelTime | CompleteTime | From | PurchaseAmount
+        mainContract.buy(idPurchase, purchase.cancelTime, purchase.completeTime, msg.sender, msg.value);
     }
 
     function cancel(uint idPurchase) public running {
         Purchase storage purchase = purchases[idPurchase];
-        require(purchase.cancelTime > block.timestamp, "The cancel time of this purchase is over!");
+        require(purchase.status == 2, "Purchase must be in payed state!");
         require(purchase.buyerAddress == msg.sender, "The buyer address must be the same!");
+        require(purchase.cancelTime > block.timestamp, "The cancel time of this purchase is over!");
 
         purchase.buyerAddress.transfer(purchase.amount);
         totalEscrowAmount -= purchase.amount;
         purchase.status = 5; // Purchase canceled
 
-        // BuyerAddress | IDPurchase
+        // To | IDPurchase
         mainContract.cancel(purchase.buyerAddress, idPurchase);
     }
 }
