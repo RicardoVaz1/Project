@@ -1,56 +1,45 @@
 import { newMockEvent } from "matchstick-as"
 import { ethereum, Address, BigInt } from "@graphprotocol/graph-ts"
 import {
-  ApprovedMerchantContract,
+  ApproveMerchantContract,
   Buy,
+  Cancel,
   Complete,
+  CreateMerchantContract,
   CreatePurchase,
-  CreatedMerchantContract,
-  Historic,
-  PausedMerchantContract,
+  PauseMerchantContract,
   Refund,
-  TopUpMyContract,
   VoteNewMerchantContract,
+  WithdrawRest,
   Withdrawal
 } from "../generated/MainContract/MainContract"
 
-export function createApprovedMerchantContractEvent(
-  MerchantContractAddress: Address,
-  MerchantName: string,
-  Approved: boolean
-): ApprovedMerchantContract {
-  let approvedMerchantContractEvent = changetype<ApprovedMerchantContract>(
+export function createApproveMerchantContractEvent(
+  contractInstance: Address
+): ApproveMerchantContract {
+  let approveMerchantContractEvent = changetype<ApproveMerchantContract>(
     newMockEvent()
   )
 
-  approvedMerchantContractEvent.parameters = new Array()
+  approveMerchantContractEvent.parameters = new Array()
 
-  approvedMerchantContractEvent.parameters.push(
+  approveMerchantContractEvent.parameters.push(
     new ethereum.EventParam(
-      "MerchantContractAddress",
-      ethereum.Value.fromAddress(MerchantContractAddress)
+      "contractInstance",
+      ethereum.Value.fromAddress(contractInstance)
     )
   )
-  approvedMerchantContractEvent.parameters.push(
-    new ethereum.EventParam(
-      "MerchantName",
-      ethereum.Value.fromString(MerchantName)
-    )
-  )
-  approvedMerchantContractEvent.parameters.push(
-    new ethereum.EventParam("Approved", ethereum.Value.fromBoolean(Approved))
-  )
 
-  return approvedMerchantContractEvent
+  return approveMerchantContractEvent
 }
 
 export function createBuyEvent(
-  MerchantContractAddress: Address,
-  IDPurchase: BigInt,
-  DateFinished: BigInt,
-  BuyerAddress: Address,
-  PurchaseAmount: BigInt,
-  PurchaseStatus: BigInt
+  contractInstance: Address,
+  idPurchase: BigInt,
+  cancelTime: BigInt,
+  completeTime: BigInt,
+  buyerAddress: Address,
+  purchaseAmount: BigInt
 ): Buy {
   let buyEvent = changetype<Buy>(newMockEvent())
 
@@ -58,47 +47,78 @@ export function createBuyEvent(
 
   buyEvent.parameters.push(
     new ethereum.EventParam(
-      "MerchantContractAddress",
-      ethereum.Value.fromAddress(MerchantContractAddress)
+      "contractInstance",
+      ethereum.Value.fromAddress(contractInstance)
     )
   )
   buyEvent.parameters.push(
     new ethereum.EventParam(
-      "IDPurchase",
-      ethereum.Value.fromUnsignedBigInt(IDPurchase)
+      "idPurchase",
+      ethereum.Value.fromUnsignedBigInt(idPurchase)
     )
   )
   buyEvent.parameters.push(
     new ethereum.EventParam(
-      "DateFinished",
-      ethereum.Value.fromUnsignedBigInt(DateFinished)
+      "cancelTime",
+      ethereum.Value.fromUnsignedBigInt(cancelTime)
     )
   )
   buyEvent.parameters.push(
     new ethereum.EventParam(
-      "BuyerAddress",
-      ethereum.Value.fromAddress(BuyerAddress)
+      "completeTime",
+      ethereum.Value.fromUnsignedBigInt(completeTime)
     )
   )
   buyEvent.parameters.push(
     new ethereum.EventParam(
-      "PurchaseAmount",
-      ethereum.Value.fromUnsignedBigInt(PurchaseAmount)
+      "buyerAddress",
+      ethereum.Value.fromAddress(buyerAddress)
     )
   )
   buyEvent.parameters.push(
     new ethereum.EventParam(
-      "PurchaseStatus",
-      ethereum.Value.fromUnsignedBigInt(PurchaseStatus)
+      "purchaseAmount",
+      ethereum.Value.fromUnsignedBigInt(purchaseAmount)
     )
   )
 
   return buyEvent
 }
 
+export function createCancelEvent(
+  contractInstance: Address,
+  buyerAddress: Address,
+  idPurchase: BigInt
+): Cancel {
+  let cancelEvent = changetype<Cancel>(newMockEvent())
+
+  cancelEvent.parameters = new Array()
+
+  cancelEvent.parameters.push(
+    new ethereum.EventParam(
+      "contractInstance",
+      ethereum.Value.fromAddress(contractInstance)
+    )
+  )
+  cancelEvent.parameters.push(
+    new ethereum.EventParam(
+      "buyerAddress",
+      ethereum.Value.fromAddress(buyerAddress)
+    )
+  )
+  cancelEvent.parameters.push(
+    new ethereum.EventParam(
+      "idPurchase",
+      ethereum.Value.fromUnsignedBigInt(idPurchase)
+    )
+  )
+
+  return cancelEvent
+}
+
 export function createCompleteEvent(
-  MerchantContractAddress: Address,
-  IDPurchase: BigInt
+  contractInstance: Address,
+  idPurchase: BigInt
 ): Complete {
   let completeEvent = changetype<Complete>(newMockEvent())
 
@@ -106,27 +126,59 @@ export function createCompleteEvent(
 
   completeEvent.parameters.push(
     new ethereum.EventParam(
-      "MerchantContractAddress",
-      ethereum.Value.fromAddress(MerchantContractAddress)
+      "contractInstance",
+      ethereum.Value.fromAddress(contractInstance)
     )
   )
   completeEvent.parameters.push(
     new ethereum.EventParam(
-      "IDPurchase",
-      ethereum.Value.fromUnsignedBigInt(IDPurchase)
+      "idPurchase",
+      ethereum.Value.fromUnsignedBigInt(idPurchase)
     )
   )
 
   return completeEvent
 }
 
+export function createCreateMerchantContractEvent(
+  contractInstance: Address,
+  merchantAddress: Address,
+  merchantName: string
+): CreateMerchantContract {
+  let createMerchantContractEvent = changetype<CreateMerchantContract>(
+    newMockEvent()
+  )
+
+  createMerchantContractEvent.parameters = new Array()
+
+  createMerchantContractEvent.parameters.push(
+    new ethereum.EventParam(
+      "contractInstance",
+      ethereum.Value.fromAddress(contractInstance)
+    )
+  )
+  createMerchantContractEvent.parameters.push(
+    new ethereum.EventParam(
+      "merchantAddress",
+      ethereum.Value.fromAddress(merchantAddress)
+    )
+  )
+  createMerchantContractEvent.parameters.push(
+    new ethereum.EventParam(
+      "merchantName",
+      ethereum.Value.fromString(merchantName)
+    )
+  )
+
+  return createMerchantContractEvent
+}
+
 export function createCreatePurchaseEvent(
-  MerchantContractAddress: Address,
-  IDPurchase: BigInt,
-  DateCreated: BigInt,
-  PurchaseAmount: BigInt,
-  EscrowTime: BigInt,
-  PurchaseStatus: BigInt
+  contractInstance: Address,
+  idPurchase: BigInt,
+  purchaseAmount: BigInt,
+  cancelTime: BigInt,
+  completeTime: BigInt
 ): CreatePurchase {
   let createPurchaseEvent = changetype<CreatePurchase>(newMockEvent())
 
@@ -134,135 +186,66 @@ export function createCreatePurchaseEvent(
 
   createPurchaseEvent.parameters.push(
     new ethereum.EventParam(
-      "MerchantContractAddress",
-      ethereum.Value.fromAddress(MerchantContractAddress)
+      "contractInstance",
+      ethereum.Value.fromAddress(contractInstance)
     )
   )
   createPurchaseEvent.parameters.push(
     new ethereum.EventParam(
-      "IDPurchase",
-      ethereum.Value.fromUnsignedBigInt(IDPurchase)
+      "idPurchase",
+      ethereum.Value.fromUnsignedBigInt(idPurchase)
     )
   )
   createPurchaseEvent.parameters.push(
     new ethereum.EventParam(
-      "DateCreated",
-      ethereum.Value.fromUnsignedBigInt(DateCreated)
+      "purchaseAmount",
+      ethereum.Value.fromUnsignedBigInt(purchaseAmount)
     )
   )
   createPurchaseEvent.parameters.push(
     new ethereum.EventParam(
-      "PurchaseAmount",
-      ethereum.Value.fromUnsignedBigInt(PurchaseAmount)
+      "cancelTime",
+      ethereum.Value.fromUnsignedBigInt(cancelTime)
     )
   )
   createPurchaseEvent.parameters.push(
     new ethereum.EventParam(
-      "EscrowTime",
-      ethereum.Value.fromUnsignedBigInt(EscrowTime)
-    )
-  )
-  createPurchaseEvent.parameters.push(
-    new ethereum.EventParam(
-      "PurchaseStatus",
-      ethereum.Value.fromUnsignedBigInt(PurchaseStatus)
+      "completeTime",
+      ethereum.Value.fromUnsignedBigInt(completeTime)
     )
   )
 
   return createPurchaseEvent
 }
 
-export function createCreatedMerchantContractEvent(
-  MerchantContractAddress: Address,
-  MerchantAddress: Address,
-  MerchantName: string
-): CreatedMerchantContract {
-  let createdMerchantContractEvent = changetype<CreatedMerchantContract>(
+export function createPauseMerchantContractEvent(
+  contractInstance: Address,
+  paused: boolean
+): PauseMerchantContract {
+  let pauseMerchantContractEvent = changetype<PauseMerchantContract>(
     newMockEvent()
   )
 
-  createdMerchantContractEvent.parameters = new Array()
+  pauseMerchantContractEvent.parameters = new Array()
 
-  createdMerchantContractEvent.parameters.push(
+  pauseMerchantContractEvent.parameters.push(
     new ethereum.EventParam(
-      "MerchantContractAddress",
-      ethereum.Value.fromAddress(MerchantContractAddress)
+      "contractInstance",
+      ethereum.Value.fromAddress(contractInstance)
     )
   )
-  createdMerchantContractEvent.parameters.push(
-    new ethereum.EventParam(
-      "MerchantAddress",
-      ethereum.Value.fromAddress(MerchantAddress)
-    )
-  )
-  createdMerchantContractEvent.parameters.push(
-    new ethereum.EventParam(
-      "MerchantName",
-      ethereum.Value.fromString(MerchantName)
-    )
+  pauseMerchantContractEvent.parameters.push(
+    new ethereum.EventParam("paused", ethereum.Value.fromBoolean(paused))
   )
 
-  return createdMerchantContractEvent
-}
-
-export function createHistoricEvent(
-  MerchantContractAddress: Address,
-  Sells: BigInt,
-  Refunds: BigInt
-): Historic {
-  let historicEvent = changetype<Historic>(newMockEvent())
-
-  historicEvent.parameters = new Array()
-
-  historicEvent.parameters.push(
-    new ethereum.EventParam(
-      "MerchantContractAddress",
-      ethereum.Value.fromAddress(MerchantContractAddress)
-    )
-  )
-  historicEvent.parameters.push(
-    new ethereum.EventParam("Sells", ethereum.Value.fromUnsignedBigInt(Sells))
-  )
-  historicEvent.parameters.push(
-    new ethereum.EventParam(
-      "Refunds",
-      ethereum.Value.fromUnsignedBigInt(Refunds)
-    )
-  )
-
-  return historicEvent
-}
-
-export function createPausedMerchantContractEvent(
-  MerchantContractAddress: Address,
-  Paused: boolean
-): PausedMerchantContract {
-  let pausedMerchantContractEvent = changetype<PausedMerchantContract>(
-    newMockEvent()
-  )
-
-  pausedMerchantContractEvent.parameters = new Array()
-
-  pausedMerchantContractEvent.parameters.push(
-    new ethereum.EventParam(
-      "MerchantContractAddress",
-      ethereum.Value.fromAddress(MerchantContractAddress)
-    )
-  )
-  pausedMerchantContractEvent.parameters.push(
-    new ethereum.EventParam("Paused", ethereum.Value.fromBoolean(Paused))
-  )
-
-  return pausedMerchantContractEvent
+  return pauseMerchantContractEvent
 }
 
 export function createRefundEvent(
-  MerchantContractAddress: Address,
-  IDPurchase: BigInt,
-  Date: BigInt,
-  BuyerAddress: Address,
-  RefundAmount: BigInt,
-  PurchaseStatus: BigInt
+  contractInstance: Address,
+  idPurchase: BigInt,
+  buyerAddress: Address,
+  refundAmount: BigInt
 ): Refund {
   let refundEvent = changetype<Refund>(newMockEvent())
 
@@ -270,65 +253,35 @@ export function createRefundEvent(
 
   refundEvent.parameters.push(
     new ethereum.EventParam(
-      "MerchantContractAddress",
-      ethereum.Value.fromAddress(MerchantContractAddress)
+      "contractInstance",
+      ethereum.Value.fromAddress(contractInstance)
     )
   )
   refundEvent.parameters.push(
     new ethereum.EventParam(
-      "IDPurchase",
-      ethereum.Value.fromUnsignedBigInt(IDPurchase)
-    )
-  )
-  refundEvent.parameters.push(
-    new ethereum.EventParam("Date", ethereum.Value.fromUnsignedBigInt(Date))
-  )
-  refundEvent.parameters.push(
-    new ethereum.EventParam(
-      "BuyerAddress",
-      ethereum.Value.fromAddress(BuyerAddress)
+      "idPurchase",
+      ethereum.Value.fromUnsignedBigInt(idPurchase)
     )
   )
   refundEvent.parameters.push(
     new ethereum.EventParam(
-      "RefundAmount",
-      ethereum.Value.fromUnsignedBigInt(RefundAmount)
+      "buyerAddress",
+      ethereum.Value.fromAddress(buyerAddress)
     )
   )
   refundEvent.parameters.push(
     new ethereum.EventParam(
-      "PurchaseStatus",
-      ethereum.Value.fromUnsignedBigInt(PurchaseStatus)
+      "refundAmount",
+      ethereum.Value.fromUnsignedBigInt(refundAmount)
     )
   )
 
   return refundEvent
 }
 
-export function createTopUpMyContractEvent(
-  MerchantContractAddress: Address,
-  Amount: BigInt
-): TopUpMyContract {
-  let topUpMyContractEvent = changetype<TopUpMyContract>(newMockEvent())
-
-  topUpMyContractEvent.parameters = new Array()
-
-  topUpMyContractEvent.parameters.push(
-    new ethereum.EventParam(
-      "MerchantContractAddress",
-      ethereum.Value.fromAddress(MerchantContractAddress)
-    )
-  )
-  topUpMyContractEvent.parameters.push(
-    new ethereum.EventParam("Amount", ethereum.Value.fromUnsignedBigInt(Amount))
-  )
-
-  return topUpMyContractEvent
-}
-
 export function createVoteNewMerchantContractEvent(
-  Voter: Address,
-  MerchantContractAddress: Address
+  contractInstance: Address,
+  voter: Address
 ): VoteNewMerchantContract {
   let voteNewMerchantContractEvent = changetype<VoteNewMerchantContract>(
     newMockEvent()
@@ -337,21 +290,45 @@ export function createVoteNewMerchantContractEvent(
   voteNewMerchantContractEvent.parameters = new Array()
 
   voteNewMerchantContractEvent.parameters.push(
-    new ethereum.EventParam("Voter", ethereum.Value.fromAddress(Voter))
+    new ethereum.EventParam(
+      "contractInstance",
+      ethereum.Value.fromAddress(contractInstance)
+    )
   )
   voteNewMerchantContractEvent.parameters.push(
-    new ethereum.EventParam(
-      "MerchantContractAddress",
-      ethereum.Value.fromAddress(MerchantContractAddress)
-    )
+    new ethereum.EventParam("voter", ethereum.Value.fromAddress(voter))
   )
 
   return voteNewMerchantContractEvent
 }
 
+export function createWithdrawRestEvent(
+  contractInstance: Address,
+  restBalance: BigInt
+): WithdrawRest {
+  let withdrawRestEvent = changetype<WithdrawRest>(newMockEvent())
+
+  withdrawRestEvent.parameters = new Array()
+
+  withdrawRestEvent.parameters.push(
+    new ethereum.EventParam(
+      "contractInstance",
+      ethereum.Value.fromAddress(contractInstance)
+    )
+  )
+  withdrawRestEvent.parameters.push(
+    new ethereum.EventParam(
+      "restBalance",
+      ethereum.Value.fromUnsignedBigInt(restBalance)
+    )
+  )
+
+  return withdrawRestEvent
+}
+
 export function createWithdrawalEvent(
-  MerchantContractAddress: Address,
-  Balance: BigInt
+  contractInstance: Address,
+  merchantBalance: BigInt
 ): Withdrawal {
   let withdrawalEvent = changetype<Withdrawal>(newMockEvent())
 
@@ -359,14 +336,14 @@ export function createWithdrawalEvent(
 
   withdrawalEvent.parameters.push(
     new ethereum.EventParam(
-      "MerchantContractAddress",
-      ethereum.Value.fromAddress(MerchantContractAddress)
+      "contractInstance",
+      ethereum.Value.fromAddress(contractInstance)
     )
   )
   withdrawalEvent.parameters.push(
     new ethereum.EventParam(
-      "Balance",
-      ethereum.Value.fromUnsignedBigInt(Balance)
+      "merchantBalance",
+      ethereum.Value.fromUnsignedBigInt(merchantBalance)
     )
   )
 

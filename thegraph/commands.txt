@@ -1,7 +1,7 @@
 Commands:
 npm install -g @graphprotocol/graph-cli
 
-[docker pull graphprotocol/graph-node:latest]
+docker pull graphprotocol/graph-node:latest
 
 graph init --contract-name [contractName] --index-events --product subgraph-studio \
 --from-contract [contractAddress]

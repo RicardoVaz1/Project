@@ -1,4 +1,4 @@
-specVersion: 0.0.4
+specVersion: 0.0.5
 schema:
   file: schema.graphql
 dataSources:
@@ -6,48 +6,49 @@ dataSources:
     name: MainContract
     network: goerli
     source:
-      address: "0x4d327b1Aac27CAd018EB7389Ba0810f028EAbb20"
+      address: "0x8d18154e1fC5de342A05ee7661AB4F22D9F57d2B"
       abi: MainContract
+      startBlock: 0
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.6
+      apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
-        - ApprovedMerchantContract
+        - ApproveMerchantContract
         - Buy
+        - Cancel
         - Complete
+        - CreateMerchantContract
         - CreatePurchase
-        - CreatedMerchantContract
-        - Historic
-        - PausedMerchantContract
+        - PauseMerchantContract
         - Refund
-        - TopUpMyContract
         - VoteNewMerchantContract
+        - WithdrawRest
         - Withdrawal
       abis:
         - name: MainContract
           file: MainContract/abis/MainContract.json
       eventHandlers:
-        - event: ApprovedMerchantContract(address,string,bool)
-          handler: handleApprovedMerchantContract
-        - event: Buy(address,uint256,uint256,address,uint256,uint256)
+        - event: ApproveMerchantContract(address)
+          handler: handleApproveMerchantContract
+        - event: Buy(address,uint256,uint256,uint256,address,uint256)
           handler: handleBuy
+        - event: Cancel(address,address,uint256)
+          handler: handleCancel
         - event: Complete(address,uint256)
           handler: handleComplete
-        - event: CreatePurchase(address,uint256,uint256,uint256,uint256,uint256)
+        - event: CreateMerchantContract(address,address,string)
+          handler: handleCreateMerchantContract
+        - event: CreatePurchase(address,uint256,uint256,uint256,uint256)
           handler: handleCreatePurchase
-        - event: CreatedMerchantContract(address,address,string)
-          handler: handleCreatedMerchantContract
-        - event: Historic(address,uint256,uint256)
-          handler: handleHistoric
-        - event: PausedMerchantContract(address,bool)
-          handler: handlePausedMerchantContract
-        - event: Refund(address,uint256,uint256,address,uint256,uint256)
+        - event: PauseMerchantContract(address,bool)
+          handler: handlePauseMerchantContract
+        - event: Refund(address,uint256,address,uint256)
           handler: handleRefund
-        - event: TopUpMyContract(address,uint256)
-          handler: handleTopUpMyContract
         - event: VoteNewMerchantContract(address,address)
           handler: handleVoteNewMerchantContract
+        - event: WithdrawRest(address,uint256)
+          handler: handleWithdrawRest
         - event: Withdrawal(address,uint256)
           handler: handleWithdrawal
       file: MainContract/MainContract.wasm
