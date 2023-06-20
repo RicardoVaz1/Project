@@ -24,18 +24,18 @@ const MerchantsList = () => {
                 {
                     query: `
                     {
-                        createdMerchantContracts(orderBy: id, orderDirection: desc) {
+                        createMerchantContracts(orderBy: merchantName, orderDirection: asc) {
                             id
-                            MerchantContractAddress
-                            MerchantAddress
-                            MerchantName
+                            contractInstance
+                            merchantAddress
+                            merchantName
                         }
                     }
                     `
                 }
             )
 
-            let MerchantsList = result.data.data.createdMerchantContracts
+            let MerchantsList = result.data.data.createMerchantContracts
             setMerchantsList(MerchantsList)
         } catch (error) {
             console.log(error)
@@ -46,36 +46,31 @@ const MerchantsList = () => {
         const instanceMainContract2 = instanceMainContract.current
 
         for (let i = 0; i < merchantsList.length; i++) {
-            const MerchantContractAddress = merchantsList[i].MerchantContractAddress
+            const MerchantContractAddress = merchantsList[i].contractInstance
 
             try {
-                const number_votes = await instanceMainContract2.getMerchantContractNumberOfVotes(MerchantContractAddress, { from: process.env.REACT_APP_OWNER_ADDRESS })
-                const status_contract = await instanceMainContract2.getMerchantContractStatusContract(MerchantContractAddress, { from: process.env.REACT_APP_OWNER_ADDRESS })
-                const status_withdrawals = await instanceMainContract2.getMerchantContractStatusWithdrawals(MerchantContractAddress, { from: process.env.REACT_APP_OWNER_ADDRESS })
+                const number_votes = await instanceMainContract2.getNumberOfVotes(MerchantContractAddress, { from: process.env.REACT_APP_OWNER_ADDRESS })
+                const status_contract = await instanceMainContract2.getStatusContract(MerchantContractAddress, { from: process.env.REACT_APP_OWNER_ADDRESS })
 
                 let number_votes_int = parseInt(number_votes, 16)
                 let status_contract_int = parseInt(status_contract, 16)
-                let status_withdrawals_int = parseInt(status_withdrawals, 16)
 
-                merchantsInfo.push({ MerchantContractAddress: MerchantContractAddress, numberOfVotes: number_votes_int, statusContract: status_contract_int, statusWithdrawals: status_withdrawals_int })
+                merchantsInfo.push({ MerchantContractAddress: MerchantContractAddress, numberOfVotes: number_votes_int, statusContract: status_contract_int })
 
                 for (let i = 0; i < merchantsInfo.length; i++) {
                     if (merchantsInfo[i].MerchantContractAddress) {
                         document.getElementById(`${merchantsInfo[i].MerchantContractAddress}_votes`).textContent = `${merchantsInfo[i].numberOfVotes}`
 
                         if (merchantsInfo[i].statusContract === 2) {
-                            document.getElementById(`${merchantsInfo[i].MerchantContractAddress}_approved`).textContent = "Approved"
+                            document.getElementById(`${merchantsInfo[i].MerchantContractAddress}_approved`).textContent = "Approved/Unpaused"
+                            document.getElementById(`${merchantsInfo[i].MerchantContractAddress}_approvedButton`).setAttribute("style", "display: table-cell;")
+                        }
+                        else if (merchantsInfo[i].statusContract === 3) {
+                            document.getElementById(`${merchantsInfo[i].MerchantContractAddress}_approved`).textContent = "Paused"
                             document.getElementById(`${merchantsInfo[i].MerchantContractAddress}_approvedButton`).setAttribute("style", "display: table-cell;")
                         }
                         else {
-                            document.getElementById(`${merchantsInfo[i].MerchantContractAddress}_approved`).textContent = "Disapproved"
-                        }
-
-                        if (merchantsInfo[i].statusWithdrawals === 0) {
-                            document.getElementById(`${merchantsInfo[i].MerchantContractAddress}_withdrawals`).textContent = "Unpaused"
-                        }
-                        else {
-                            document.getElementById(`${merchantsInfo[i].MerchantContractAddress}_withdrawals`).textContent = "Paused"
+                            document.getElementById(`${merchantsInfo[i].MerchantContractAddress}_approved`).textContent = "Not Approved"
                         }
                     }
                 }
@@ -88,20 +83,17 @@ const MerchantsList = () => {
     function saveNumberOfVotes(MerchantContractAddress) {
         let numberOfVotes
         let statusContract
-        let statusWithdrawals
 
         for (let i = 0; i < merchantsInfo.length; i++) {
             if (merchantsInfo[i].MerchantContractAddress === MerchantContractAddress) {
                 numberOfVotes = merchantsInfo[i].numberOfVotes
                 statusContract = merchantsInfo[i].statusContract
-                statusWithdrawals = merchantsInfo[i].statusWithdrawals
             }
         }
 
-        statusContract === 2 ? statusContract = "Approved" : statusContract = "Disapproved"
-        statusWithdrawals === 0 ? statusWithdrawals = "Unpaused" : statusWithdrawals = "Paused"
+        statusContract === 2 ? statusContract = "Approved/Unpaused" : statusContract = "Paused"
 
-        localStorage.setItem("MerchantContractData", JSON.stringify({ MerchantContractAddress, numberOfVotes, statusContract, statusWithdrawals }))
+        localStorage.setItem("MerchantContractData", JSON.stringify({ MerchantContractAddress, numberOfVotes, statusContract }))
         navigate(`/admin/edit/merchant/${MerchantContractAddress}`)
     }
 
@@ -122,12 +114,11 @@ const MerchantsList = () => {
             <table className="table">
                 <thead>
                     <tr>
-                        <th>ID</th>
+                        <th></th>
                         <th>Merchant Contract Address</th>
                         <th>Merchant Name</th>
                         <th>No. of Votes</th>
-                        <th>Approved</th>
-                        <th>Withdrawals</th>
+                        <th>Status</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -135,15 +126,14 @@ const MerchantsList = () => {
                 <tbody>
                     {merchantsList.map((item, i) => {
                         return (
-                            <tr className="item" key={item.MerchantContractAddress}>
+                            <tr className="item" key={item.contractInstance}>
                                 <td className="itemDisplay">{i + 1}</td>
-                                <td className="itemDisplay">{item.MerchantContractAddress}</td>
-                                <td className="itemDisplay">{item.MerchantName}</td>
-                                <td className="itemDisplay"><span id={`${item.MerchantContractAddress}_votes`}></span></td>
-                                <td className="itemDisplay"><span id={`${item.MerchantContractAddress}_approved`}></span></td>
-                                <td className="itemDisplay"><span id={`${item.MerchantContractAddress}_withdrawals`}></span></td>
-                                <td className="removeItemButton" id={`${item.MerchantContractAddress}_approvedButton`} style={{ display: "none" }}>
-                                    <button onClick={() => saveNumberOfVotes(item.MerchantContractAddress)}>Edit</button>
+                                <td className="itemDisplay">{item.contractInstance}</td>
+                                <td className="itemDisplay">{item.merchantName}</td>
+                                <td className="itemDisplay"><span id={`${item.contractInstance}_votes`}></span></td>
+                                <td className="itemDisplay"><span id={`${item.contractInstance}_approved`}></span></td>
+                                <td className="removeItemButton" id={`${item.contractInstance}_approvedButton`} style={{ display: "none" }}>
+                                    <button onClick={() => saveNumberOfVotes(item.contractInstance)}>Edit</button>
                                 </td>
                             </tr>
                         )

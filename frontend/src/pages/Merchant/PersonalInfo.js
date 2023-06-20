@@ -22,10 +22,10 @@ const PersonalInfo = () => {
         const instanceMerchantContract2 = instanceMerchantContract.current
 
         try {
-            const merchantAddress = await instanceMerchantContract2.checkMyAddress({ from: currentAccount })
-            const merchantName = await instanceMerchantContract2.checkMyName({ from: currentAccount })
-            const merchantEscrowAmount = await instanceMerchantContract2.checkMyEscrowAmount({ from: currentAccount })
-            const merchantBalance = await instanceMerchantContract2.checkMyBalance({ from: currentAccount })
+            const merchantAddress = await instanceMerchantContract2.merchantAddress()
+            const merchantName = await instanceMerchantContract2.getName({ from: currentAccount })
+            const merchantEscrowAmount = await instanceMerchantContract2.getTotalEscrowAmount({ from: currentAccount })
+            const merchantBalance = await instanceMerchantContract2.getBalance({ from: currentAccount })
 
             setWalletAddress(merchantAddress)
             setName(merchantName)
@@ -43,7 +43,7 @@ const PersonalInfo = () => {
         }
 
         try {
-            const merchantNewAddress = await instanceMerchantContract.changeMyAddress(walletAddress, { from: currentAccount })
+            const merchantNewAddress = await instanceMerchantContract.setAddress(walletAddress, { from: currentAccount })
             console.log("Merchant New Address: ", merchantNewAddress)
 
             setWalletAddress(merchantNewAddress)
@@ -68,7 +68,7 @@ const PersonalInfo = () => {
         <>
             <h3>MerchantContract Info</h3>
 
-            <label htmlFor="walletAddress">Address:</label>
+            <label htmlFor="walletAddress">Wallet Address:</label>
             <input
                 type="text"
                 id="walletAddress"
@@ -84,7 +84,7 @@ const PersonalInfo = () => {
             <span>{name}</span>
             <br />
 
-            <label htmlFor="escrowAmount">Escrow Amount: </label>
+            <label htmlFor="escrowAmount">Total Escrow Amount: </label>
             <span>{escrowAmount >= 10 ** 18 ? escrowAmount / 10 ** 18 + " ETH" : escrowAmount + " Wei"}</span>
             <br />
 

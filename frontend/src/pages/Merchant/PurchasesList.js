@@ -15,20 +15,20 @@ const PurchasesList = () => {
     const instanceMerchantContract = useRef(new ethers.Contract(MerchantContractAddress, MerchantContractABI.abi, signer))
 
 
-    async function getPurchasesList(MerchantContractAddress) {
+    async function getPurchasesList(contractInstance) {
         try {
             const result = await axios.post(
                 `${process.env.REACT_APP_THE_GRAPH_API}`,
                 {
                     query: `
                     {
-                        createPurchases(orderBy: id, orderDirection: desc, where: {MerchantContractAddress: "${MerchantContractAddress}"}) {
+                        createPurchases(orderBy: idPurchase, orderDirection: asc, where: {contractInstance: "${contractInstance}"}) {
                             id
-                            MerchantContractAddress
-                            IDPurchase
-                            DateCreated
-                            PurchaseAmount
-                            EscrowTime
+                            contractInstance
+                            idPurchase
+                            purchaseAmount
+                            cancelTime
+                            completeTime
                         }
                     }
                     `
@@ -46,10 +46,10 @@ const PurchasesList = () => {
         const instanceMerchantContract2 = instanceMerchantContract.current
 
         for (let i = 0; i < purchasesList.length; i++) {
-            const IDPurchase = purchasesList[i].IDPurchase
+            const IDPurchase = purchasesList[i].idPurchase
 
             try {
-                const purchase_status = await instanceMerchantContract2.getPurchaseStatus(IDPurchase)
+                const purchase_status = await instanceMerchantContract2.purchaseStatus(IDPurchase)
                 let purchase_status_int = parseInt(purchase_status, 16)
 
                 purchasesInfo.push({ id: purchasesList[i].id, MerchantContractAddress: MerchantContractAddress, idPurchase: IDPurchase, purchaseStatus: purchase_status_int })
@@ -57,24 +57,28 @@ const PurchasesList = () => {
                 for (let i = 0; i < purchasesInfo.length; i++) {
                     if (purchasesInfo[i].MerchantContractAddress) {
                         if (purchasesInfo[i].purchaseStatus === 0) {
-                            document.getElementById(`${purchasesInfo[i].id}_status`).textContent = "Not Created"
+                            document.getElementById(`${purchasesInfo[i].idPurchase}_status`).textContent = "Not Created"
                         }
 
                         if (purchasesInfo[i].purchaseStatus === 1) {
-                            document.getElementById(`${purchasesInfo[i].id}_status`).textContent = "Not Paid"
+                            document.getElementById(`${purchasesInfo[i].idPurchase}_status`).textContent = "Not Paid"
                         }
 
                         if (purchasesInfo[i].purchaseStatus === 2) {
-                            document.getElementById(`${purchasesInfo[i].id}_status`).textContent = "Paid"
-                            document.getElementById(`${purchasesInfo[i].id}_button`).setAttribute("style", "display: table-cell;")
+                            document.getElementById(`${purchasesInfo[i].idPurchase}_status`).textContent = "Paid"
+                            document.getElementById(`${purchasesInfo[i].idPurchase}_button`).setAttribute("style", "display: table-cell;")
                         }
 
                         if (purchasesInfo[i].purchaseStatus === 3) {
-                            document.getElementById(`${purchasesInfo[i].id}_status`).textContent = "Completed"
+                            document.getElementById(`${purchasesInfo[i].idPurchase}_status`).textContent = "Completed"
                         }
 
                         if (purchasesInfo[i].purchaseStatus === 4) {
-                            document.getElementById(`${purchasesInfo[i].id}_status`).textContent = "Refunded"
+                            document.getElementById(`${purchasesInfo[i].idPurchase}_status`).textContent = "Refunded"
+                        }
+
+                        if (purchasesInfo[i].purchaseStatus === 5) {
+                            document.getElementById(`${purchasesInfo[i].idPurchase}_status`).textContent = "Canceled"
                         }
                     }
                 }
@@ -118,10 +122,11 @@ const PurchasesList = () => {
             <table className="table">
                 <thead>
                     <tr>
-                        <th>ID</th>
+                        <th></th>
                         <th>ID Purchase</th>
                         <th>Purchase Amount</th>
-                        <th>Escrow Time</th>
+                        <th>Cancel Time</th>
+                        <th>Complete Time</th>
                         <th>Status</th>
                         <th></th>
                     </tr>
@@ -130,14 +135,15 @@ const PurchasesList = () => {
                 <tbody>
                     {purchasesList.map((item, i) => {
                         return (
-                            <tr className="item" key={item.IDPurchase}>
+                            <tr className="item" key={item.idPurchase}>
                                 <td className="itemDisplay">{i + 1}</td>
-                                <td className="itemDisplay">{item.IDPurchase}</td>
-                                <td className="itemDisplay">{item.PurchaseAmount}</td>
-                                <td className="itemDisplay">{item.EscrowTime}</td>
-                                <td className="itemDisplay"><span id={`${item.id}_status`}></span></td>
-                                <td className="removeItemButton" id={`${item.id}_button`} style={{ display: "none" }}>
-                                    <button onClick={() => completePurchase(item.IDPurchase)}>Collect</button>
+                                <td className="itemDisplay">{item.idPurchase}</td>
+                                <td className="itemDisplay">{item.purchaseAmount}</td>
+                                <td className="itemDisplay">{item.cancelTime}</td>
+                                <td className="itemDisplay">{item.completeTime}</td>
+                                <td className="itemDisplay"><span id={`${item.idPurchase}_status`}></span></td>
+                                <td className="removeItemButton" id={`${item.idPurchase}_button`} style={{ display: "none" }}>
+                                    <button onClick={() => completePurchase(item.idPurchase)}>Collect</button>
                                 </td>
                             </tr>
                         )

@@ -1,129 +1,153 @@
 import {
-  ApprovedMerchantContract as ApprovedMerchantContractEvent,
+  ApproveMerchantContract as ApproveMerchantContractEvent,
   Buy as BuyEvent,
+  Cancel as CancelEvent,
   Complete as CompleteEvent,
+  CreateMerchantContract as CreateMerchantContractEvent,
   CreatePurchase as CreatePurchaseEvent,
-  CreatedMerchantContract as CreatedMerchantContractEvent,
-  Historic as HistoricEvent,
-  PausedMerchantContract as PausedMerchantContractEvent,
+  PauseMerchantContract as PauseMerchantContractEvent,
   Refund as RefundEvent,
-  TopUpMyContract as TopUpMyContractEvent,
   VoteNewMerchantContract as VoteNewMerchantContractEvent,
+  WithdrawRest as WithdrawRestEvent,
   Withdrawal as WithdrawalEvent
 } from "../generated/MainContract/MainContract"
 import {
-  ApprovedMerchantContract,
+  ApproveMerchantContract,
   Buy,
+  Cancel,
   Complete,
+  CreateMerchantContract,
   CreatePurchase,
-  CreatedMerchantContract,
-  Historic,
-  PausedMerchantContract,
+  PauseMerchantContract,
   Refund,
-  TopUpMyContract,
   VoteNewMerchantContract,
+  WithdrawRest,
   Withdrawal
 } from "../generated/schema"
 
-export function handleApprovedMerchantContract(
-  event: ApprovedMerchantContractEvent
+export function handleApproveMerchantContract(
+  event: ApproveMerchantContractEvent
 ): void {
-  let entity = new ApprovedMerchantContract(
-    event.transaction.hash.toHex() + "-" + event.logIndex.toString()
+  let entity = new ApproveMerchantContract(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
   )
-  entity.MerchantContractAddress = event.params.MerchantContractAddress
-  entity.MerchantName = event.params.MerchantName
-  entity.Approved = event.params.Approved
+  entity.contractInstance = event.params.contractInstance
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
   entity.save()
 }
 
 export function handleBuy(event: BuyEvent): void {
-  let entity = new Buy(
-    event.transaction.hash.toHex() + "-" + event.logIndex.toString()
+  let entity = new Buy(event.transaction.hash.concatI32(event.logIndex.toI32()))
+  entity.contractInstance = event.params.contractInstance
+  entity.idPurchase = event.params.idPurchase
+  entity.cancelTime = event.params.cancelTime
+  entity.completeTime = event.params.completeTime
+  entity.buyerAddress = event.params.buyerAddress
+  entity.purchaseAmount = event.params.purchaseAmount
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.save()
+}
+
+export function handleCancel(event: CancelEvent): void {
+  let entity = new Cancel(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
   )
-  entity.MerchantContractAddress = event.params.MerchantContractAddress
-  entity.IDPurchase = event.params.IDPurchase
-  entity.DateFinished = event.params.DateFinished
-  entity.BuyerAddress = event.params.BuyerAddress
-  entity.PurchaseAmount = event.params.PurchaseAmount
-  entity.PurchaseStatus = event.params.PurchaseStatus
+  entity.contractInstance = event.params.contractInstance
+  entity.buyerAddress = event.params.buyerAddress
+  entity.idPurchase = event.params.idPurchase
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
   entity.save()
 }
 
 export function handleComplete(event: CompleteEvent): void {
   let entity = new Complete(
-    event.transaction.hash.toHex() + "-" + event.logIndex.toString()
+    event.transaction.hash.concatI32(event.logIndex.toI32())
   )
-  entity.MerchantContractAddress = event.params.MerchantContractAddress
-  entity.IDPurchase = event.params.IDPurchase
+  entity.contractInstance = event.params.contractInstance
+  entity.idPurchase = event.params.idPurchase
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.save()
+}
+
+export function handleCreateMerchantContract(
+  event: CreateMerchantContractEvent
+): void {
+  let entity = new CreateMerchantContract(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  entity.contractInstance = event.params.contractInstance
+  entity.merchantAddress = event.params.merchantAddress
+  entity.merchantName = event.params.merchantName
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
   entity.save()
 }
 
 export function handleCreatePurchase(event: CreatePurchaseEvent): void {
   let entity = new CreatePurchase(
-    event.transaction.hash.toHex() + "-" + event.logIndex.toString()
+    event.transaction.hash.concatI32(event.logIndex.toI32())
   )
-  entity.MerchantContractAddress = event.params.MerchantContractAddress
-  entity.IDPurchase = event.params.IDPurchase
-  entity.DateCreated = event.params.DateCreated
-  entity.PurchaseAmount = event.params.PurchaseAmount
-  entity.EscrowTime = event.params.EscrowTime
-  entity.PurchaseStatus = event.params.PurchaseStatus
+  entity.contractInstance = event.params.contractInstance
+  entity.idPurchase = event.params.idPurchase
+  entity.purchaseAmount = event.params.purchaseAmount
+  entity.cancelTime = event.params.cancelTime
+  entity.completeTime = event.params.completeTime
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
   entity.save()
 }
 
-export function handleCreatedMerchantContract(
-  event: CreatedMerchantContractEvent
+export function handlePauseMerchantContract(
+  event: PauseMerchantContractEvent
 ): void {
-  let entity = new CreatedMerchantContract(
-    event.transaction.hash.toHex() + "-" + event.logIndex.toString()
+  let entity = new PauseMerchantContract(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
   )
-  entity.MerchantContractAddress = event.params.MerchantContractAddress
-  entity.MerchantAddress = event.params.MerchantAddress
-  entity.MerchantName = event.params.MerchantName
-  entity.save()
-}
+  entity.contractInstance = event.params.contractInstance
+  entity.paused = event.params.paused
 
-export function handleHistoric(event: HistoricEvent): void {
-  let entity = new Historic(
-    event.transaction.hash.toHex() + "-" + event.logIndex.toString()
-  )
-  entity.MerchantContractAddress = event.params.MerchantContractAddress
-  entity.Sells = event.params.Sells
-  entity.Refunds = event.params.Refunds
-  entity.save()
-}
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
 
-export function handlePausedMerchantContract(
-  event: PausedMerchantContractEvent
-): void {
-  let entity = new PausedMerchantContract(
-    event.transaction.hash.toHex() + "-" + event.logIndex.toString()
-  )
-  entity.MerchantContractAddress = event.params.MerchantContractAddress
-  entity.Paused = event.params.Paused
   entity.save()
 }
 
 export function handleRefund(event: RefundEvent): void {
   let entity = new Refund(
-    event.transaction.hash.toHex() + "-" + event.logIndex.toString()
+    event.transaction.hash.concatI32(event.logIndex.toI32())
   )
-  entity.MerchantContractAddress = event.params.MerchantContractAddress
-  entity.IDPurchase = event.params.IDPurchase
-  entity.Date = event.params.Date
-  entity.BuyerAddress = event.params.BuyerAddress
-  entity.RefundAmount = event.params.RefundAmount
-  entity.PurchaseStatus = event.params.PurchaseStatus
-  entity.save()
-}
+  entity.contractInstance = event.params.contractInstance
+  entity.idPurchase = event.params.idPurchase
+  entity.buyerAddress = event.params.buyerAddress
+  entity.refundAmount = event.params.refundAmount
 
-export function handleTopUpMyContract(event: TopUpMyContractEvent): void {
-  let entity = new TopUpMyContract(
-    event.transaction.hash.toHex() + "-" + event.logIndex.toString()
-  )
-  entity.MerchantContractAddress = event.params.MerchantContractAddress
-  entity.Amount = event.params.Amount
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
   entity.save()
 }
 
@@ -131,18 +155,42 @@ export function handleVoteNewMerchantContract(
   event: VoteNewMerchantContractEvent
 ): void {
   let entity = new VoteNewMerchantContract(
-    event.transaction.hash.toHex() + "-" + event.logIndex.toString()
+    event.transaction.hash.concatI32(event.logIndex.toI32())
   )
-  entity.Voter = event.params.Voter
-  entity.MerchantContractAddress = event.params.MerchantContractAddress
+  entity.contractInstance = event.params.contractInstance
+  entity.voter = event.params.voter
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
+  entity.save()
+}
+
+export function handleWithdrawRest(event: WithdrawRestEvent): void {
+  let entity = new WithdrawRest(
+    event.transaction.hash.concatI32(event.logIndex.toI32())
+  )
+  entity.contractInstance = event.params.contractInstance
+  entity.restBalance = event.params.restBalance
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
   entity.save()
 }
 
 export function handleWithdrawal(event: WithdrawalEvent): void {
   let entity = new Withdrawal(
-    event.transaction.hash.toHex() + "-" + event.logIndex.toString()
+    event.transaction.hash.concatI32(event.logIndex.toI32())
   )
-  entity.MerchantContractAddress = event.params.MerchantContractAddress
-  entity.Balance = event.params.Balance
+  entity.contractInstance = event.params.contractInstance
+  entity.merchantBalance = event.params.merchantBalance
+
+  entity.blockNumber = event.block.number
+  entity.blockTimestamp = event.block.timestamp
+  entity.transactionHash = event.transaction.hash
+
   entity.save()
 }

@@ -23,19 +23,19 @@ const Vote = () => {
         `${process.env.REACT_APP_THE_GRAPH_API}`,
         {
           query: `
-                  {
-                      createdMerchantContracts(orderBy: id, orderDirection: desc) {
-                          id
-                          MerchantContractAddress
-                          MerchantAddress
-                          MerchantName
-                      }
-                  }
-                  `
+          {
+            createMerchantContracts(orderBy: merchantName, orderDirection: asc) {
+              id
+              contractInstance
+              merchantAddress
+              merchantName
+            }
+          }
+          `
         }
       )
 
-      let MerchantsList = result.data.data.createdMerchantContracts
+      let MerchantsList = result.data.data.createMerchantContracts
       setMerchantsList(MerchantsList)
     } catch (error) {
       console.log(error)
@@ -46,11 +46,11 @@ const Vote = () => {
     const instanceMainContract2 = instanceMainContract.current
 
     for (let i = 0; i < merchantsList.length; i++) {
-      const MerchantContractAddress = merchantsList[i].MerchantContractAddress
+      const MerchantContractAddress = merchantsList[i].contractInstance
 
       try {
-        const requiredNumberOfVotes = await instanceMainContract2.getRequiredNumberOfVotes()
-        const number_votes = await instanceMainContract2.getMerchantContractNumberOfVotes(MerchantContractAddress, { from: process.env.REACT_APP_OWNER_ADDRESS })
+        const requiredNumberOfVotes = await instanceMainContract2.requiredNumberOfVotes()
+        const number_votes = await instanceMainContract2.getNumberOfVotes(MerchantContractAddress, { from: process.env.REACT_APP_OWNER_ADDRESS })
 
         let requiredNumberOfVotes_int = parseInt(requiredNumberOfVotes, 16)
         let number_votes_int = parseInt(number_votes, 16)
@@ -59,12 +59,11 @@ const Vote = () => {
 
         for (let i = 0; i < merchantsInfo.length; i++) {
           if (merchantsInfo[i].MerchantContractAddress) {
-            if (merchantsInfo[i].numberOfVotes <= requiredNumberOfVotes_int) {
+            if (merchantsInfo[i].numberOfVotes < requiredNumberOfVotes_int) {
               document.getElementById(`${merchantsInfo[i].MerchantContractAddress}`).textContent = `${merchantsInfo[i].numberOfVotes}`
               document.getElementById(`${merchantsInfo[i].MerchantContractAddress}_tr`).setAttribute("style", "display:table-row")
             }
             else {
-              document.getElementById(`${merchantsInfo[i].MerchantContractAddress}_id`).textContent = 0
               document.getElementById(`${merchantsInfo[i].MerchantContractAddress}`).textContent = `${merchantsInfo[i].numberOfVotes}`
             }
           }
@@ -112,8 +111,7 @@ const Vote = () => {
       <table className="table">
         <thead>
           <tr>
-            <th>ID</th>
-            <th>Merchant Address</th>
+            <th>Merchant Contract Address</th>
             <th>Merchant Name</th>
             <th>No. of Votes</th>
             <th></th>
@@ -123,13 +121,12 @@ const Vote = () => {
         <tbody>
           {merchantsList.map((item, i) => {
             return (
-              <tr className="item" key={i} id={`${item.MerchantContractAddress}_tr`} style={{ display: "none", backgroundColor: "red" }}>
-                <td className="itemDisplay"><span id={`${item.MerchantContractAddress}_id`}>{i + 1}</span></td>
-                <td className="itemDisplay">{item.MerchantContractAddress}</td>
-                <td className="itemDisplay">{item.MerchantName}</td>
-                <td className="itemDisplay"><span id={item.MerchantContractAddress}></span></td>
+              <tr className="item" key={i} id={`${item.contractInstance}_tr`} style={{ display: "none", backgroundColor: "red" }}>
+                <td className="itemDisplay">{item.contractInstance}</td>
+                <td className="itemDisplay">{item.merchantName}</td>
+                <td className="itemDisplay"><span id={item.contractInstance}></span></td>
                 <td className="removeItemButton">
-                  <button onClick={() => saveNumberOfVotes(item.MerchantContractAddress)}>+Info</button>
+                  <button onClick={() => saveNumberOfVotes(item.contractInstance)}>+Info</button>
                 </td>
               </tr>
             )

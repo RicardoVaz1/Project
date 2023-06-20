@@ -5,24 +5,12 @@
     "inputs": [
       {
         "indexed": false,
-        "internalType": "address",
-        "name": "MerchantContractAddress",
+        "internalType": "contract MerchantContract",
+        "name": "contractInstance",
         "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "MerchantName",
-        "type": "string"
-      },
-      {
-        "indexed": false,
-        "internalType": "bool",
-        "name": "Approved",
-        "type": "bool"
       }
     ],
-    "name": "ApprovedMerchantContract",
+    "name": "ApproveMerchantContract",
     "type": "event"
   },
   {
@@ -30,38 +18,38 @@
     "inputs": [
       {
         "indexed": false,
-        "internalType": "address",
-        "name": "MerchantContractAddress",
+        "internalType": "contract MerchantContract",
+        "name": "contractInstance",
         "type": "address"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "IDPurchase",
+        "name": "idPurchase",
         "type": "uint256"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "DateFinished",
+        "name": "cancelTime",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "completeTime",
         "type": "uint256"
       },
       {
         "indexed": false,
         "internalType": "address",
-        "name": "BuyerAddress",
+        "name": "buyerAddress",
         "type": "address"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "PurchaseAmount",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "PurchaseStatus",
+        "name": "purchaseAmount",
         "type": "uint256"
       }
     ],
@@ -73,14 +61,39 @@
     "inputs": [
       {
         "indexed": false,
+        "internalType": "contract MerchantContract",
+        "name": "contractInstance",
+        "type": "address"
+      },
+      {
+        "indexed": false,
         "internalType": "address",
-        "name": "MerchantContractAddress",
+        "name": "buyerAddress",
         "type": "address"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "IDPurchase",
+        "name": "idPurchase",
+        "type": "uint256"
+      }
+    ],
+    "name": "Cancel",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "contract MerchantContract",
+        "name": "contractInstance",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "idPurchase",
         "type": "uint256"
       }
     ],
@@ -92,38 +105,57 @@
     "inputs": [
       {
         "indexed": false,
+        "internalType": "contract MerchantContract",
+        "name": "contractInstance",
+        "type": "address"
+      },
+      {
+        "indexed": false,
         "internalType": "address",
-        "name": "MerchantContractAddress",
+        "name": "merchantAddress",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "merchantName",
+        "type": "string"
+      }
+    ],
+    "name": "CreateMerchantContract",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "contract MerchantContract",
+        "name": "contractInstance",
         "type": "address"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "IDPurchase",
+        "name": "idPurchase",
         "type": "uint256"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "DateCreated",
+        "name": "purchaseAmount",
         "type": "uint256"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "PurchaseAmount",
+        "name": "cancelTime",
         "type": "uint256"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "EscrowTime",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "PurchaseStatus",
+        "name": "completeTime",
         "type": "uint256"
       }
     ],
@@ -135,68 +167,18 @@
     "inputs": [
       {
         "indexed": false,
-        "internalType": "address",
-        "name": "MerchantContractAddress",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "MerchantAddress",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "MerchantName",
-        "type": "string"
-      }
-    ],
-    "name": "CreatedMerchantContract",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "MerchantContractAddress",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "Sells",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "Refunds",
-        "type": "uint256"
-      }
-    ],
-    "name": "Historic",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "MerchantContractAddress",
+        "internalType": "contract MerchantContract",
+        "name": "contractInstance",
         "type": "address"
       },
       {
         "indexed": false,
         "internalType": "bool",
-        "name": "Paused",
+        "name": "paused",
         "type": "bool"
       }
     ],
-    "name": "PausedMerchantContract",
+    "name": "PauseMerchantContract",
     "type": "event"
   },
   {
@@ -204,38 +186,26 @@
     "inputs": [
       {
         "indexed": false,
-        "internalType": "address",
-        "name": "MerchantContractAddress",
+        "internalType": "contract MerchantContract",
+        "name": "contractInstance",
         "type": "address"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "IDPurchase",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "Date",
+        "name": "idPurchase",
         "type": "uint256"
       },
       {
         "indexed": false,
         "internalType": "address",
-        "name": "BuyerAddress",
+        "name": "buyerAddress",
         "type": "address"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "RefundAmount",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "PurchaseStatus",
+        "name": "refundAmount",
         "type": "uint256"
       }
     ],
@@ -247,33 +217,14 @@
     "inputs": [
       {
         "indexed": false,
-        "internalType": "address",
-        "name": "MerchantContractAddress",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "Amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "TopUpMyContract",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "Voter",
+        "internalType": "contract MerchantContract",
+        "name": "contractInstance",
         "type": "address"
       },
       {
         "indexed": false,
         "internalType": "address",
-        "name": "MerchantContractAddress",
+        "name": "voter",
         "type": "address"
       }
     ],
@@ -285,14 +236,33 @@
     "inputs": [
       {
         "indexed": false,
-        "internalType": "address",
-        "name": "MerchantContractAddress",
+        "internalType": "contract MerchantContract",
+        "name": "contractInstance",
         "type": "address"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "Balance",
+        "name": "restBalance",
+        "type": "uint256"
+      }
+    ],
+    "name": "WithdrawRest",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "contract MerchantContract",
+        "name": "contractInstance",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "merchantBalance",
         "type": "uint256"
       }
     ],
@@ -300,17 +270,33 @@
     "type": "event"
   },
   {
-    "inputs": [],
-    "name": "RequiredNumberOfVotes",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-    "stateMutability": "view",
+    "inputs": [
+      { "internalType": "uint256", "name": "idPurchase", "type": "uint256" },
+      { "internalType": "uint256", "name": "cancelTime", "type": "uint256" },
+      { "internalType": "uint256", "name": "completeTime", "type": "uint256" },
+      { "internalType": "address", "name": "buyerAddress", "type": "address" },
+      { "internalType": "uint256", "name": "amount", "type": "uint256" }
+    ],
+    "name": "buy",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "uint256", "name": "NumberOfVotes", "type": "uint256" }
+      { "internalType": "address", "name": "buyerAddress", "type": "address" },
+      { "internalType": "uint256", "name": "idPurchase", "type": "uint256" }
     ],
-    "name": "changeRequiredNumberOfVotes",
+    "name": "cancel",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "idPurchase", "type": "uint256" }
+    ],
+    "name": "complete",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -319,10 +305,10 @@
     "inputs": [
       {
         "internalType": "address payable",
-        "name": "MerchantWalletAddress",
+        "name": "merchantWalletAddress",
         "type": "address"
       },
-      { "internalType": "string", "name": "MerchantName", "type": "string" }
+      { "internalType": "string", "name": "merchantName", "type": "string" }
     ],
     "name": "createMerchantContract",
     "outputs": [],
@@ -331,173 +317,108 @@
   },
   {
     "inputs": [
-      {
-        "internalType": "address",
-        "name": "MerchantContractAddress",
-        "type": "address"
-      }
+      { "internalType": "uint256", "name": "idPurchase", "type": "uint256" },
+      { "internalType": "uint256", "name": "amount", "type": "uint256" },
+      { "internalType": "uint256", "name": "cancelTime", "type": "uint256" },
+      { "internalType": "uint256", "name": "completeTime", "type": "uint256" }
     ],
-    "name": "disapproveMerchantContract",
+    "name": "createPurchase",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "uint256", "name": "eventID", "type": "uint256" },
-      {
-        "internalType": "address",
-        "name": "MerchantContractAddress",
-        "type": "address"
-      },
-      { "internalType": "uint256", "name": "Amount", "type": "uint256" }
-    ],
-    "name": "eventsMerchantContracts",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "uint256", "name": "eventID", "type": "uint256" },
-      {
-        "internalType": "address",
-        "name": "MerchantContractAddress",
-        "type": "address"
-      },
-      { "internalType": "uint256", "name": "IDPurchase", "type": "uint256" },
-      { "internalType": "uint256", "name": "Sells", "type": "uint256" },
-      { "internalType": "uint256", "name": "Refunds", "type": "uint256" }
-    ],
-    "name": "eventsMerchantContracts2",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "uint256", "name": "eventID", "type": "uint256" },
-      {
-        "internalType": "address",
-        "name": "MerchantContractAddress",
-        "type": "address"
-      },
-      { "internalType": "uint256", "name": "IDPurchase", "type": "uint256" },
-      { "internalType": "uint256", "name": "Date", "type": "uint256" },
-      { "internalType": "address", "name": "BuyerAddress", "type": "address" },
-      { "internalType": "uint256", "name": "Amount", "type": "uint256" },
-      {
-        "internalType": "uint256",
-        "name": "PurchaseStatus",
-        "type": "uint256"
-      },
-      { "internalType": "uint256", "name": "EscrowTime", "type": "uint256" }
-    ],
-    "name": "eventsMerchantContracts3",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "MerchantContractAddress",
-        "type": "address"
-      }
-    ],
-    "name": "freezeWithdrawalsMerchantContract",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "MerchantContractAddress",
-        "type": "address"
-      }
-    ],
-    "name": "getMerchantContractNumberOfVotes",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "MerchantContractAddress",
-        "type": "address"
-      }
-    ],
-    "name": "getMerchantContractStatusContract",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "MerchantContractAddress",
-        "type": "address"
-      }
-    ],
-    "name": "getMerchantContractStatusWithdrawals",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getOwnerAddress",
-    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getRequiredNumberOfVotes",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
-    "name": "merchants",
-    "outputs": [
       {
         "internalType": "contract MerchantContract",
-        "name": "merchantContract",
+        "name": "contractInstance",
         "type": "address"
-      },
-      { "internalType": "string", "name": "name", "type": "string" },
+      }
+    ],
+    "name": "getNumberOfVotes",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
       {
-        "internalType": "uint256",
-        "name": "status_contract",
-        "type": "uint256"
-      },
+        "internalType": "contract MerchantContract",
+        "name": "contractInstance",
+        "type": "address"
+      }
+    ],
+    "name": "getStatusContract",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
       {
-        "internalType": "uint256",
-        "name": "status_withdrawals",
-        "type": "uint256"
-      },
+        "internalType": "contract MerchantContract",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "merchants",
+    "outputs": [
+      { "internalType": "uint256", "name": "status", "type": "uint256" },
       { "internalType": "uint256", "name": "votes", "type": "uint256" }
     ],
     "stateMutability": "view",
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "ownerAddress",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "MerchantContractAddress",
+        "internalType": "contract MerchantContract",
+        "name": "contractInstance",
         "type": "address"
       }
     ],
-    "name": "unfreezeWithdrawalsMerchantContract",
+    "name": "pause",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "idPurchase", "type": "uint256" },
+      { "internalType": "address", "name": "buyerAddress", "type": "address" },
+      { "internalType": "uint256", "name": "amount", "type": "uint256" }
+    ],
+    "name": "refund",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "requiredNumberOfVotes",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "numberOfVotes", "type": "uint256" }
+    ],
+    "name": "setRequiredNumberOfVotes",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "transferRest",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -505,14 +426,50 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "MerchantContractAddress",
+        "internalType": "contract MerchantContract",
+        "name": "contractInstance",
         "type": "address"
       }
     ],
-    "name": "voteNewMerchantContractApproval",
+    "name": "unpause",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
-  }
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "contract MerchantContract",
+        "name": "contractInstance",
+        "type": "address"
+      }
+    ],
+    "name": "voteApproval",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "contract MerchantContract",
+        "name": "contractInstance",
+        "type": "address"
+      }
+    ],
+    "name": "withdrawRest",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "amount", "type": "uint256" }
+    ],
+    "name": "withdrawal",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  { "stateMutability": "payable", "type": "receive" }
 ]

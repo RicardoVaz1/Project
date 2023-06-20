@@ -10,7 +10,7 @@ const axios = require("axios")
 const EditMerchant = () => {
     const navigate = useNavigate()
     const { currentAccount, chainName } = JSON.parse(localStorage.getItem("userData"))
-    const { numberOfVotes, statusContract, statusWithdrawals } = JSON.parse(localStorage.getItem("MerchantContractData"))
+    const { numberOfVotes, statusContract } = JSON.parse(localStorage.getItem("MerchantContractData"))
     const [merchantContractInfo, setMerchantContractInfo] = useState("")
 
     const location = new URL(window.location.href).pathname
@@ -22,55 +22,39 @@ const EditMerchant = () => {
     const instanceMainContract = new ethers.Contract(MAINCONTRACTADDRESS, MainContractABI.abi, signer)
 
 
-    async function getMerchantContractInfo(MerchantContractAddress) {
+    async function getMerchantContractInfo(contractInstance) {
         try {
             const result = await axios.post(
                 `${process.env.REACT_APP_THE_GRAPH_API}`,
                 {
                     query: `
                     {
-                        createdMerchantContracts(where: {MerchantContractAddress: "${MerchantContractAddress}"}) {
+                        createMerchantContracts(where: {contractInstance: "${contractInstance}"}) {
                             id
-                            MerchantContractAddress
-                            MerchantAddress
-                            MerchantName
+                            contractInstance
+                            merchantAddress
+                            merchantName
                         }
                     }
                     `
                 }
             )
 
-            let MerchantsList = result.data.data.createdMerchantContracts[0]
+            let MerchantsList = result.data.data.createMerchantContracts[0]
             setMerchantContractInfo(MerchantsList)
         } catch (error) {
             console.log(error)
         }
     }
 
-    async function disapprove(ID) {
+    async function pause(ID) {
         try {
-            const ownerDisapproveMerchant = await instanceMainContract.disapproveMerchantContract(ID, { from: currentAccount, gasLimit: 1500000 })
-            console.log("Owner Disapprove Merchant: ", ownerDisapproveMerchant)
-
-            document.getElementById("done-successfully-1").style.display = ''
-        } catch (error) {
-            console.log("ERROR AT DISAPPROVING MERCHANT: ", error)
-        }
-
-        setTimeout(function () {
-            document.getElementById("done-successfully-1").style.display = 'none'
-            navigate("/admin")
-        }, 2000)
-    }
-
-    async function pauseWithdrawals(ID) {
-        try {
-            const ownerPauseWithdrawals = await instanceMainContract.freezeWithdrawalsMerchantContract(ID, { from: currentAccount, gasLimit: 1500000 })
-            console.log("Owner Pause Withdrawals: ", ownerPauseWithdrawals)
+            const ownerPause = await instanceMainContract.pause(ID, { from: currentAccount, gasLimit: 1500000 })
+            console.log("Owner Pause: ", ownerPause)
 
             document.getElementById("done-successfully-2").style.display = ''
         } catch (error) {
-            console.log("ERROR AT PAUSING WITHDRAWALS: ", error)
+            console.log("ERROR AT PAUSING: ", error)
         }
 
         setTimeout(function () {
@@ -79,14 +63,14 @@ const EditMerchant = () => {
         }, 2000)
     }
 
-    async function unpauseWithdrawals(ID) {
+    async function unpause(ID) {
         try {
-            const ownerUnpauseWithdrawals = await instanceMainContract.unfreezeWithdrawalsMerchantContract(ID, { from: currentAccount, gasLimit: 1500000 })
-            console.log("Owner Unpause Withdrawals: ", ownerUnpauseWithdrawals)
+            const ownerUnpause = await instanceMainContract.unpause(ID, { from: currentAccount, gasLimit: 1500000 })
+            console.log("Owner Unpause: ", ownerUnpause)
 
             document.getElementById("done-successfully-3").style.display = ''
         } catch (error) {
-            console.log("ERROR AT UNPAUSING WITHDRAWALS: ", error)
+            console.log("ERROR AT UNPAUSING: ", error)
         }
 
         setTimeout(function () {
@@ -112,40 +96,29 @@ const EditMerchant = () => {
         <>
             <h1>Edit Merchant #{MerchantContractAddress.slice(0, 5)}...{MerchantContractAddress.slice(38)}</h1>
 
-            <span>Merchant Contract Address: <a href={`https://${chainName}.etherscan.io/address/${MerchantContractAddress}`} target="_blank" rel="noreferrer" >{merchantContractInfo.MerchantContractAddress}</a></span>
+            <span>Merchant Contract Address: <a href={`https://${chainName}.etherscan.io/address/${MerchantContractAddress}`} target="_blank" rel="noreferrer" >{merchantContractInfo.contractInstance}</a></span>
             <br />
 
-            <span>Merchant Name: {merchantContractInfo.MerchantName}</span>
+            <span>Merchant Name: {merchantContractInfo.merchantName}</span>
             <br />
 
             <span>No. of Votes: {numberOfVotes}</span>
             <br />
 
-            <span>Approved: {statusContract}</span>
-            <br />
-
-            <span>Withdrawals: {statusWithdrawals}</span>
+            <span>Status: {statusContract}</span>
             <br />
             <br />
 
             <div className="side-by-side-buttons">
                 <button onClick={() => navigate("/admin")}>Cancel</button>
 
-                { // IF Merchant approved -> disapprove()
-                    (statusContract === "Approved") ? <button onClick={() => disapprove(MerchantContractAddress)}>Disapprove</button> : ""
-                }
-
-                { // IF Merchant approved and unpausedWithdrawals -> pauseWithdrawals() 
-                    (statusContract === "Approved") && (statusWithdrawals === "Unpaused") ? <button onClick={() => pauseWithdrawals(MerchantContractAddress)}>PauseWithdrawals</button> :
-
-                        // ElseIF Merchant approved and pausedWithdrawals -> unpauseWithdrawals()
-                        (statusContract === "Approved") && (statusWithdrawals === "Paused") ? <button onClick={() => unpauseWithdrawals(MerchantContractAddress)}>UnpauseWithdrawals</button> : ""
+                { // IF Merchant approved/unpaused -> pause() ELSE -> unpaused()
+                    (statusContract === "Approved/Unpaused") ? <button onClick={() => pause(MerchantContractAddress)}>Pause</button> : <button onClick={() => unpause(MerchantContractAddress)}>Unpause</button> 
                 }
             </div>
 
-            <span id="done-successfully-1" style={{ "display": "none" }}>Merchant Disapproved! <br /> Redirecting ...</span>
-            <span id="done-successfully-2" style={{ "display": "none" }}>Merchant Withdrawals Paused! <br /> Redirecting ...</span>
-            <span id="done-successfully-3" style={{ "display": "none" }}>Merchant Withdrawals Unpaused! <br /> Redirecting ...</span>
+            <span id="done-successfully-2" style={{ "display": "none" }}>Merchant Paused! <br /> Redirecting ...</span>
+            <span id="done-successfully-3" style={{ "display": "none" }}>Merchant Unpaused! <br /> Redirecting ...</span>
         </>
     )
 }

@@ -6,175 +6,190 @@ import "./merchantContract.sol";
 
 contract MainContract {
     /* ========== OWNER ========== */
-    address private owner_address;
-    uint public RequiredNumberOfVotes;   // Number of Votes required for the MerchantContract to be approved
-
-    function _onlyOwner() private view {
-        require(msg.sender == owner_address, "Only Owner can call this function");
-    }
+    address public ownerAddress;
+    uint public requiredNumberOfVotes;   // Number of votes required for the MerchantContract to be approved
 
     modifier onlyOwner() {
-        _onlyOwner();
+        require(msg.sender == ownerAddress, "Only Owner can call this function!");
+        _;
+    }
+
+    modifier created(MerchantContract contractInstance) {
+        require(merchants[contractInstance].status != 0, "This contract is not created!");
+        _;
+    }
+
+    modifier approved(MerchantContract contractInstance) {
+        require(merchants[contractInstance].status == 2, "Merchant is not approved!");
+        _;
+    }
+
+    modifier paused(MerchantContract contractInstance) {
+        require(merchants[contractInstance].status == 3, "Merchant is not paused!");
         _;
     }
 
 
 
-    /* ========== MERCHANTs ========== */
+    /* ========== MERCHANTS ========== */
     struct Merchant {
-        MerchantContract merchantContract;   // buyers will be sending the money to this address
-        string name;
-        uint status_contract;                // 0: default, Merchant doesn't exist; 1: Merchant exist, but not approved; 2: Merchant exist and approved
-        uint status_withdrawals;             // 0: Merchant withdrawals unpaused; 1: default, Merchant withdrawals paused;
+        uint status;    // 0: default, Merchant doesn't exist; 1: Merchant exist, but not approved; 2: Merchant exist and approved/unpaused; 3: Merchant paused
         uint votes;
+        mapping(address => bool) voters;
     }
 
-    // MerchantContractAddress => Merchant
-    mapping(address => Merchant) public merchants;
+    mapping(MerchantContract => Merchant) public merchants;
 
 
-    struct Votes {
-        bool voted;   // false: didn't vote; true: already voted
+
+    /* ========== BUYERS HISTORIC ========== */
+    struct BuyersHistoric {
+        uint purchases;
+        uint cancellations;
     }
 
-    // msg.sender => (MerchantContractAddress => Votes)
-    mapping(address => mapping(address => Votes)) saveVoters;
+    // msg.sender => BuyersHistoric
+    mapping(address => BuyersHistoric) private buyersHistoric;
 
 
 
     /* ========== CONSTRUCTOR ========== */
      constructor() {
-        owner_address = msg.sender;
-        RequiredNumberOfVotes = 2;
+        ownerAddress = msg.sender;
+        requiredNumberOfVotes = 2;
+    }
+
+    receive() external payable approved(MerchantContract(msg.sender)) { }
+
+
+
+    /* ========== MAINCONTRACT ========== */
+    function getNumberOfVotes(MerchantContract contractInstance) public view onlyOwner created(contractInstance) returns(uint) {
+        return merchants[contractInstance].votes;
+    }
+
+    function getStatusContract(MerchantContract contractInstance) public view onlyOwner created(contractInstance) returns(uint) {
+        return merchants[contractInstance].status;
+    }
+
+    function setRequiredNumberOfVotes(uint numberOfVotes) public onlyOwner {
+        requiredNumberOfVotes = numberOfVotes;
+    }
+
+    function transferRest() public onlyOwner {
+        uint256 amount = address(this).balance;
+        require(amount > 0, "No balance available to transfer!");
+        payable(ownerAddress).transfer(amount);
     }
 
 
 
-    /* ========== MERCHANT_CONTRACTs ========== */
-    function getOwnerAddress() public view onlyOwner returns(address) {
-        return owner_address;
+    /* ========== MERCHANTCONTRACT ========== */
+    function createMerchantContract(address payable merchantWalletAddress, string memory merchantName) public onlyOwner {
+        MerchantContract merchantContract = new MerchantContract(merchantWalletAddress, merchantName);
+        merchants[merchantContract].status = 1;
+        merchants[merchantContract].votes = 0;
+
+        emit CreateMerchantContract(merchantContract, merchantWalletAddress, merchantName);
     }
 
-    function createMerchantContract(address payable MerchantWalletAddress, string memory MerchantName) public onlyOwner {
-        MerchantContract merchantContract = new MerchantContract(MerchantWalletAddress, MerchantName, address(this));
-        merchants[address(merchantContract)] = Merchant(merchantContract, MerchantName, 1, 1, 0);
+    function approve(MerchantContract contractInstance) private {
+        contractInstance.approveMerchant();
+        merchants[contractInstance].status = 2;
 
-        emit CreatedMerchantContract(address(merchantContract), MerchantWalletAddress, MerchantName);
+        emit ApproveMerchantContract(contractInstance);
     }
 
-    function approveMerchantContract(address MerchantContractAddress) private {
-        merchants[MerchantContractAddress].merchantContract.approveMerchant();
-        merchants[MerchantContractAddress].status_contract = 2;
-        merchants[MerchantContractAddress].status_withdrawals = 0;
+    function pause(MerchantContract contractInstance) public onlyOwner approved(contractInstance) {
+        contractInstance.pauseMerchant();
+        merchants[contractInstance].status = 3;
 
-        emit ApprovedMerchantContract(MerchantContractAddress, merchants[MerchantContractAddress].name, true);
+        emit PauseMerchantContract(contractInstance, true);
     }
 
-    function disapproveMerchantContract(address MerchantContractAddress) public onlyOwner {
-        if(merchants[MerchantContractAddress].status_contract != 2) revert("This address isn't approved!");
+    function unpause(MerchantContract contractInstance) public onlyOwner paused(contractInstance) {
+        contractInstance.unpauseMerchant();
+        merchants[contractInstance].status = 2;
 
-        merchants[MerchantContractAddress].merchantContract.disapproveMerchant();
-        merchants[MerchantContractAddress].status_contract = 1;
-        merchants[MerchantContractAddress].status_withdrawals = 1;
-        merchants[MerchantContractAddress].votes = 0;
-
-        emit ApprovedMerchantContract(MerchantContractAddress, merchants[MerchantContractAddress].name, false);
+        emit PauseMerchantContract(contractInstance, false);
     }
 
-    function freezeWithdrawalsMerchantContract(address MerchantContractAddress) public onlyOwner {
-        merchants[MerchantContractAddress].merchantContract.pauseWithdrawals();
-        merchants[MerchantContractAddress].status_withdrawals = 1;
-
-        emit PausedMerchantContract(MerchantContractAddress, true);
-    }
-
-    function unfreezeWithdrawalsMerchantContract(address MerchantContractAddress) public onlyOwner {
-        merchants[MerchantContractAddress].merchantContract.unpauseWithdrawals();
-        merchants[MerchantContractAddress].status_withdrawals = 0;
-
-        emit PausedMerchantContract(MerchantContractAddress, false);
-    }
-
-    function getMerchantContractNumberOfVotes(address MerchantContractAddress) public view onlyOwner returns(uint) {
-        return merchants[MerchantContractAddress].votes;
-    }
-
-    function getMerchantContractStatusContract(address MerchantContractAddress) public view onlyOwner returns(uint) {
-        return merchants[MerchantContractAddress].status_contract;
-    }
-
-    function getMerchantContractStatusWithdrawals(address MerchantContractAddress) public view onlyOwner returns(uint) {
-        return merchants[MerchantContractAddress].status_withdrawals;
-    }
-
-    function getRequiredNumberOfVotes() public view returns(uint) {
-        return RequiredNumberOfVotes;
-    }
-
-    function changeRequiredNumberOfVotes(uint NumberOfVotes) public onlyOwner {
-        RequiredNumberOfVotes = NumberOfVotes;
-    }
-
-    function voteNewMerchantContractApproval(address MerchantContractAddress) public {
-        if(merchants[MerchantContractAddress].status_contract == 0) revert("Merchant doesn't exist!");
-        // if(merchants[MerchantContractAddress].status_contract == 1) revert("Merchant exist but not approved!");
-        if(merchants[MerchantContractAddress].status_contract == 2) revert("Merchant has already been approved!");
-
-        if(saveVoters[msg.sender][MerchantContractAddress].voted == true) revert("This address has already voted in this MerchantContract!");
-
-        merchants[MerchantContractAddress].votes += 1;
-
-        saveVoters[msg.sender][MerchantContractAddress].voted = true;
-
-        // Voter | MerchantContract
-        emit VoteNewMerchantContract(msg.sender, MerchantContractAddress);
-
-        if(merchants[MerchantContractAddress].votes > RequiredNumberOfVotes) approveMerchantContract(MerchantContractAddress);
+    function withdrawRest(MerchantContract contractInstance) public onlyOwner approved(contractInstance) {
+        uint256 amount = contractInstance.withdrawRest();
+        emit WithdrawRest(contractInstance, amount);
     }
 
 
 
-    /* ========== MERCHANTCONTRACTS EVENTS ========== */
-    function eventsMerchantContracts(uint eventID, address MerchantContractAddress, uint256 Amount) public {
-        if(merchants[msg.sender].status_contract != 2) revert("Merchant hasn't been approved!");
+    /* ========== MERCHANTS/BUYERS ========== */
+    function voteApproval(MerchantContract contractInstance) public {
+        Merchant storage merchant = merchants[contractInstance];
+        require(merchant.status == 1, "Merchant does not exist or has already been approved!");
+        require(merchant.voters[msg.sender] == false, "This address has already voted in this MerchantContract!");
 
-        if(eventID == 1) emit Withdrawal(MerchantContractAddress, Amount);
-        if(eventID == 2) emit TopUpMyContract(MerchantContractAddress, Amount);
+        merchant.voters[msg.sender] = true;
+
+        uint votePower = sqrt(buyersHistoric[msg.sender].purchases) + 1;
+        merchant.votes += votePower > 20 ? 20 : votePower;
+
+        // MerchantContract | Voter
+        emit VoteNewMerchantContract(contractInstance, msg.sender);
+
+        if (merchant.votes >= requiredNumberOfVotes) approve(contractInstance);
     }
 
-    function eventsMerchantContracts2(uint eventID, address MerchantContractAddress, uint IDPurchase, uint Sells, uint Refunds) public {
-        if(merchants[msg.sender].status_contract != 2) revert("Merchant hasn't been approved!");
-
-        if(eventID == 1) emit Complete(MerchantContractAddress, IDPurchase);
-        if(eventID == 2) emit Historic(MerchantContractAddress, Sells, Refunds);
+    function sqrt(uint x) private pure returns (uint y) {
+        uint z = (x + 1) / 2;
+        y = x;
+        while (z < y) {
+            y = z;
+            z = (x / z + z) / 2;
+        }
     }
 
-    function eventsMerchantContracts3(uint eventID, address MerchantContractAddress, uint IDPurchase, uint256 Date, address BuyerAddress, uint256 Amount, uint PurchaseStatus, uint EscrowTime) public {
-        if(merchants[msg.sender].status_contract != 2) revert("Merchant hasn't been approved!");
 
-        if(eventID == 1) emit CreatePurchase(MerchantContractAddress, IDPurchase, Date, Amount, EscrowTime, PurchaseStatus);
-        if(eventID == 2) emit Buy(MerchantContractAddress, IDPurchase, Date, BuyerAddress, Amount, PurchaseStatus);
-        if(eventID == 3) emit Refund(MerchantContractAddress, IDPurchase, Date, BuyerAddress, Amount, PurchaseStatus);
+
+    /* ========== MERCHANTCONTRACT EVENTS ========== */
+    function createPurchase(uint idPurchase, uint256 amount, uint cancelTime, uint completeTime) public approved(MerchantContract(msg.sender)) {
+        emit CreatePurchase(MerchantContract(msg.sender), idPurchase, amount, cancelTime, completeTime);
+    }
+
+    function buy(uint idPurchase, uint cancelTime, uint completeTime, address buyerAddress, uint256 amount) public approved(MerchantContract(msg.sender)) {
+        buyersHistoric[buyerAddress].purchases += 1; // purchase completed
+        emit Buy(MerchantContract(msg.sender), idPurchase, cancelTime, completeTime, buyerAddress, amount);
+    }
+
+    function complete(uint idPurchase) public approved(MerchantContract(msg.sender)) {
+        emit Complete(MerchantContract(msg.sender), idPurchase);
+    }
+
+    function refund(uint idPurchase, address buyerAddress, uint256 amount) public approved(MerchantContract(msg.sender)) {
+        buyersHistoric[buyerAddress].cancellations += 1; // purchase refunded
+        emit Refund(MerchantContract(msg.sender), idPurchase, buyerAddress, amount);
+    }
+
+    function withdrawal(uint256 amount) public approved(MerchantContract(msg.sender)) {
+        emit Withdrawal(MerchantContract(msg.sender), amount);
+    }
+
+    function cancel(address buyerAddress, uint idPurchase) public approved(MerchantContract(msg.sender)) {
+        buyersHistoric[buyerAddress].cancellations += 1; // purchase canceled
+        emit Cancel(MerchantContract(msg.sender), buyerAddress, idPurchase);
     }
 
 
 
     /* ========== EVENTS ========== */
-    event CreatedMerchantContract(address MerchantContractAddress, address MerchantAddress, string MerchantName);
-    event ApprovedMerchantContract(address MerchantContractAddress, string MerchantName, bool Approved); // true = approved; false = not approved
-    event PausedMerchantContract(address MerchantContractAddress, bool Paused); // true = withdrawals paused; false = withdrawals unpaused
-    event VoteNewMerchantContract(address Voter, address MerchantContractAddress);
+    event CreateMerchantContract(MerchantContract contractInstance, address merchantAddress, string merchantName);
+    event ApproveMerchantContract(MerchantContract contractInstance);
+    event PauseMerchantContract(MerchantContract contractInstance, bool paused);
+    event VoteNewMerchantContract(MerchantContract contractInstance, address voter);
 
-
-
-    /* ========== MERCHANTCONTRACTS EVENTS ========== */
-    event TopUpMyContract(address MerchantContractAddress, uint256 Amount);
-    event Historic(address MerchantContractAddress, uint Sells, uint Refunds);
-
-    // Purchase Flow
-    event CreatePurchase(address MerchantContractAddress, uint IDPurchase, uint256 DateCreated, uint256 PurchaseAmount, uint EscrowTime, uint PurchaseStatus);
-    event Buy(address MerchantContractAddress, uint IDPurchase, uint256 DateFinished, address BuyerAddress, uint256 PurchaseAmount, uint PurchaseStatus);
-    event Complete(address MerchantContractAddress, uint IDPurchase);
-    event Withdrawal(address MerchantContractAddress, uint256 Balance);
-    event Refund(address MerchantContractAddress, uint IDPurchase, uint256 Date, address BuyerAddress, uint256 RefundAmount, uint PurchaseStatus);
+    event CreatePurchase(MerchantContract contractInstance, uint idPurchase, uint256 purchaseAmount, uint cancelTime, uint completeTime);
+    event Buy(MerchantContract contractInstance, uint idPurchase, uint cancelTime, uint completeTime, address buyerAddress, uint256 purchaseAmount);
+    event Complete(MerchantContract contractInstance, uint idPurchase);
+    event Withdrawal(MerchantContract contractInstance, uint256 merchantBalance);
+    event Refund(MerchantContract contractInstance, uint idPurchase, address buyerAddress, uint256 refundAmount);
+    event Cancel(MerchantContract contractInstance, address buyerAddress, uint idPurchase);
+    event WithdrawRest(MerchantContract contractInstance, uint256 restBalance);
 }

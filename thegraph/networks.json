@@ -1,7 +1,8 @@
 {
   "goerli": {
     "MainContract": {
-      "address": "0x4d327b1Aac27CAd018EB7389Ba0810f028EAbb20"
+      "address": "0x8d18154e1fC5de342A05ee7661AB4F22D9F57d2B",
+      "startBlock": 0
     }
   }
 }

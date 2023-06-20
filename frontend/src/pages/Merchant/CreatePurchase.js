@@ -10,27 +10,28 @@ const CreatePurchase = () => {
     const [purchasesList, setPurchasesList] = useState([])
     const [idPurchase, setIDPurchase] = useState(0)
     const [purchaseAmount, setPurchaseAmount] = useState(0)
-    const [escrowTime, setEscrowTime] = useState(0)
+    const [cancelTime, setCancelTime] = useState(0)
+    const [completeTime, setCompleteTime] = useState(0)
 
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner()
     const instanceMerchantContract = new ethers.Contract(MerchantContractAddress, MerchantContractABI.abi, signer)
 
 
-    async function getPurchasesList(MerchantContractAddress) {
+    async function getPurchasesList(contractInstance) {
         try {
             const result = await axios.post(
                 `${process.env.REACT_APP_THE_GRAPH_API}`,
                 {
                     query: `
                     {
-                        createPurchases(orderBy: id, orderDirection: desc, where: {MerchantContractAddress: "${MerchantContractAddress}"}) {
+                        createPurchases(orderBy: idPurchase, orderDirection: asc, where: {contractInstance: "${contractInstance}"}) {
                             id
-                            MerchantContractAddress
-                            IDPurchase
-                            DateCreated
-                            PurchaseAmount
-                            EscrowTime
+                            contractInstance
+                            idPurchase
+                            purchaseAmount
+                            cancelTime
+                            completeTime
                         }
                     }
                     `
@@ -45,20 +46,20 @@ const CreatePurchase = () => {
     }
 
     async function createPurchase() {
-        if (idPurchase === null || purchaseAmount === null || escrowTime === null) {
+        if (idPurchase === null || purchaseAmount === null || cancelTime === null || completeTime === null) {
             alert("Fill the all fields!")
             return
         }
 
         for (let i = 0; i < purchasesList.length; i++) {
-            if (purchasesList[i].IDPurchase === idPurchase) {
+            if (purchasesList[i].idPurchase === idPurchase) {
                 alert("This IDPurchase already exist!")
                 return
             }
         }
 
         try {
-            const merchantNewPurchase = await instanceMerchantContract.createPurchase(idPurchase, purchaseAmount, escrowTime, { from: currentAccount, gasLimit: 1500000 })
+            const merchantNewPurchase = await instanceMerchantContract.createPurchase(idPurchase, purchaseAmount, cancelTime, completeTime, { from: currentAccount, gasLimit: 1500000 })
             console.log("Merchant New Purchase: ", merchantNewPurchase)
 
             document.getElementById("done-successfully-1").style.display = ''
@@ -86,7 +87,7 @@ const CreatePurchase = () => {
                 type="text"
                 id="idPurchase"
                 name="fname"
-                placeholder="Insert your wallet address"
+                placeholder="Insert the ID purchase"
                 value={idPurchase}
                 onChange={(e) => setIDPurchase(e.target.value)}
             />
@@ -97,20 +98,31 @@ const CreatePurchase = () => {
                 type="text"
                 id="purchaseAmount"
                 name="fname"
-                placeholder="Insert your wallet address"
+                placeholder="Insert the purchase amount"
                 value={purchaseAmount}
                 onChange={(e) => setPurchaseAmount(e.target.value)}
             />
             <br />
 
-            <label htmlFor="escrowTime">Escrow Time:</label>
+            <label htmlFor="cancelTime">Cancel Time:</label>
             <input
                 type="text"
-                id="escrowTime"
+                id="cancelTime"
                 name="fname"
-                placeholder="Insert your wallet address"
-                value={escrowTime}
-                onChange={(e) => setEscrowTime(e.target.value)}
+                placeholder="Insert the cancel time"
+                value={cancelTime}
+                onChange={(e) => setCancelTime(e.target.value)}
+            />
+            <br />
+
+            <label htmlFor="completeTime">Complete Time:</label>
+            <input
+                type="text"
+                id="completeTime"
+                name="fname"
+                placeholder="Insert the complete time"
+                value={completeTime}
+                onChange={(e) => setCompleteTime(e.target.value)}
             />
             <br />
 

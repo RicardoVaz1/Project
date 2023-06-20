@@ -21,16 +21,26 @@ function App() {
 
   function setListOfProducts() {
     let listOfProducts = [
-      { IDPurchase: 1, PurchaseAmount: 10, EscrowTime: 10 },
-      { IDPurchase: 2, PurchaseAmount: 20, EscrowTime: 20 },
-      { IDPurchase: 3, PurchaseAmount: 30, EscrowTime: 30 },
-      { IDPurchase: 4, PurchaseAmount: 40, EscrowTime: 40 },
-      { IDPurchase: 5, PurchaseAmount: 50, EscrowTime: 50 },
-      { IDPurchase: 6, PurchaseAmount: 60, EscrowTime: 60 },
-      { IDPurchase: 7, PurchaseAmount: 70, EscrowTime: 70 },
-      { IDPurchase: 8, PurchaseAmount: 80, EscrowTime: 80 },
-      { IDPurchase: 9, PurchaseAmount: 90, EscrowTime: 90 },
-      { IDPurchase: 10, PurchaseAmount: 100, EscrowTime: 100 },
+      { idPurchase: 1, purchaseAmount: 10, cancelTime: 10, completeTime: 10 },
+      { idPurchase: 2, purchaseAmount: 20, cancelTime: 20, completeTime: 20 },
+      { idPurchase: 3, purchaseAmount: 30, cancelTime: 30, completeTime: 30 },
+      { idPurchase: 4, purchaseAmount: 40, cancelTime: 40, completeTime: 40 },
+      { idPurchase: 5, purchaseAmount: 50, cancelTime: 50, completeTime: 50 },
+      { idPurchase: 6, purchaseAmount: 60, cancelTime: 60, completeTime: 60 },
+      { idPurchase: 7, purchaseAmount: 70, cancelTime: 70, completeTime: 70 },
+      { idPurchase: 8, purchaseAmount: 80, cancelTime: 80, completeTime: 80 },
+      { idPurchase: 9, purchaseAmount: 90, cancelTime: 90, completeTime: 90 },
+      { idPurchase: 10, purchaseAmount: 100, cancelTime: 100, completeTime: 200 },
+      { idPurchase: 11, purchaseAmount: 110, cancelTime: 150, completeTime: 300 },
+      { idPurchase: 12, purchaseAmount: 120, cancelTime: 200, completeTime: 400 },
+      { idPurchase: 13, purchaseAmount: 130, cancelTime: 300, completeTime: 500 },
+      { idPurchase: 14, purchaseAmount: 140, cancelTime: 400, completeTime: 600 },
+      { idPurchase: 15, purchaseAmount: 150, cancelTime: 500, completeTime: 700 },
+      { idPurchase: 16, purchaseAmount: 100, cancelTime: 1000, completeTime: 1200 },
+      { idPurchase: 17, purchaseAmount: 100, cancelTime: 1500, completeTime: 1600 },
+      { idPurchase: 18, purchaseAmount: 100, cancelTime: 2000, completeTime: 2200 },
+      { idPurchase: 19, purchaseAmount: 100, cancelTime: 2500, completeTime: 2500 },
+      { idPurchase: 20, purchaseAmount: 100, cancelTime: 3000, completeTime: 3500 },
     ]
 
     setProductsList(listOfProducts)
@@ -40,32 +50,40 @@ function App() {
     const instanceMerchantContract2 = instanceMerchantContract.current
 
     for (let i = 0; i < productsList.length; i++) {
-      const IDPurchase = productsList[i].IDPurchase
+      const idPurchase = productsList[i].idPurchase
 
       try {
-        const purchase_status = await instanceMerchantContract2.getPurchaseStatus(IDPurchase)
+        const purchase_status = await instanceMerchantContract2.purchaseStatus(idPurchase)
         let purchase_status_int = parseInt(purchase_status, 16)
 
         if (purchase_status_int === 0) {
-          document.getElementById(`${IDPurchase}_status`).textContent = "Not Created"
-          document.getElementById(`${IDPurchase}_button`).setAttribute("style", "display: table-cell;")
+          document.getElementById(`${idPurchase}_status`).textContent = "Not Created"
+          document.getElementById(`${idPurchase}_button`).setAttribute("style", "display: table-cell;")
+          document.getElementById(`${idPurchase}_buy`).setAttribute("style", "display: table-cell;")
         }
 
         if (purchase_status_int === 1) {
-          document.getElementById(`${IDPurchase}_status`).textContent = "Not Paid"
-          document.getElementById(`${IDPurchase}_button`).setAttribute("style", "display: table-cell;")
+          document.getElementById(`${idPurchase}_status`).textContent = "Not Paid"
+          document.getElementById(`${idPurchase}_button`).setAttribute("style", "display: table-cell;")
+          document.getElementById(`${idPurchase}_buy`).setAttribute("style", "display: table-cell;")
         }
 
         if (purchase_status_int === 2) {
-          document.getElementById(`${IDPurchase}_status`).textContent = "Paid"
+          document.getElementById(`${idPurchase}_status`).textContent = "Paid"
+          document.getElementById(`${idPurchase}_button`).setAttribute("style", "display: table-cell;")
+          document.getElementById(`${idPurchase}_cancel`).setAttribute("style", "display: table-cell;")
         }
 
         if (purchase_status_int === 3) {
-          document.getElementById(`${IDPurchase}_status`).textContent = "Completed"
+          document.getElementById(`${idPurchase}_status`).textContent = "Completed"
         }
 
         if (purchase_status_int === 4) {
-          document.getElementById(`${IDPurchase}_status`).textContent = "Refunded"
+          document.getElementById(`${idPurchase}_status`).textContent = "Refunded"
+        }
+
+        if (purchase_status_int === 5) {
+          document.getElementById(`${idPurchase}_status`).textContent = "Canceled"
         }
       } catch (error) {
         console.log("ERROR AT GETTING MERCHANT CONTRACT INFO: ", error)
@@ -92,17 +110,27 @@ function App() {
     provider2.getNetwork().then((result) => {
       setChainID(result.chainId)
     })
+
+    getMerchantContractInfo()
   }
 
-  async function buy(idPurchase, purchaseAmount, escrowTime) {
+  async function buy(idPurchase, purchaseAmount, cancelTime, completeTime) {
     const instanceMerchantContract2 = instanceMerchantContract.current
 
     provider2 = new ethers.providers.Web3Provider(window.ethereum)
     const signer2 = provider2.getSigner()
     const buyerInstanceMerchantContract = new ethers.Contract(MerchantContractAddress, MerchantContractABI.abi, signer2)
 
+    const _purchaseStatus = await getPurchaseStatus(idPurchase)
+
     try {
-      const MerchantCreatePurchase = await instanceMerchantContract2.createPurchase(idPurchase, purchaseAmount, escrowTime, { from: MerchantAddress, gasLimit: 1500000 })
+      if(_purchaseStatus > 1) {
+        console.log("idPurchase: " + idPurchase +", purchaseStatus: ", _purchaseStatus)
+        console.log("Purchase must exist and has not yet been paid! (state: 0 or 1)")
+        return
+      }
+
+      const MerchantCreatePurchase = await instanceMerchantContract2.createPurchase(idPurchase, purchaseAmount, cancelTime, completeTime, { from: MerchantAddress, gasLimit: 1500000 })
       console.log("Merchant Create Purchase: ", MerchantCreatePurchase)
 
       const BuyerNewBuy = await buyerInstanceMerchantContract.buy(idPurchase, { from: currentAccount, value: purchaseAmount, gasLimit: 1500000 })
@@ -116,6 +144,51 @@ function App() {
     setTimeout(function () {
       document.getElementById("done-successfully").style.display = 'none'
     }, 2000)
+  }
+
+  async function cancel(idPurchase) {
+    provider2 = new ethers.providers.Web3Provider(window.ethereum)
+    const signer2 = provider2.getSigner()
+    const buyerInstanceMerchantContract = new ethers.Contract(MerchantContractAddress, MerchantContractABI.abi, signer2)
+
+    const _purchaseStatus = await getPurchaseStatus(idPurchase)
+
+    try {
+      if(_purchaseStatus !== 2) {
+        console.log("idPurchase: " + idPurchase +", purchaseStatus: ", _purchaseStatus)
+        console.log("Purchase must be in payed state! (state: 2)")
+        return
+      }
+
+      const BuyerNewCancel = await buyerInstanceMerchantContract.cancel(idPurchase, { from: currentAccount, gasLimit: 1500000 })
+      console.log("Buyer New Cancel: ", BuyerNewCancel)
+
+      document.getElementById("done-successfully").style.display = ''
+    } catch (error) {
+      console.log("ERROR AT CANCELING THE PURCHASE: ", error)
+    }
+
+    setTimeout(function () {
+      document.getElementById("done-successfully").style.display = 'none'
+    }, 2000)
+  }
+
+  async function getPurchaseStatus(idPurchase) {
+    provider2 = new ethers.providers.Web3Provider(window.ethereum)
+    const signer2 = provider2.getSigner()
+    const buyerInstanceMerchantContract = new ethers.Contract(MerchantContractAddress, MerchantContractABI.abi, signer2)
+    let BuyerGetPurchaseStatus
+
+    try {
+      BuyerGetPurchaseStatus = await buyerInstanceMerchantContract.purchaseStatus(idPurchase, { from: currentAccount, gasLimit: 1500000 })
+      console.log("Buyer Get Purchase Status: ", BuyerGetPurchaseStatus.toNumber())
+
+      document.getElementById("done-successfully").style.display = ''
+    } catch (error) {
+      console.log("ERROR AT CANCELING THE PURCHASE: ", error)
+    }
+
+    return BuyerGetPurchaseStatus.toNumber()
   }
 
 
@@ -142,7 +215,8 @@ function App() {
           <tr>
             <th>ID Purchase</th>
             <th>Purchase Amount</th>
-            <th>Escrow Time</th>
+            <th>Cancel Time</th>
+            <th>Complete Time</th>
             <th>Purchase Status</th>
             <th></th>
           </tr>
@@ -152,14 +226,18 @@ function App() {
           {productsList.map((item, i) => {
             return (
               <tr className="item" key={i}>
-                <td className="itemDisplay">{item.IDPurchase}</td>
-                <td className="itemDisplay">{item.PurchaseAmount}</td>
-                <td className="itemDisplay">{item.EscrowTime}</td>
-                <td className="itemDisplay" id={`${item.IDPurchase}_status`}>-</td>
-                <td className="itemButton" id={`${item.IDPurchase}_button`} style={{ display: "none" }}>
+                <td className="itemDisplay">{item.idPurchase}</td>
+                <td className="itemDisplay">{item.purchaseAmount}</td>
+                <td className="itemDisplay">{item.cancelTime}</td>
+                <td className="itemDisplay">{item.completeTime}</td>
+                <td className="itemDisplay" id={`${item.idPurchase}_status`}>-</td>
+                <td className="itemButton" id={`${item.idPurchase}_button`} style={{ display: "none" }}>
                   {!currentAccount ?
                     <button onClick={() => connectWallet()}>Connect Wallet</button> :
-                    <button onClick={() => buy(item.IDPurchase, item.PurchaseAmount, item.EscrowTime)}>Buy</button>
+                    <>
+                      <button onClick={() => buy(item.idPurchase, item.purchaseAmount, item.cancelTime, item.completeTime)} id={`${item.idPurchase}_buy`} style={{ display: "none" }}>Buy</button>
+                      <button onClick={() => cancel(item.idPurchase)} id={`${item.idPurchase}_cancel`} style={{ display: "none" }}>Cancel</button>
+                    </>
                   }
                 </td>
               </tr>

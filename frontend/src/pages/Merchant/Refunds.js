@@ -7,7 +7,6 @@ import MerchantContractABI from "../../abis/MerchantContract.json"
 const Refunds = () => {
     const { currentAccount, MerchantContractAddress } = JSON.parse(localStorage.getItem("userData"))
     const [idPurchase, setIDPurchase] = useState(0)
-    const [buyerAddress, setBuyerAddress] = useState("")
     const [refundAmount, setRefundAmount] = useState(0)
 
     const provider = new ethers.providers.Web3Provider(window.ethereum)
@@ -16,13 +15,13 @@ const Refunds = () => {
 
 
     async function refund() {
-        if (idPurchase === null || buyerAddress === "" || refundAmount === null) {
+        if (idPurchase === null || refundAmount === null) {
             alert("Fill the all fields!")
             return
         }
 
         try {
-            const merchantNewRefund = await instanceMerchantContract.refund(idPurchase, buyerAddress, refundAmount, { from: currentAccount, gasLimit: 1500000 })
+            const merchantNewRefund = await instanceMerchantContract.refund(idPurchase, refundAmount, { from: currentAccount, gasLimit: 1500000 })
             console.log("Merchant New Refund: ", merchantNewRefund)
 
             document.getElementById("done-successfully-4").style.display = ''
@@ -45,20 +44,9 @@ const Refunds = () => {
                 type="text"
                 id="idPurchase"
                 name="fname"
-                placeholder="Insert your wallet address"
+                placeholder="Insert the ID Purchase"
                 value={idPurchase}
                 onChange={(e) => setIDPurchase(e.target.value)}
-            />
-            <br />
-
-            <label htmlFor="buyerAddress">Buyer Address:</label>
-            <input
-                type="text"
-                id="buyerAddress"
-                name="fname"
-                placeholder="Insert your wallet address"
-                value={buyerAddress}
-                onChange={(e) => setBuyerAddress(e.target.value)}
             />
             <br />
 
@@ -67,7 +55,7 @@ const Refunds = () => {
                 type="text"
                 id="refundAmount"
                 name="fname"
-                placeholder="Insert your wallet address"
+                placeholder="Insert the refund amount"
                 value={refundAmount}
                 onChange={(e) => setRefundAmount(e.target.value)}
             />

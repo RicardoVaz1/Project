@@ -10,29 +10,21 @@ import {
   BigInt
 } from "@graphprotocol/graph-ts";
 
-export class ApprovedMerchantContract extends ethereum.Event {
-  get params(): ApprovedMerchantContract__Params {
-    return new ApprovedMerchantContract__Params(this);
+export class ApproveMerchantContract extends ethereum.Event {
+  get params(): ApproveMerchantContract__Params {
+    return new ApproveMerchantContract__Params(this);
   }
 }
 
-export class ApprovedMerchantContract__Params {
-  _event: ApprovedMerchantContract;
+export class ApproveMerchantContract__Params {
+  _event: ApproveMerchantContract;
 
-  constructor(event: ApprovedMerchantContract) {
+  constructor(event: ApproveMerchantContract) {
     this._event = event;
   }
 
-  get MerchantContractAddress(): Address {
+  get contractInstance(): Address {
     return this._event.parameters[0].value.toAddress();
-  }
-
-  get MerchantName(): string {
-    return this._event.parameters[1].value.toString();
-  }
-
-  get Approved(): boolean {
-    return this._event.parameters[2].value.toBoolean();
   }
 }
 
@@ -49,28 +41,54 @@ export class Buy__Params {
     this._event = event;
   }
 
-  get MerchantContractAddress(): Address {
+  get contractInstance(): Address {
     return this._event.parameters[0].value.toAddress();
   }
 
-  get IDPurchase(): BigInt {
+  get idPurchase(): BigInt {
     return this._event.parameters[1].value.toBigInt();
   }
 
-  get DateFinished(): BigInt {
+  get cancelTime(): BigInt {
     return this._event.parameters[2].value.toBigInt();
   }
 
-  get BuyerAddress(): Address {
-    return this._event.parameters[3].value.toAddress();
+  get completeTime(): BigInt {
+    return this._event.parameters[3].value.toBigInt();
   }
 
-  get PurchaseAmount(): BigInt {
-    return this._event.parameters[4].value.toBigInt();
+  get buyerAddress(): Address {
+    return this._event.parameters[4].value.toAddress();
   }
 
-  get PurchaseStatus(): BigInt {
+  get purchaseAmount(): BigInt {
     return this._event.parameters[5].value.toBigInt();
+  }
+}
+
+export class Cancel extends ethereum.Event {
+  get params(): Cancel__Params {
+    return new Cancel__Params(this);
+  }
+}
+
+export class Cancel__Params {
+  _event: Cancel;
+
+  constructor(event: Cancel) {
+    this._event = event;
+  }
+
+  get contractInstance(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+
+  get buyerAddress(): Address {
+    return this._event.parameters[1].value.toAddress();
+  }
+
+  get idPurchase(): BigInt {
+    return this._event.parameters[2].value.toBigInt();
   }
 }
 
@@ -87,12 +105,38 @@ export class Complete__Params {
     this._event = event;
   }
 
-  get MerchantContractAddress(): Address {
+  get contractInstance(): Address {
     return this._event.parameters[0].value.toAddress();
   }
 
-  get IDPurchase(): BigInt {
+  get idPurchase(): BigInt {
     return this._event.parameters[1].value.toBigInt();
+  }
+}
+
+export class CreateMerchantContract extends ethereum.Event {
+  get params(): CreateMerchantContract__Params {
+    return new CreateMerchantContract__Params(this);
+  }
+}
+
+export class CreateMerchantContract__Params {
+  _event: CreateMerchantContract;
+
+  constructor(event: CreateMerchantContract) {
+    this._event = event;
+  }
+
+  get contractInstance(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+
+  get merchantAddress(): Address {
+    return this._event.parameters[1].value.toAddress();
+  }
+
+  get merchantName(): string {
+    return this._event.parameters[2].value.toString();
   }
 }
 
@@ -109,101 +153,45 @@ export class CreatePurchase__Params {
     this._event = event;
   }
 
-  get MerchantContractAddress(): Address {
+  get contractInstance(): Address {
     return this._event.parameters[0].value.toAddress();
   }
 
-  get IDPurchase(): BigInt {
+  get idPurchase(): BigInt {
     return this._event.parameters[1].value.toBigInt();
   }
 
-  get DateCreated(): BigInt {
+  get purchaseAmount(): BigInt {
     return this._event.parameters[2].value.toBigInt();
   }
 
-  get PurchaseAmount(): BigInt {
+  get cancelTime(): BigInt {
     return this._event.parameters[3].value.toBigInt();
   }
 
-  get EscrowTime(): BigInt {
+  get completeTime(): BigInt {
     return this._event.parameters[4].value.toBigInt();
   }
+}
 
-  get PurchaseStatus(): BigInt {
-    return this._event.parameters[5].value.toBigInt();
+export class PauseMerchantContract extends ethereum.Event {
+  get params(): PauseMerchantContract__Params {
+    return new PauseMerchantContract__Params(this);
   }
 }
 
-export class CreatedMerchantContract extends ethereum.Event {
-  get params(): CreatedMerchantContract__Params {
-    return new CreatedMerchantContract__Params(this);
-  }
-}
+export class PauseMerchantContract__Params {
+  _event: PauseMerchantContract;
 
-export class CreatedMerchantContract__Params {
-  _event: CreatedMerchantContract;
-
-  constructor(event: CreatedMerchantContract) {
+  constructor(event: PauseMerchantContract) {
     this._event = event;
   }
 
-  get MerchantContractAddress(): Address {
+  get contractInstance(): Address {
     return this._event.parameters[0].value.toAddress();
   }
 
-  get MerchantAddress(): Address {
-    return this._event.parameters[1].value.toAddress();
-  }
-
-  get MerchantName(): string {
-    return this._event.parameters[2].value.toString();
-  }
-}
-
-export class Historic extends ethereum.Event {
-  get params(): Historic__Params {
-    return new Historic__Params(this);
-  }
-}
-
-export class Historic__Params {
-  _event: Historic;
-
-  constructor(event: Historic) {
-    this._event = event;
-  }
-
-  get MerchantContractAddress(): Address {
-    return this._event.parameters[0].value.toAddress();
-  }
-
-  get Sells(): BigInt {
-    return this._event.parameters[1].value.toBigInt();
-  }
-
-  get Refunds(): BigInt {
-    return this._event.parameters[2].value.toBigInt();
-  }
-}
-
-export class PausedMerchantContract extends ethereum.Event {
-  get params(): PausedMerchantContract__Params {
-    return new PausedMerchantContract__Params(this);
-  }
-}
-
-export class PausedMerchantContract__Params {
-  _event: PausedMerchantContract;
-
-  constructor(event: PausedMerchantContract) {
-    this._event = event;
-  }
-
-  get MerchantContractAddress(): Address {
-    return this._event.parameters[0].value.toAddress();
-  }
-
-  get Paused(): boolean {
+  get paused(): boolean {
     return this._event.parameters[1].value.toBoolean();
   }
 }
@@ -221,50 +209,20 @@ export class Refund__Params {
     this._event = event;
   }
 
-  get MerchantContractAddress(): Address {
+  get contractInstance(): Address {
     return this._event.parameters[0].value.toAddress();
   }
 
-  get IDPurchase(): BigInt {
+  get idPurchase(): BigInt {
     return this._event.parameters[1].value.toBigInt();
   }
 
-  get Date(): BigInt {
-    return this._event.parameters[2].value.toBigInt();
+  get buyerAddress(): Address {
+    return this._event.parameters[2].value.toAddress();
   }
 
-  get BuyerAddress(): Address {
-    return this._event.parameters[3].value.toAddress();
-  }
-
-  get RefundAmount(): BigInt {
-    return this._event.parameters[4].value.toBigInt();
-  }
-
-  get PurchaseStatus(): BigInt {
-    return this._event.parameters[5].value.toBigInt();
-  }
-}
-
-export class TopUpMyContract extends ethereum.Event {
-  get params(): TopUpMyContract__Params {
-    return new TopUpMyContract__Params(this);
-  }
-}
-
-export class TopUpMyContract__Params {
-  _event: TopUpMyContract;
-
-  constructor(event: TopUpMyContract) {
-    this._event = event;
-  }
-
-  get MerchantContractAddress(): Address {
-    return this._event.parameters[0].value.toAddress();
-  }
-
-  get Amount(): BigInt {
-    return this._event.parameters[1].value.toBigInt();
+  get refundAmount(): BigInt {
+    return this._event.parameters[3].value.toBigInt();
   }
 }
 
@@ -281,12 +239,34 @@ export class VoteNewMerchantContract__Params {
     this._event = event;
   }
 
-  get Voter(): Address {
+  get contractInstance(): Address {
     return this._event.parameters[0].value.toAddress();
   }
 
-  get MerchantContractAddress(): Address {
+  get voter(): Address {
     return this._event.parameters[1].value.toAddress();
+  }
+}
+
+export class WithdrawRest extends ethereum.Event {
+  get params(): WithdrawRest__Params {
+    return new WithdrawRest__Params(this);
+  }
+}
+
+export class WithdrawRest__Params {
+  _event: WithdrawRest;
+
+  constructor(event: WithdrawRest) {
+    this._event = event;
+  }
+
+  get contractInstance(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+
+  get restBalance(): BigInt {
+    return this._event.parameters[1].value.toBigInt();
   }
 }
 
@@ -303,64 +283,37 @@ export class Withdrawal__Params {
     this._event = event;
   }
 
-  get MerchantContractAddress(): Address {
+  get contractInstance(): Address {
     return this._event.parameters[0].value.toAddress();
   }
 
-  get Balance(): BigInt {
+  get merchantBalance(): BigInt {
     return this._event.parameters[1].value.toBigInt();
   }
 }
 
 export class MainContract__merchantsResult {
-  value0: Address;
-  value1: string;
-  value2: BigInt;
-  value3: BigInt;
-  value4: BigInt;
+  value0: BigInt;
+  value1: BigInt;
 
-  constructor(
-    value0: Address,
-    value1: string,
-    value2: BigInt,
-    value3: BigInt,
-    value4: BigInt
-  ) {
+  constructor(value0: BigInt, value1: BigInt) {
     this.value0 = value0;
     this.value1 = value1;
-    this.value2 = value2;
-    this.value3 = value3;
-    this.value4 = value4;
   }
 
   toMap(): TypedMap<string, ethereum.Value> {
     let map = new TypedMap<string, ethereum.Value>();
-    map.set("value0", ethereum.Value.fromAddress(this.value0));
-    map.set("value1", ethereum.Value.fromString(this.value1));
-    map.set("value2", ethereum.Value.fromUnsignedBigInt(this.value2));
-    map.set("value3", ethereum.Value.fromUnsignedBigInt(this.value3));
-    map.set("value4", ethereum.Value.fromUnsignedBigInt(this.value4));
+    map.set("value0", ethereum.Value.fromUnsignedBigInt(this.value0));
+    map.set("value1", ethereum.Value.fromUnsignedBigInt(this.value1));
     return map;
   }
 
-  getMerchantContract(): Address {
+  getStatus(): BigInt {
     return this.value0;
   }
 
-  getName(): string {
-    return this.value1;
-  }
-
-  getStatus_contract(): BigInt {
-    return this.value2;
-  }
-
-  getStatus_withdrawals(): BigInt {
-    return this.value3;
-  }
-
   getVotes(): BigInt {
-    return this.value4;
+    return this.value1;
   }
 }
 
@@ -369,21 +322,21 @@ export class MainContract extends ethereum.SmartContract {
     return new MainContract("MainContract", address);
   }
 
-  RequiredNumberOfVotes(): BigInt {
+  getNumberOfVotes(contractInstance: Address): BigInt {
     let result = super.call(
-      "RequiredNumberOfVotes",
-      "RequiredNumberOfVotes():(uint256)",
-      []
+      "getNumberOfVotes",
+      "getNumberOfVotes(address):(uint256)",
+      [ethereum.Value.fromAddress(contractInstance)]
     );
 
     return result[0].toBigInt();
   }
 
-  try_RequiredNumberOfVotes(): ethereum.CallResult<BigInt> {
+  try_getNumberOfVotes(contractInstance: Address): ethereum.CallResult<BigInt> {
     let result = super.tryCall(
-      "RequiredNumberOfVotes",
-      "RequiredNumberOfVotes():(uint256)",
-      []
+      "getNumberOfVotes",
+      "getNumberOfVotes(address):(uint256)",
+      [ethereum.Value.fromAddress(contractInstance)]
     );
     if (result.reverted) {
       return new ethereum.CallResult();
@@ -392,121 +345,23 @@ export class MainContract extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toBigInt());
   }
 
-  getMerchantContractNumberOfVotes(MerchantContractAddress: Address): BigInt {
+  getStatusContract(contractInstance: Address): BigInt {
     let result = super.call(
-      "getMerchantContractNumberOfVotes",
-      "getMerchantContractNumberOfVotes(address):(uint256)",
-      [ethereum.Value.fromAddress(MerchantContractAddress)]
+      "getStatusContract",
+      "getStatusContract(address):(uint256)",
+      [ethereum.Value.fromAddress(contractInstance)]
     );
 
     return result[0].toBigInt();
   }
 
-  try_getMerchantContractNumberOfVotes(
-    MerchantContractAddress: Address
+  try_getStatusContract(
+    contractInstance: Address
   ): ethereum.CallResult<BigInt> {
     let result = super.tryCall(
-      "getMerchantContractNumberOfVotes",
-      "getMerchantContractNumberOfVotes(address):(uint256)",
-      [ethereum.Value.fromAddress(MerchantContractAddress)]
-    );
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toBigInt());
-  }
-
-  getMerchantContractStatusContract(MerchantContractAddress: Address): BigInt {
-    let result = super.call(
-      "getMerchantContractStatusContract",
-      "getMerchantContractStatusContract(address):(uint256)",
-      [ethereum.Value.fromAddress(MerchantContractAddress)]
-    );
-
-    return result[0].toBigInt();
-  }
-
-  try_getMerchantContractStatusContract(
-    MerchantContractAddress: Address
-  ): ethereum.CallResult<BigInt> {
-    let result = super.tryCall(
-      "getMerchantContractStatusContract",
-      "getMerchantContractStatusContract(address):(uint256)",
-      [ethereum.Value.fromAddress(MerchantContractAddress)]
-    );
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toBigInt());
-  }
-
-  getMerchantContractStatusWithdrawals(
-    MerchantContractAddress: Address
-  ): BigInt {
-    let result = super.call(
-      "getMerchantContractStatusWithdrawals",
-      "getMerchantContractStatusWithdrawals(address):(uint256)",
-      [ethereum.Value.fromAddress(MerchantContractAddress)]
-    );
-
-    return result[0].toBigInt();
-  }
-
-  try_getMerchantContractStatusWithdrawals(
-    MerchantContractAddress: Address
-  ): ethereum.CallResult<BigInt> {
-    let result = super.tryCall(
-      "getMerchantContractStatusWithdrawals",
-      "getMerchantContractStatusWithdrawals(address):(uint256)",
-      [ethereum.Value.fromAddress(MerchantContractAddress)]
-    );
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toBigInt());
-  }
-
-  getOwnerAddress(): Address {
-    let result = super.call(
-      "getOwnerAddress",
-      "getOwnerAddress():(address)",
-      []
-    );
-
-    return result[0].toAddress();
-  }
-
-  try_getOwnerAddress(): ethereum.CallResult<Address> {
-    let result = super.tryCall(
-      "getOwnerAddress",
-      "getOwnerAddress():(address)",
-      []
-    );
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toAddress());
-  }
-
-  getRequiredNumberOfVotes(): BigInt {
-    let result = super.call(
-      "getRequiredNumberOfVotes",
-      "getRequiredNumberOfVotes():(uint256)",
-      []
-    );
-
-    return result[0].toBigInt();
-  }
-
-  try_getRequiredNumberOfVotes(): ethereum.CallResult<BigInt> {
-    let result = super.tryCall(
-      "getRequiredNumberOfVotes",
-      "getRequiredNumberOfVotes():(uint256)",
-      []
+      "getStatusContract",
+      "getStatusContract(address):(uint256)",
+      [ethereum.Value.fromAddress(contractInstance)]
     );
     if (result.reverted) {
       return new ethereum.CallResult();
@@ -518,16 +373,13 @@ export class MainContract extends ethereum.SmartContract {
   merchants(param0: Address): MainContract__merchantsResult {
     let result = super.call(
       "merchants",
-      "merchants(address):(address,string,uint256,uint256,uint256)",
+      "merchants(address):(uint256,uint256)",
       [ethereum.Value.fromAddress(param0)]
     );
 
     return new MainContract__merchantsResult(
-      result[0].toAddress(),
-      result[1].toString(),
-      result[2].toBigInt(),
-      result[3].toBigInt(),
-      result[4].toBigInt()
+      result[0].toBigInt(),
+      result[1].toBigInt()
     );
   }
 
@@ -536,7 +388,7 @@ export class MainContract extends ethereum.SmartContract {
   ): ethereum.CallResult<MainContract__merchantsResult> {
     let result = super.tryCall(
       "merchants",
-      "merchants(address):(address,string,uint256,uint256,uint256)",
+      "merchants(address):(uint256,uint256)",
       [ethereum.Value.fromAddress(param0)]
     );
     if (result.reverted) {
@@ -545,13 +397,48 @@ export class MainContract extends ethereum.SmartContract {
     let value = result.value;
     return ethereum.CallResult.fromValue(
       new MainContract__merchantsResult(
-        value[0].toAddress(),
-        value[1].toString(),
-        value[2].toBigInt(),
-        value[3].toBigInt(),
-        value[4].toBigInt()
+        value[0].toBigInt(),
+        value[1].toBigInt()
       )
     );
+  }
+
+  ownerAddress(): Address {
+    let result = super.call("ownerAddress", "ownerAddress():(address)", []);
+
+    return result[0].toAddress();
+  }
+
+  try_ownerAddress(): ethereum.CallResult<Address> {
+    let result = super.tryCall("ownerAddress", "ownerAddress():(address)", []);
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toAddress());
+  }
+
+  requiredNumberOfVotes(): BigInt {
+    let result = super.call(
+      "requiredNumberOfVotes",
+      "requiredNumberOfVotes():(uint256)",
+      []
+    );
+
+    return result[0].toBigInt();
+  }
+
+  try_requiredNumberOfVotes(): ethereum.CallResult<BigInt> {
+    let result = super.tryCall(
+      "requiredNumberOfVotes",
+      "requiredNumberOfVotes():(uint256)",
+      []
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBigInt());
   }
 }
 
@@ -581,32 +468,112 @@ export class ConstructorCall__Outputs {
   }
 }
 
-export class ChangeRequiredNumberOfVotesCall extends ethereum.Call {
-  get inputs(): ChangeRequiredNumberOfVotesCall__Inputs {
-    return new ChangeRequiredNumberOfVotesCall__Inputs(this);
+export class BuyCall extends ethereum.Call {
+  get inputs(): BuyCall__Inputs {
+    return new BuyCall__Inputs(this);
   }
 
-  get outputs(): ChangeRequiredNumberOfVotesCall__Outputs {
-    return new ChangeRequiredNumberOfVotesCall__Outputs(this);
+  get outputs(): BuyCall__Outputs {
+    return new BuyCall__Outputs(this);
   }
 }
 
-export class ChangeRequiredNumberOfVotesCall__Inputs {
-  _call: ChangeRequiredNumberOfVotesCall;
+export class BuyCall__Inputs {
+  _call: BuyCall;
 
-  constructor(call: ChangeRequiredNumberOfVotesCall) {
+  constructor(call: BuyCall) {
     this._call = call;
   }
 
-  get NumberOfVotes(): BigInt {
+  get idPurchase(): BigInt {
+    return this._call.inputValues[0].value.toBigInt();
+  }
+
+  get cancelTime(): BigInt {
+    return this._call.inputValues[1].value.toBigInt();
+  }
+
+  get completeTime(): BigInt {
+    return this._call.inputValues[2].value.toBigInt();
+  }
+
+  get buyerAddress(): Address {
+    return this._call.inputValues[3].value.toAddress();
+  }
+
+  get amount(): BigInt {
+    return this._call.inputValues[4].value.toBigInt();
+  }
+}
+
+export class BuyCall__Outputs {
+  _call: BuyCall;
+
+  constructor(call: BuyCall) {
+    this._call = call;
+  }
+}
+
+export class CancelCall extends ethereum.Call {
+  get inputs(): CancelCall__Inputs {
+    return new CancelCall__Inputs(this);
+  }
+
+  get outputs(): CancelCall__Outputs {
+    return new CancelCall__Outputs(this);
+  }
+}
+
+export class CancelCall__Inputs {
+  _call: CancelCall;
+
+  constructor(call: CancelCall) {
+    this._call = call;
+  }
+
+  get buyerAddress(): Address {
+    return this._call.inputValues[0].value.toAddress();
+  }
+
+  get idPurchase(): BigInt {
+    return this._call.inputValues[1].value.toBigInt();
+  }
+}
+
+export class CancelCall__Outputs {
+  _call: CancelCall;
+
+  constructor(call: CancelCall) {
+    this._call = call;
+  }
+}
+
+export class CompleteCall extends ethereum.Call {
+  get inputs(): CompleteCall__Inputs {
+    return new CompleteCall__Inputs(this);
+  }
+
+  get outputs(): CompleteCall__Outputs {
+    return new CompleteCall__Outputs(this);
+  }
+}
+
+export class CompleteCall__Inputs {
+  _call: CompleteCall;
+
+  constructor(call: CompleteCall) {
+    this._call = call;
+  }
+
+  get idPurchase(): BigInt {
     return this._call.inputValues[0].value.toBigInt();
   }
 }
 
-export class ChangeRequiredNumberOfVotesCall__Outputs {
-  _call: ChangeRequiredNumberOfVotesCall;
+export class CompleteCall__Outputs {
+  _call: CompleteCall;
 
-  constructor(call: ChangeRequiredNumberOfVotesCall) {
+  constructor(call: CompleteCall) {
     this._call = call;
   }
 }
@@ -628,11 +595,11 @@ export class CreateMerchantContractCall__Inputs {
     this._call = call;
   }
 
-  get MerchantWalletAddress(): Address {
+  get merchantWalletAddress(): Address {
     return this._call.inputValues[0].value.toAddress();
   }
 
-  get MerchantName(): string {
+  get merchantName(): string {
     return this._call.inputValues[1].value.toString();
   }
 }
@@ -645,264 +612,288 @@ export class CreateMerchantContractCall__Outputs {
   }
 }
 
-export class DisapproveMerchantContractCall extends ethereum.Call {
-  get inputs(): DisapproveMerchantContractCall__Inputs {
-    return new DisapproveMerchantContractCall__Inputs(this);
+export class CreatePurchaseCall extends ethereum.Call {
+  get inputs(): CreatePurchaseCall__Inputs {
+    return new CreatePurchaseCall__Inputs(this);
   }
 
-  get outputs(): DisapproveMerchantContractCall__Outputs {
-    return new DisapproveMerchantContractCall__Outputs(this);
+  get outputs(): CreatePurchaseCall__Outputs {
+    return new CreatePurchaseCall__Outputs(this);
   }
 }
 
-export class DisapproveMerchantContractCall__Inputs {
-  _call: DisapproveMerchantContractCall;
+export class CreatePurchaseCall__Inputs {
+  _call: CreatePurchaseCall;
 
-  constructor(call: DisapproveMerchantContractCall) {
+  constructor(call: CreatePurchaseCall) {
     this._call = call;
   }
 
-  get MerchantContractAddress(): Address {
-    return this._call.inputValues[0].value.toAddress();
-  }
-}
-
-export class DisapproveMerchantContractCall__Outputs {
-  _call: DisapproveMerchantContractCall;
-
-  constructor(call: DisapproveMerchantContractCall) {
-    this._call = call;
-  }
-}
-
-export class EventsMerchantContractsCall extends ethereum.Call {
-  get inputs(): EventsMerchantContractsCall__Inputs {
-    return new EventsMerchantContractsCall__Inputs(this);
-  }
-
-  get outputs(): EventsMerchantContractsCall__Outputs {
-    return new EventsMerchantContractsCall__Outputs(this);
-  }
-}
-
-export class EventsMerchantContractsCall__Inputs {
-  _call: EventsMerchantContractsCall;
-
-  constructor(call: EventsMerchantContractsCall) {
-    this._call = call;
-  }
-
-  get eventID(): BigInt {
+  get idPurchase(): BigInt {
     return this._call.inputValues[0].value.toBigInt();
   }
 
-  get MerchantContractAddress(): Address {
-    return this._call.inputValues[1].value.toAddress();
+  get amount(): BigInt {
+    return this._call.inputValues[1].value.toBigInt();
   }
 
-  get Amount(): BigInt {
-    return this._call.inputValues[2].value.toBigInt();
-  }
-}
-
-export class EventsMerchantContractsCall__Outputs {
-  _call: EventsMerchantContractsCall;
-
-  constructor(call: EventsMerchantContractsCall) {
-    this._call = call;
-  }
-}
-
-export class EventsMerchantContracts2Call extends ethereum.Call {
-  get inputs(): EventsMerchantContracts2Call__Inputs {
-    return new EventsMerchantContracts2Call__Inputs(this);
-  }
-
-  get outputs(): EventsMerchantContracts2Call__Outputs {
-    return new EventsMerchantContracts2Call__Outputs(this);
-  }
-}
-
-export class EventsMerchantContracts2Call__Inputs {
-  _call: EventsMerchantContracts2Call;
-
-  constructor(call: EventsMerchantContracts2Call) {
-    this._call = call;
-  }
-
-  get eventID(): BigInt {
-    return this._call.inputValues[0].value.toBigInt();
-  }
-
-  get MerchantContractAddress(): Address {
-    return this._call.inputValues[1].value.toAddress();
-  }
-
-  get IDPurchase(): BigInt {
+  get cancelTime(): BigInt {
     return this._call.inputValues[2].value.toBigInt();
   }
 
-  get Sells(): BigInt {
+  get completeTime(): BigInt {
     return this._call.inputValues[3].value.toBigInt();
   }
-
-  get Refunds(): BigInt {
-    return this._call.inputValues[4].value.toBigInt();
-  }
 }
 
-export class EventsMerchantContracts2Call__Outputs {
-  _call: EventsMerchantContracts2Call;
+export class CreatePurchaseCall__Outputs {
+  _call: CreatePurchaseCall;
 
-  constructor(call: EventsMerchantContracts2Call) {
+  constructor(call: CreatePurchaseCall) {
     this._call = call;
   }
 }
 
-export class EventsMerchantContracts3Call extends ethereum.Call {
-  get inputs(): EventsMerchantContracts3Call__Inputs {
-    return new EventsMerchantContracts3Call__Inputs(this);
+export class PauseCall extends ethereum.Call {
+  get inputs(): PauseCall__Inputs {
+    return new PauseCall__Inputs(this);
   }
 
-  get outputs(): EventsMerchantContracts3Call__Outputs {
-    return new EventsMerchantContracts3Call__Outputs(this);
+  get outputs(): PauseCall__Outputs {
+    return new PauseCall__Outputs(this);
   }
 }
 
-export class EventsMerchantContracts3Call__Inputs {
-  _call: EventsMerchantContracts3Call;
+export class PauseCall__Inputs {
+  _call: PauseCall;
 
-  constructor(call: EventsMerchantContracts3Call) {
+  constructor(call: PauseCall) {
     this._call = call;
   }
 
-  get eventID(): BigInt {
+  get contractInstance(): Address {
+    return this._call.inputValues[0].value.toAddress();
+  }
+}
+
+export class PauseCall__Outputs {
+  _call: PauseCall;
+
+  constructor(call: PauseCall) {
+    this._call = call;
+  }
+}
+
+export class RefundCall extends ethereum.Call {
+  get inputs(): RefundCall__Inputs {
+    return new RefundCall__Inputs(this);
+  }
+
+  get outputs(): RefundCall__Outputs {
+    return new RefundCall__Outputs(this);
+  }
+}
+
+export class RefundCall__Inputs {
+  _call: RefundCall;
+
+  constructor(call: RefundCall) {
+    this._call = call;
+  }
+
+  get idPurchase(): BigInt {
     return this._call.inputValues[0].value.toBigInt();
   }
 
-  get MerchantContractAddress(): Address {
+  get buyerAddress(): Address {
     return this._call.inputValues[1].value.toAddress();
   }
 
-  get IDPurchase(): BigInt {
+  get amount(): BigInt {
     return this._call.inputValues[2].value.toBigInt();
   }
-
-  get Date(): BigInt {
-    return this._call.inputValues[3].value.toBigInt();
-  }
-
-  get BuyerAddress(): Address {
-    return this._call.inputValues[4].value.toAddress();
-  }
-
-  get Amount(): BigInt {
-    return this._call.inputValues[5].value.toBigInt();
-  }
-
-  get PurchaseStatus(): BigInt {
-    return this._call.inputValues[6].value.toBigInt();
-  }
-
-  get EscrowTime(): BigInt {
-    return this._call.inputValues[7].value.toBigInt();
-  }
 }
 
-export class EventsMerchantContracts3Call__Outputs {
-  _call: EventsMerchantContracts3Call;
+export class RefundCall__Outputs {
+  _call: RefundCall;
 
-  constructor(call: EventsMerchantContracts3Call) {
+  constructor(call: RefundCall) {
     this._call = call;
   }
 }
 
-export class FreezeWithdrawalsMerchantContractCall extends ethereum.Call {
-  get inputs(): FreezeWithdrawalsMerchantContractCall__Inputs {
-    return new FreezeWithdrawalsMerchantContractCall__Inputs(this);
+export class SetRequiredNumberOfVotesCall extends ethereum.Call {
+  get inputs(): SetRequiredNumberOfVotesCall__Inputs {
+    return new SetRequiredNumberOfVotesCall__Inputs(this);
   }
 
-  get outputs(): FreezeWithdrawalsMerchantContractCall__Outputs {
-    return new FreezeWithdrawalsMerchantContractCall__Outputs(this);
+  get outputs(): SetRequiredNumberOfVotesCall__Outputs {
+    return new SetRequiredNumberOfVotesCall__Outputs(this);
   }
 }
 
-export class FreezeWithdrawalsMerchantContractCall__Inputs {
-  _call: FreezeWithdrawalsMerchantContractCall;
+export class SetRequiredNumberOfVotesCall__Inputs {
+  _call: SetRequiredNumberOfVotesCall;
 
-  constructor(call: FreezeWithdrawalsMerchantContractCall) {
+  constructor(call: SetRequiredNumberOfVotesCall) {
     this._call = call;
   }
 
-  get MerchantContractAddress(): Address {
+  get numberOfVotes(): BigInt {
+    return this._call.inputValues[0].value.toBigInt();
+  }
+}
+
+export class SetRequiredNumberOfVotesCall__Outputs {
+  _call: SetRequiredNumberOfVotesCall;
+
+  constructor(call: SetRequiredNumberOfVotesCall) {
+    this._call = call;
+  }
+}
+
+export class TransferRestCall extends ethereum.Call {
+  get inputs(): TransferRestCall__Inputs {
+    return new TransferRestCall__Inputs(this);
+  }
+
+  get outputs(): TransferRestCall__Outputs {
+    return new TransferRestCall__Outputs(this);
+  }
+}
+
+export class TransferRestCall__Inputs {
+  _call: TransferRestCall;
+
+  constructor(call: TransferRestCall) {
+    this._call = call;
+  }
+}
+
+export class TransferRestCall__Outputs {
+  _call: TransferRestCall;
+
+  constructor(call: TransferRestCall) {
+    this._call = call;
+  }
+}
+
+export class UnpauseCall extends ethereum.Call {
+  get inputs(): UnpauseCall__Inputs {
+    return new UnpauseCall__Inputs(this);
+  }
+
+  get outputs(): UnpauseCall__Outputs {
+    return new UnpauseCall__Outputs(this);
+  }
+}
+
+export class UnpauseCall__Inputs {
+  _call: UnpauseCall;
+
+  constructor(call: UnpauseCall) {
+    this._call = call;
+  }
+
+  get contractInstance(): Address {
     return this._call.inputValues[0].value.toAddress();
   }
 }
 
-export class FreezeWithdrawalsMerchantContractCall__Outputs {
-  _call: FreezeWithdrawalsMerchantContractCall;
+export class UnpauseCall__Outputs {
+  _call: UnpauseCall;
 
-  constructor(call: FreezeWithdrawalsMerchantContractCall) {
+  constructor(call: UnpauseCall) {
     this._call = call;
   }
 }
 
-export class UnfreezeWithdrawalsMerchantContractCall extends ethereum.Call {
-  get inputs(): UnfreezeWithdrawalsMerchantContractCall__Inputs {
-    return new UnfreezeWithdrawalsMerchantContractCall__Inputs(this);
+export class VoteApprovalCall extends ethereum.Call {
+  get inputs(): VoteApprovalCall__Inputs {
+    return new VoteApprovalCall__Inputs(this);
   }
 
-  get outputs(): UnfreezeWithdrawalsMerchantContractCall__Outputs {
-    return new UnfreezeWithdrawalsMerchantContractCall__Outputs(this);
+  get outputs(): VoteApprovalCall__Outputs {
+    return new VoteApprovalCall__Outputs(this);
   }
 }
 
-export class UnfreezeWithdrawalsMerchantContractCall__Inputs {
-  _call: UnfreezeWithdrawalsMerchantContractCall;
+export class VoteApprovalCall__Inputs {
+  _call: VoteApprovalCall;
 
-  constructor(call: UnfreezeWithdrawalsMerchantContractCall) {
+  constructor(call: VoteApprovalCall) {
     this._call = call;
   }
 
-  get MerchantContractAddress(): Address {
+  get contractInstance(): Address {
     return this._call.inputValues[0].value.toAddress();
   }
 }
 
-export class UnfreezeWithdrawalsMerchantContractCall__Outputs {
-  _call: UnfreezeWithdrawalsMerchantContractCall;
+export class VoteApprovalCall__Outputs {
+  _call: VoteApprovalCall;
 
-  constructor(call: UnfreezeWithdrawalsMerchantContractCall) {
+  constructor(call: VoteApprovalCall) {
     this._call = call;
   }
 }
 
-export class VoteNewMerchantContractApprovalCall extends ethereum.Call {
-  get inputs(): VoteNewMerchantContractApprovalCall__Inputs {
-    return new VoteNewMerchantContractApprovalCall__Inputs(this);
+export class WithdrawRestCall extends ethereum.Call {
+  get inputs(): WithdrawRestCall__Inputs {
+    return new WithdrawRestCall__Inputs(this);
   }
 
-  get outputs(): VoteNewMerchantContractApprovalCall__Outputs {
-    return new VoteNewMerchantContractApprovalCall__Outputs(this);
+  get outputs(): WithdrawRestCall__Outputs {
+    return new WithdrawRestCall__Outputs(this);
   }
 }
 
-export class VoteNewMerchantContractApprovalCall__Inputs {
-  _call: VoteNewMerchantContractApprovalCall;
+export class WithdrawRestCall__Inputs {
+  _call: WithdrawRestCall;
 
-  constructor(call: VoteNewMerchantContractApprovalCall) {
+  constructor(call: WithdrawRestCall) {
     this._call = call;
   }
 
-  get MerchantContractAddress(): Address {
+  get contractInstance(): Address {
     return this._call.inputValues[0].value.toAddress();
   }
 }
 
-export class VoteNewMerchantContractApprovalCall__Outputs {
-  _call: VoteNewMerchantContractApprovalCall;
+export class WithdrawRestCall__Outputs {
+  _call: WithdrawRestCall;
 
-  constructor(call: VoteNewMerchantContractApprovalCall) {
+  constructor(call: WithdrawRestCall) {
+    this._call = call;
+  }
+}
+
+export class WithdrawalCall extends ethereum.Call {
+  get inputs(): WithdrawalCall__Inputs {
+    return new WithdrawalCall__Inputs(this);
+  }
+
+  get outputs(): WithdrawalCall__Outputs {
+    return new WithdrawalCall__Outputs(this);
+  }
+}
+
+export class WithdrawalCall__Inputs {
+  _call: WithdrawalCall;
+
+  constructor(call: WithdrawalCall) {
+    this._call = call;
+  }
+
+  get amount(): BigInt {
+    return this._call.inputValues[0].value.toBigInt();
+  }
+}
+
+export class WithdrawalCall__Outputs {
+  _call: WithdrawalCall;
+
+  constructor(call: WithdrawalCall) {
     this._call = call;
   }
 }
