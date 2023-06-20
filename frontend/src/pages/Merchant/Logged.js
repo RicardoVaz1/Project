@@ -4,7 +4,6 @@ import PersonalInfo from './PersonalInfo'
 import CreatePurchase from './CreatePurchase'
 import PurchasesList from './PurchasesList'
 import Refunds from './Refunds'
-import TopUpMyContract from './TopUpMyContract'
 import Withdrawals from './Withdrawals'
 
 import { ethers } from "ethers"
@@ -14,6 +13,7 @@ import MerchantContractABI from "../../abis/MerchantContract.json"
 const Logged = () => {
     const data = JSON.parse(localStorage.getItem("userData"))
     const CurrentAccount = data.currentAccount
+    const chainName = data.chainName
     const MerchantContractAddress = data.MerchantContractAddress
     const MerchantContractApprovedStatus = data.MerchantContractApprovedStatus
     const [name, setName] = useState("")
@@ -27,7 +27,7 @@ const Logged = () => {
         const instanceMerchantContract2 = instanceMerchantContract.current
 
         try {
-            const merchantName = await instanceMerchantContract2.checkMyName({ from: CurrentAccount })
+            const merchantName = await instanceMerchantContract2.getName({ from: CurrentAccount })
             setName(merchantName)
         } catch (error) {
             console.log("ERROR AT GETTING MERCHANT NAME: ", error)
@@ -48,7 +48,7 @@ const Logged = () => {
     return (
         <>
             {MerchantContractApprovedStatus ?
-                <h1>Welcome {name}, {CurrentAccount.slice(0, 5)}...{CurrentAccount.slice(38)}!</h1> :
+                <h1>Welcome <a href={`https://${chainName}.etherscan.io/address/${MerchantContractAddress}`} target="_blank" rel="noreferrer" >{name}</a>, {CurrentAccount.slice(0, 5)}...{CurrentAccount.slice(38)}!</h1> :
                 <>
                     <h1>Welcome, {CurrentAccount.slice(0, 5)}...{CurrentAccount.slice(38)}!</h1>
                     <h4 style={{ color: "red", textDecoration: "underline" }}>MerchantContract not approved!</h4>
@@ -61,7 +61,6 @@ const Logged = () => {
                 <PurchasesList />
                 <Withdrawals />
                 <Refunds />
-                <TopUpMyContract />
             </div>
 
             <br />

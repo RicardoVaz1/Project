@@ -25,56 +25,55 @@ const ConnectWallet = ({ nextPage }) => {
     const instanceMainContract2 = instanceMainContract.current
 
     try {
-      const OwnerAddress = await instanceMainContract2.getOwnerAddress({ from: process.env.REACT_APP_OWNER_ADDRESS })
+      const OwnerAddress = await instanceMainContract2.ownerAddress()
       setOwnerAddress(OwnerAddress)
     } catch (error) {
       console.log(error)
     }
   }, [])
 
-  const getMerchantContractAddress = async (MerchantAddress) => {
+  const getMerchantContractAddress = async (merchantAddress) => {
     try {
       const result = await axios.post(
         `${process.env.REACT_APP_THE_GRAPH_API}`,
         {
           query: `
                 {
-                    createdMerchantContracts(first: 1, where: {MerchantAddress: "${MerchantAddress}"}) {
+                    createMerchantContracts(first: 1, where: {merchantAddress: "${merchantAddress}"}) {
                         id
-                        MerchantContractAddress
-                        MerchantAddress
-                        MerchantName
+                        contractInstance
+                        merchantAddress
+                        merchantName
                     }
                 }
                 `
         }
       )
 
-      let MerchantContractAddress = result.data.data.createdMerchantContracts[0].MerchantContractAddress
+      let MerchantContractAddress = result.data.data.createMerchantContracts[0].contractInstance
       return MerchantContractAddress
     } catch (error) {
       console.log(error)
     }
   }
 
-  const getMerchantContractApprovedStatus = async (MerchantContractAddress) => {
+  const getMerchantContractApprovedStatus = async (contractInstance) => {
     try {
       const result = await axios.post(
         `${process.env.REACT_APP_THE_GRAPH_API}`,
         {
           query: `
                 {
-                  approvedMerchantContracts(first: 1, where: {MerchantContractAddress: "${MerchantContractAddress}"}) {
-                        id
-                        MerchantContractAddress
-                        Approved
-                    }
+                  approveMerchantContracts(first: 1, where: {contractInstance: "${contractInstance}"}) {
+                    id
+                    contractInstance
+                  }
                 }
                 `
         }
       )
 
-      let MerchantContractApprovedStatus = result.data.data.approvedMerchantContracts[0].Approved
+      let MerchantContractApprovedStatus = result.data.data.approveMerchantContracts[0].contractInstance
       return MerchantContractApprovedStatus
     } catch (error) {
       console.log(error)
@@ -112,7 +111,8 @@ const ConnectWallet = ({ nextPage }) => {
       MerchantContractAddress = await getMerchantContractAddress(currentAccount)
       MerchantContractApprovedStatus = await getMerchantContractApprovedStatus(MerchantContractAddress)
 
-      if (MerchantContractApprovedStatus !== true) MerchantContractApprovedStatus = false
+      if (MerchantContractApprovedStatus !== null && MerchantContractApprovedStatus !== undefined) MerchantContractApprovedStatus = true
+      else MerchantContractApprovedStatus = false
 
       if (MerchantContractAddress) {
         isAdmin = false

@@ -18,7 +18,7 @@ const SetupVotes = () => {
         const instanceMainContract2 = instanceMainContract.current
 
         try {
-            const numberOfVotes = await instanceMainContract2.getRequiredNumberOfVotes()
+            const numberOfVotes = await instanceMainContract2.requiredNumberOfVotes()
             setNumberOfVotes(numberOfVotes)
         } catch (error) {
             console.log("ERROR AT GETTING MERCHANT INFO: ", error)
@@ -33,8 +33,8 @@ const SetupVotes = () => {
 
         try {
             const instanceMainContract2 = instanceMainContract.current
-            const ownerChangeRequiredNumberOfVotes = await instanceMainContract2.changeRequiredNumberOfVotes(numberOfVotes, { from: currentAccount })
-            console.log("Owner Change Required Number Of Votes: ", ownerChangeRequiredNumberOfVotes)
+            const ownerSetRequiredNumberOfVotes = await instanceMainContract2.setRequiredNumberOfVotes(numberOfVotes, { from: currentAccount })
+            console.log("Owner Change Required Number Of Votes: ", ownerSetRequiredNumberOfVotes)
 
             document.getElementById("done-successfully-2").style.display = ''
         } catch (error) {

@@ -17,7 +17,7 @@ const Withdrawals = () => {
         const instanceMerchantContract2 = instanceMerchantContract.current
 
         try {
-            const merchantBalance = await instanceMerchantContract2.checkMyBalance({ from: currentAccount })
+            const merchantBalance = await instanceMerchantContract2.getBalance({ from: currentAccount })
             setBalance(parseInt(merchantBalance._hex, 16))
         } catch (error) {
             console.log("ERROR AT GETTING MERCHANT BALANCE: ", error)

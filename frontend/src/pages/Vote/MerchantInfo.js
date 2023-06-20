@@ -23,25 +23,25 @@ const MerchantInfo = () => {
     let instanceMainContract
 
 
-    async function getMerchantContractInfo(MerchantContractAddress) {
+    async function getMerchantContractInfo(contractInstance) {
         try {
             const result = await axios.post(
                 `${process.env.REACT_APP_THE_GRAPH_API}`,
                 {
                     query: `
                     {
-                        createdMerchantContracts(where: {MerchantContractAddress: "${MerchantContractAddress}"}) {
+                        createMerchantContracts(where: {contractInstance: "${contractInstance}"}) {
                             id
-                            MerchantContractAddress
-                            MerchantAddress
-                            MerchantName
+                            contractInstance
+                            merchantAddress
+                            merchantName
                         }
                     }
                     `
                 }
             )
 
-            let MerchantsList = result.data.data.createdMerchantContracts[0]
+            let MerchantsList = result.data.data.createMerchantContracts[0]
             setMerchantContractInfo(MerchantsList)
         } catch (error) {
             console.log(error)
@@ -71,7 +71,7 @@ const MerchantInfo = () => {
         instanceMainContract = new ethers.Contract(MAINCONTRACTADDRESS, MainContractABI.abi, signer)
 
         try {
-            const userVote = await instanceMainContract.voteNewMerchantContractApproval(ID, { from: currentAccount, gasLimit: 1500000 })
+            const userVote = await instanceMainContract.voteApproval(ID, { from: currentAccount, gasLimit: 1500000 })
             console.log("User Vote: ", userVote)
 
             document.getElementById("done-successfully").style.display = ''
@@ -107,10 +107,10 @@ const MerchantInfo = () => {
         <>
             <h1>Merchant #{MerchantContractAddress.slice(0, 5)}...{MerchantContractAddress.slice(38)}</h1>
 
-            <span>Merchant Contract Address: <a href={`https://${chainName}.etherscan.io/address/${merchantContractInfo.MerchantContractAddress}`} target="_blank" rel="noreferrer" >{merchantContractInfo.MerchantContractAddress}</a></span>
+            <span>Merchant Contract Address: <a href={`https://${chainName}.etherscan.io/address/${merchantContractInfo.contractInstance}`} target="_blank" rel="noreferrer" >{merchantContractInfo.contractInstance}</a></span>
             <br />
 
-            <span>Merchant Name: {merchantContractInfo.MerchantName}</span>
+            <span>Merchant Name: {merchantContractInfo.merchantName}</span>
             <br />
 
             <span>Number of Votes: {numberOfVotes}</span>

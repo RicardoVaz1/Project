@@ -24,18 +24,18 @@ const MerchantsList = () => {
                 {
                     query: `
                     {
-                        createdMerchantContracts(orderBy: id, orderDirection: desc) {
+                        createMerchantContracts(orderBy: merchantName, orderDirection: asc) {
                             id
-                            MerchantContractAddress
-                            MerchantAddress
-                            MerchantName
+                            contractInstance
+                            merchantAddress
+                            merchantName
                         }
                     }
                     `
                 }
             )
 
-            let MerchantsList = result.data.data.createdMerchantContracts
+            let MerchantsList = result.data.data.createMerchantContracts
             setMerchantsList(MerchantsList)
         } catch (error) {
             console.log(error)
@@ -46,10 +46,10 @@ const MerchantsList = () => {
         const instanceMainContract2 = instanceMainContract.current
 
         for (let i = 0; i < merchantsList.length; i++) {
-            const MerchantContractAddress = merchantsList[i].MerchantContractAddress
+            const MerchantContractAddress = merchantsList[i].contractInstance
 
             try {
-                const status_contract = await instanceMainContract2.getMerchantContractStatusContract(MerchantContractAddress, { from: process.env.REACT_APP_OWNER_ADDRESS })
+                const status_contract = await instanceMainContract2.getStatusContract(MerchantContractAddress, { from: process.env.REACT_APP_OWNER_ADDRESS })
                 let status_contract_int = parseInt(status_contract, 16)
 
                 merchantsInfo.push({ MerchantContractAddress: MerchantContractAddress, statusContract: status_contract_int })
@@ -94,7 +94,6 @@ const MerchantsList = () => {
             <table className="table">
                 <thead>
                     <tr>
-                        <th>ID</th>
                         <th>Merchant Contract Address</th>
                         <th>Merchant Name</th>
                         <th></th>
@@ -104,13 +103,12 @@ const MerchantsList = () => {
                 <tbody>
                     {merchantsList.map((item, i) => {
                         return (
-                            <tr className="item" key={i} id={`${item.MerchantContractAddress}_status`} style={{ display: "none", backgroundColor: "red" }}>
-                                <td className="itemDisplay" id={`${item.MerchantContractAddress}_id`}>{i + 1}</td>
-                                <td className="itemDisplay">{item.MerchantContractAddress}</td>
-                                <td className="itemDisplay">{item.MerchantName}</td>
+                            <tr className="item" key={i} id={`${item.contractInstance}_status`} style={{ display: "none", backgroundColor: "red" }}>
+                                <td className="itemDisplay">{item.contractInstance}</td>
+                                <td className="itemDisplay">{item.merchantName}</td>
                                 <td className="removeItemButton">
                                     {item.approved === false ? "" :
-                                        (<button onClick={() => navigate(`/merchant/${item.MerchantContractAddress}/products-list`)}>Check Products</button>)
+                                        (<button onClick={() => navigate(`/merchant/${item.contractInstance}/products-list`)}>Check Products</button>)
                                     }
                                 </td>
                             </tr>
